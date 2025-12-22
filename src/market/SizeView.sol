@@ -180,6 +180,13 @@ abstract contract SizeView is SizeStorage, ReentrancyGuardUpgradeableWithViewMod
     }
 
     /// @inheritdoc ISizeView
+    function extSload(bytes32 key) external view returns (bytes32 result) {
+        assembly {
+            result := sload(key)
+        }
+    }
+
+    /// @inheritdoc ISizeView
     function version() public pure returns (string memory) {
         return VERSION;
     }

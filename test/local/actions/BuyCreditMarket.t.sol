@@ -599,4 +599,33 @@ contract BuyCreditMarketLendTest is BaseTest {
             assertIn(bytes4(err), expectedErrors);
         }
     }
+
+    function test_BuyCreditMarket_buyCreditMarket_debtTokenCap_exceeded() public {
+        assertEq(size.extSload(bytes32(uint256(29))), bytes32(uint256(type(uint256).max)));
+
+        _updateConfig("debtTokenCap", 10e6);
+
+        assertEq(size.extSload(bytes32(uint256(29))), bytes32(uint256(10e6)));
+
+        _deposit(alice, weth, 100e6);
+
+        _deposit(bob, usdc, 100e18);
+        _sellCreditLimit(bob, block.timestamp + 365 days, YieldCurveHelper.pointCurve(365 days, 0.1e18));
+
+        vm.expectRevert(abi.encodeWithSelector(Errors.DEBT_TOKEN_CAP_EXCEEDED.selector, 10e6, 110e6));
+        vm.prank(alice);
+        size.buyCreditMarket(
+            BuyCreditMarketParams({
+                borrower: bob,
+                creditPositionId: RESERVED_ID,
+                amount: 100e6,
+                tenor: 365 days,
+                minAPR: 0,
+                deadline: block.timestamp + 365 days,
+                exactAmountIn: true,
+                collectionId: RESERVED_ID,
+                rateProvider: address(0)
+            })
+        );
+    }
 }

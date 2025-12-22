@@ -10,7 +10,7 @@ import {SetVaultOnBehalfOfParams} from "@src/market/libraries/actions/SetVault.s
 /// @notice The interface for the Size v1.8 view methods
 interface ISizeV1_8 {
     /// @notice Reinitialize the contract
-    /// @dev Initializes the reentrancy guard
+    /// @dev Initializes the debt token cap
     function reinitialize() external;
 
     /// @notice Set the vault for a user

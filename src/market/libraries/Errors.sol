@@ -116,4 +116,6 @@ library Errors {
 
     error INVALID_MARKET(address market);
     error PAUSED_MARKET(address market);
+
+    error DEBT_TOKEN_CAP_EXCEEDED(uint256 debtTokenCap, uint256 actual);
 }

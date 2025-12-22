@@ -77,6 +77,11 @@ interface ISizeView is ISizeViewV1_8 {
         view
         returns (SellCreditMarket.SwapDataSellCreditMarket memory);
 
+    /// @notice Get the value of a storage slot
+    /// @param key The key of the storage slot
+    /// @return result The value of the storage slot
+    function extSload(bytes32 key) external view returns (bytes32 result);
+
     /// @notice Get the version of the Size protocol
     /// @return The version of the Size protocol
     function version() external view returns (string memory);

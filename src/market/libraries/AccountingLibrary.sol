@@ -93,6 +93,9 @@ library AccountingLibrary {
         );
 
         state.data.debtToken.mint(borrower, futureValue);
+        if (state.data.debtToken.totalSupply() > state.data.debtTokenCap) {
+            revert Errors.DEBT_TOKEN_CAP_EXCEEDED(state.data.debtTokenCap, state.data.debtToken.totalSupply());
+        }
     }
 
     /// @notice Creates a credit position by exiting an existing credit position

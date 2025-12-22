@@ -135,6 +135,8 @@ library UpdateConfig {
             state.oracle.priceFeed = IPriceFeed(address(uint160(params.value)));
         } else if (Strings.equal(params.key, "variablePoolBorrowRateStaleRateInterval")) {
             state.oracle.variablePoolBorrowRateStaleRateInterval = uint64(params.value);
+        } else if (Strings.equal(params.key, "debtTokenCap")) {
+            state.data.debtTokenCap = params.value;
         } else {
             revert Errors.INVALID_KEY(params.key);
         }

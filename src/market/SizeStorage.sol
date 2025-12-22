@@ -109,6 +109,8 @@ struct Data {
     mapping(address => UserCopyLimitOrderConfigs) usersCopyLimitOrderConfigs;
     // Size Factory (added in v1.7)
     ISizeFactory sizeFactory;
+    // debtTokenCap (added in v1.8.2)
+    uint256 debtTokenCap;
 }
 
 struct State {

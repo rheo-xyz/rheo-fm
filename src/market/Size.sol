@@ -151,8 +151,8 @@ contract Size is
     }
 
     /// @inheritdoc ISizeV1_8
-    function reinitialize() external onlyRole(DEFAULT_ADMIN_ROLE) reinitializer(1_08_01) {
-        __ReentrancyGuard_init();
+    function reinitialize() external onlyRole(DEFAULT_ADMIN_ROLE) reinitializer(1_08_02) {
+        state.data.debtTokenCap = type(uint256).max;
     }
 
     function _hasRole(bytes32 role, address account) internal view returns (bool) {
