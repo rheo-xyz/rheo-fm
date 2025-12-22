@@ -607,9 +607,9 @@ contract BuyCreditMarketLendTest is BaseTest {
 
         assertEq(size.extSload(bytes32(uint256(29))), bytes32(uint256(10e6)));
 
-        _deposit(alice, weth, 100e6);
+        _deposit(alice, weth, 100e18);
 
-        _deposit(bob, usdc, 100e18);
+        _deposit(bob, usdc, 100e6);
         _sellCreditLimit(bob, block.timestamp + 365 days, YieldCurveHelper.pointCurve(365 days, 0.1e18));
 
         vm.expectRevert(abi.encodeWithSelector(Errors.DEBT_TOKEN_CAP_EXCEEDED.selector, 10e6, 110e6));
