@@ -245,7 +245,7 @@ for i in {0..5}; do halmos --loop $i; done
 - The Variable Pool Borrow Rate feed is trusted and users of rate hook adopt oracle risk of buying/selling credit at unsatisfactory prices. In practice, this feature has never been turned on in production.
 - LiquidateWithReplacement might not be available for the big enough debt positions
 - The fragmentation fee meant to subsidize `claim` operations by protocol-owned keeper bots during credit splits are not charged during loan origination
-- The debt token cap can be inexpensively met with self-borrows, even if there is no benefit to the attacker. Reducing the debt cap does not affect currently open positions, but may prevent liquidation with replacement even if the total system health does not increase
+- The debt token cap can be inexpensively met with self-borrows, even if there is no benefit to the attacker. Reducing the debt cap does not affect currently open positions, but may prevent liquidation with replacement even if the total system health does not decrease 
 - All issues acknowledged on previous audits and automated findings
 
 ## Deployment
