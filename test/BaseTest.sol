@@ -69,6 +69,8 @@ struct Vars {
 }
 
 contract BaseTest is Test, Deploy, AssertsHelper {
+    uint256 internal constant OVERDUE_LIQUIDATION_REWARD_SLOT = 30;
+
     address internal alice = address(0x10000);
     address internal bob = address(0x20000);
     address internal candy = address(0x30000);
@@ -155,6 +157,10 @@ contract BaseTest is Test, Deploy, AssertsHelper {
     function _setKeeperRole(address user) internal {
         vm.prank(address(this));
         size.grantRole(KEEPER_ROLE, user);
+    }
+
+    function _overdueLiquidationRewardPercent() internal view returns (uint256) {
+        return uint256(size.extSload(bytes32(OVERDUE_LIQUIDATION_REWARD_SLOT)));
     }
 
     function _deposit(address user, IERC20Metadata token, uint256 amount) internal {

@@ -16,7 +16,9 @@ contract ForkTest is BaseTest, BaseScript {
     IAToken public aToken;
 
     function setUp() public virtual override {
-        vm.createSelectFork("base");
+        string memory alchemyKey = vm.envOr("API_KEY_ALCHEMY", string(""));
+        string memory rpcAlias = bytes(alchemyKey).length == 0 ? "base_archive" : "base";
+        vm.createSelectFork(rpcAlias);
         ISize isize;
         (isize, priceFeed, owner) = importDeployments("base-production-weth-usdc");
         size = SizeMock(address(isize));

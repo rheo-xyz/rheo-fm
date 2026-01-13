@@ -271,6 +271,7 @@ library Initialize {
         state.data.sizeFactory = ISizeFactory(d.sizeFactory);
         state.data.borrowTokenVault = NonTransferrableRebasingTokenVault(d.borrowTokenVault);
         state.data.debtTokenCap = type(uint256).max;
+        state.data.overdueLiquidationRewardPercent = state.feeConfig.liquidationRewardPercent;
     }
 
     /// @notice Executes the initialization of the protocol

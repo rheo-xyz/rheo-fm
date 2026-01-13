@@ -125,6 +125,11 @@ library UpdateConfig {
             state.feeConfig.fragmentationFee = params.value;
         } else if (Strings.equal(params.key, "liquidationRewardPercent")) {
             state.feeConfig.liquidationRewardPercent = params.value;
+        } else if (Strings.equal(params.key, "overdueLiquidationRewardPercent")) {
+            if (params.value > PERCENT) {
+                revert Errors.INVALID_COLLATERAL_PERCENTAGE_PREMIUM(params.value);
+            }
+            state.data.overdueLiquidationRewardPercent = params.value;
         } else if (Strings.equal(params.key, "overdueCollateralProtocolPercent")) {
             state.feeConfig.overdueCollateralProtocolPercent = params.value;
         } else if (Strings.equal(params.key, "collateralProtocolPercent")) {

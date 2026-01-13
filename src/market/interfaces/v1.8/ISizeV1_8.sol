@@ -9,9 +9,8 @@ import {SetVaultOnBehalfOfParams} from "@src/market/libraries/actions/SetVault.s
 /// @author Size (https://size.credit/)
 /// @notice The interface for the Size v1.8 view methods
 interface ISizeV1_8 {
-    /// @notice Reinitialize the contract
-    /// @dev Initializes the debt token cap
-    function reinitialize() external;
+    // /// @notice Reinitialize the contract
+    // function reinitialize() external;
 
     /// @notice Set the vault for a user
     /// @param params SetVaultParams struct containing the following fields:

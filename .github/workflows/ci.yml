@@ -94,7 +94,7 @@ jobs:
 
       - name: Fork Test
         run: |
-          forge test -vvv --fail-fast
+          forge test -vvv --fail-fast --threads 1
         id: test
         env:
           API_KEY_ALCHEMY: ${{ secrets.API_KEY_ALCHEMY }}
@@ -123,6 +123,8 @@ jobs:
         id: slither
         with:
           fail-on: low
+          solc-version: 0.8.23
+          slither-args: --legacy-ast
 
 
   solhint:

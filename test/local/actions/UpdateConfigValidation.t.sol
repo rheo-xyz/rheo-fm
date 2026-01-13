@@ -4,6 +4,7 @@ pragma solidity 0.8.23;
 import {BaseTest} from "@test/BaseTest.sol";
 
 import {Errors} from "@src/market/libraries/Errors.sol";
+import {PERCENT} from "@src/market/libraries/Math.sol";
 import {UpdateConfigParams} from "@src/market/libraries/actions/UpdateConfig.sol";
 
 contract UpdateConfigValidationTest is BaseTest {
@@ -27,6 +28,9 @@ contract UpdateConfigValidationTest is BaseTest {
             abi.encodeWithSelector(Errors.VALUE_GREATER_THAN_MAX.selector, maxSwapFeeAPR + 1, maxSwapFeeAPR)
         );
         size.updateConfig(UpdateConfigParams({key: "swapFeeAPR", value: maxSwapFeeAPR + 1}));
+
+        vm.expectRevert(abi.encodeWithSelector(Errors.INVALID_COLLATERAL_PERCENTAGE_PREMIUM.selector, PERCENT + 1));
+        size.updateConfig(UpdateConfigParams({key: "overdueLiquidationRewardPercent", value: PERCENT + 1}));
     }
 
     function test_UpdateConfig_updateConfig_cannot_update_data() public {

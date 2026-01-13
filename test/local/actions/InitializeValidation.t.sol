@@ -48,7 +48,7 @@ contract InitializeValidationTest is Test, BaseTest {
         f.overdueCollateralProtocolPercent = 1.1e18;
         vm.expectRevert(abi.encodeWithSelector(Errors.INVALID_COLLATERAL_PERCENTAGE_PREMIUM.selector, 1.1e18));
         proxy = new ERC1967Proxy(address(implementation), abi.encodeCall(Size.initialize, (owner, f, r, o, d)));
-        f.overdueCollateralProtocolPercent = 0.3e18;
+        f.overdueCollateralProtocolPercent = 0.01e18;
 
         f.collateralProtocolPercent = 1.2e18;
         vm.expectRevert(abi.encodeWithSelector(Errors.INVALID_COLLATERAL_PERCENTAGE_PREMIUM.selector, 1.2e18));
