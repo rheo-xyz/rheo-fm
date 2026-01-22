@@ -4,7 +4,7 @@ pragma solidity 0.8.23;
 import {BaseTest} from "@test/BaseTest.sol";
 
 import {Errors} from "@src/market/libraries/Errors.sol";
-import {PERCENT} from "@src/market/libraries/Math.sol";
+import {Math, PERCENT, YEAR} from "@src/market/libraries/Math.sol";
 import {UpdateConfigParams} from "@src/market/libraries/actions/UpdateConfig.sol";
 
 contract UpdateConfigValidationTest is BaseTest {
@@ -35,14 +35,25 @@ contract UpdateConfigValidationTest is BaseTest {
         size.updateConfig(UpdateConfigParams({key: "removeMaturity", value: missingMaturity}));
         assertEq(size.riskConfig().maturities.length, maturitiesLength);
 
+        uint256 maxSwapFeeAPR = Math.mulDivDown(PERCENT, YEAR, size.riskConfig().maxTenor);
+        vm.expectRevert(abi.encodeWithSelector(Errors.VALUE_GREATER_THAN_MAX.selector, maxSwapFeeAPR, maxSwapFeeAPR));
+        size.updateConfig(UpdateConfigParams({key: "swapFeeAPR", value: maxSwapFeeAPR}));
+
         vm.expectRevert(abi.encodeWithSelector(Errors.INVALID_COLLATERAL_PERCENTAGE_PREMIUM.selector, PERCENT + 1));
         size.updateConfig(UpdateConfigParams({key: "overdueLiquidationRewardPercent", value: PERCENT + 1}));
 
-        uint256[] memory maturities = size.riskConfig().maturities;
         uint256 maxTenor = size.riskConfig().maxTenor;
         size.updateConfig(UpdateConfigParams({key: "minTenor", value: maxTenor}));
         assertEq(size.riskConfig().minTenor, maxTenor);
 
+        uint256 maxTenorForFee = Math.mulDivDown(YEAR, PERCENT, size.feeConfig().swapFeeAPR);
+        vm.expectRevert(abi.encodeWithSelector(Errors.VALUE_GREATER_THAN_MAX.selector, maxTenorForFee, maxTenorForFee));
+        size.updateConfig(UpdateConfigParams({key: "minTenor", value: maxTenorForFee}));
+
+        vm.expectRevert(abi.encodeWithSelector(Errors.VALUE_GREATER_THAN_MAX.selector, maxTenorForFee, maxTenorForFee));
+        size.updateConfig(UpdateConfigParams({key: "maxTenor", value: maxTenorForFee}));
+
+        uint256[] memory maturities = size.riskConfig().maturities;
         for (uint256 i = 0; i + 1 < maturities.length; i++) {
             size.updateConfig(UpdateConfigParams({key: "removeMaturity", value: maturities[i]}));
         }

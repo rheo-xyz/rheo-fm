@@ -8,9 +8,7 @@ import {State} from "@src/market/SizeStorage.sol";
 import {Errors} from "@src/market/libraries/Errors.sol";
 import {Events} from "@src/market/libraries/Events.sol";
 
-import {PERCENT} from "@src/market/libraries/Math.sol";
-
-import {RiskLibrary} from "@src/market/libraries/RiskLibrary.sol";
+import {Math, PERCENT, YEAR} from "@src/market/libraries/Math.sol";
 import {Initialize} from "@src/market/libraries/actions/Initialize.sol";
 
 import {IPriceFeed} from "@src/oracle/IPriceFeed.sol";
@@ -40,7 +38,6 @@ struct UpdateConfigParams {
 library UpdateConfig {
     using Initialize for State;
     using EnumerableSet for EnumerableSet.UintSet;
-    using RiskLibrary for State;
 
     /// @notice Returns the current fee configuration parameters
     /// @param state The state of the protocol
@@ -100,8 +97,24 @@ library UpdateConfig {
         } else if (Strings.equal(params.key, "minimumCreditBorrowToken")) {
             state.riskConfig.minimumCreditBorrowToken = params.value;
         } else if (Strings.equal(params.key, "minTenor")) {
+            if (
+                state.feeConfig.swapFeeAPR != 0
+                    && params.value >= Math.mulDivDown(YEAR, PERCENT, state.feeConfig.swapFeeAPR)
+            ) {
+                revert Errors.VALUE_GREATER_THAN_MAX(
+                    params.value, Math.mulDivDown(YEAR, PERCENT, state.feeConfig.swapFeeAPR)
+                );
+            }
             state.riskConfig.minTenor = params.value;
         } else if (Strings.equal(params.key, "maxTenor")) {
+            if (
+                state.feeConfig.swapFeeAPR != 0
+                    && params.value >= Math.mulDivDown(YEAR, PERCENT, state.feeConfig.swapFeeAPR)
+            ) {
+                revert Errors.VALUE_GREATER_THAN_MAX(
+                    params.value, Math.mulDivDown(YEAR, PERCENT, state.feeConfig.swapFeeAPR)
+                );
+            }
             state.riskConfig.maxTenor = params.value;
         } else if (Strings.equal(params.key, "addMaturity")) {
             if (params.value <= block.timestamp) {
@@ -117,6 +130,11 @@ library UpdateConfig {
             // slither-disable-next-line unused-return
             state.riskConfig.maturities.remove(params.value);
         } else if (Strings.equal(params.key, "swapFeeAPR")) {
+            if (params.value >= Math.mulDivDown(PERCENT, YEAR, state.riskConfig.maxTenor)) {
+                revert Errors.VALUE_GREATER_THAN_MAX(
+                    params.value, Math.mulDivDown(PERCENT, YEAR, state.riskConfig.maxTenor)
+                );
+            }
             state.feeConfig.swapFeeAPR = params.value;
         } else if (Strings.equal(params.key, "fragmentationFee")) {
             state.feeConfig.fragmentationFee = params.value;
