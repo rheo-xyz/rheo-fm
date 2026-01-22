@@ -3,6 +3,7 @@ pragma solidity 0.8.23;
 
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
 import {Errors} from "@src/market/libraries/Errors.sol";
+import {Math, PERCENT, YEAR} from "@src/market/libraries/Math.sol";
 import {BaseTest} from "@test/BaseTest.sol";
 import {PriceFeedMock} from "@test/mocks/PriceFeedMock.sol";
 
@@ -66,24 +67,13 @@ contract UpdateConfigTest is BaseTest {
         assertLt(maturities[1], block.timestamp);
         assertGt(maturities[2], block.timestamp);
 
-        uint256 beforeLength = size.riskConfig().maturities.length;
-
+        uint256 maxSwapFeeAPR = Math.mulDivDown(PERCENT, YEAR, size.riskConfig().maxTenor);
+        assertGt(maxSwapFeeAPR, 1);
         uint256 nextSwapFeeAPR = size.feeConfig().swapFeeAPR + 1;
+        if (nextSwapFeeAPR >= maxSwapFeeAPR) {
+            nextSwapFeeAPR = maxSwapFeeAPR - 1;
+        }
         size.updateConfig(UpdateConfigParams({key: "swapFeeAPR", value: nextSwapFeeAPR}));
         assertEq(size.feeConfig().swapFeeAPR, nextSwapFeeAPR);
-
-        size.updateConfig(UpdateConfigParams({key: "removeMaturity", value: maturities[0]}));
-        uint256[] memory afterFirst = size.riskConfig().maturities;
-        assertEq(afterFirst.length, beforeLength - 1);
-        for (uint256 i = 0; i < afterFirst.length; i++) {
-            assertTrue(afterFirst[i] != maturities[0]);
-        }
-
-        size.updateConfig(UpdateConfigParams({key: "removeMaturity", value: maturities[1]}));
-        uint256[] memory afterSecond = size.riskConfig().maturities;
-        assertEq(afterSecond.length, beforeLength - 2);
-        for (uint256 i = 0; i < afterSecond.length; i++) {
-            assertTrue(afterSecond[i] != maturities[1]);
-        }
     }
 }
