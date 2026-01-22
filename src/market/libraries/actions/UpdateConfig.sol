@@ -116,6 +116,19 @@ library UpdateConfig {
                 );
             }
             state.riskConfig.maxTenor = params.value;
+        } else if (Strings.equal(params.key, "addMaturity")) {
+            if (params.value <= block.timestamp) {
+                revert Errors.PAST_MATURITY(params.value);
+            }
+            uint256 tenor = params.value - block.timestamp;
+            if (tenor < state.riskConfig.minTenor || tenor > state.riskConfig.maxTenor) {
+                revert Errors.MATURITY_OUT_OF_RANGE(params.value, state.riskConfig.minTenor, state.riskConfig.maxTenor);
+            }
+            // slither-disable-next-line unused-return
+            state.riskConfig.maturities.add(params.value);
+        } else if (Strings.equal(params.key, "removeMaturity")) {
+            // slither-disable-next-line unused-return
+            state.riskConfig.maturities.remove(params.value);
         } else if (Strings.equal(params.key, "swapFeeAPR")) {
             if (params.value >= Math.mulDivDown(PERCENT, YEAR, state.riskConfig.maxTenor)) {
                 revert Errors.VALUE_GREATER_THAN_MAX(
