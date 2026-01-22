@@ -15,7 +15,6 @@ library Events {
         address indexed sender, address indexed onBehalfOf, address indexed token, address to, uint256 amount
     );
     event UpdateConfig(address indexed sender, string indexed key, uint256 value);
-    event VariablePoolBorrowRateUpdated(address indexed sender, uint128 oldBorrowRate, uint128 newBorrowRate);
     // introduced in v1.8
     event SellCreditMarket( // introduced in v1.8
         address indexed sender,
@@ -24,21 +23,14 @@ library Events {
         address recipient,
         uint256 creditPositionId,
         uint256 amount,
-        uint256 tenor,
+        uint256 maturity,
         uint256 deadline,
         uint256 maxAPR,
         bool exactAmountIn,
         uint256 collectionId,
         address rateProvider
     ); // borrower == onBehalfOf
-    event SellCreditLimit(
-        address indexed sender,
-        address indexed onBehalfOf,
-        uint256 maxDueDate,
-        uint256[] curveRelativeTimeTenors,
-        int256[] curveRelativeTimeAprs,
-        uint256[] curveRelativeTimeMarketRateMultipliers
-    );
+    event SellCreditLimit(address indexed sender, address indexed onBehalfOf, uint256[] maturities, uint256[] aprs);
     // introduced in v1.8
     event BuyCreditMarket( // introduced in v1.8
         address indexed sender,
@@ -47,21 +39,14 @@ library Events {
         address recipient,
         uint256 creditPositionId,
         uint256 amount,
-        uint256 tenor,
+        uint256 maturity,
         uint256 deadline,
         uint256 minAPR,
         bool exactAmountIn,
         uint256 collectionId,
         address rateProvider
     ); // lender == onBehalfOf
-    event BuyCreditLimit(
-        address indexed sender,
-        address indexed onBehalfOf,
-        uint256 maxDueDate,
-        uint256[] curveRelativeTimeTenors,
-        int256[] curveRelativeTimeAprs,
-        uint256[] curveRelativeTimeMarketRateMultipliers
-    );
+    event BuyCreditLimit(address indexed sender, address indexed onBehalfOf, uint256[] maturities, uint256[] aprs);
     event Repay(address indexed sender, uint256 indexed debtPositionId, address indexed borrower);
     event PartialRepay(
         address indexed sender, uint256 indexed creditPositionWithDebtToRepayId, uint256 amount, address borrower
@@ -77,16 +62,6 @@ library Events {
     );
     event SelfLiquidate(
         address indexed sender, address indexed lender, uint256 indexed creditPositionId, address recipient
-    );
-    event LiquidateWithReplacement(
-        address indexed sender,
-        uint256 indexed debtPositionId,
-        address indexed borrower,
-        uint256 minimumCollateralProfit,
-        uint256 deadline,
-        uint256 minAPR,
-        uint256 collectionId,
-        address rateProvider
     );
     event Compensate(
         address indexed sender,
@@ -159,6 +134,6 @@ library Events {
         uint256 cashOut,
         uint256 swapFee,
         uint256 fragmentationFee,
-        uint256 tenor
+        uint256 maturity
     );
 }

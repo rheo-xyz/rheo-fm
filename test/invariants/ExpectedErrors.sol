@@ -29,7 +29,6 @@ abstract contract ExpectedErrors is Deploy, Properties {
     bytes4[] internal CLAIM_ERRORS;
     bytes4[] internal LIQUIDATE_ERRORS;
     bytes4[] internal SELF_LIQUIDATE_ERRORS;
-    bytes4[] internal LIQUIDATE_WITH_REPLACEMENT_ERRORS;
     bytes4[] internal COMPENSATE_ERRORS;
     bytes4[] internal SET_USER_CONFIGURATION_ERRORS;
     bytes4[] internal SET_COPY_LIMIT_ORDER_CONFIGS_ERRORS;
@@ -60,50 +59,60 @@ abstract contract ExpectedErrors is Deploy, Properties {
         SELL_CREDIT_MARKET_ERRORS.push(Errors.INVALID_CREDIT_POSITION_ID.selector);
         SELL_CREDIT_MARKET_ERRORS.push(Errors.INVALID_OFFER.selector);
         SELL_CREDIT_MARKET_ERRORS.push(Errors.NULL_AMOUNT.selector);
-        SELL_CREDIT_MARKET_ERRORS.push(Errors.DUE_DATE_GREATER_THAN_MAX_DUE_DATE.selector);
+        SELL_CREDIT_MARKET_ERRORS.push(Errors.PAST_MATURITY.selector);
+        SELL_CREDIT_MARKET_ERRORS.push(Errors.MATURITY_OUT_OF_RANGE.selector);
+        SELL_CREDIT_MARKET_ERRORS.push(Errors.INVALID_MATURITY.selector);
         SELL_CREDIT_MARKET_ERRORS.push(Errors.BORROWER_IS_NOT_LENDER.selector);
         SELL_CREDIT_MARKET_ERRORS.push(Errors.CR_BELOW_OPENING_LIMIT_BORROW_CR.selector);
-        SELL_CREDIT_MARKET_ERRORS.push(Errors.TENOR_OUT_OF_RANGE.selector);
+        SELL_CREDIT_MARKET_ERRORS.push(Errors.MATURITY_OUT_OF_RANGE.selector);
         SELL_CREDIT_MARKET_ERRORS.push(Errors.CREDIT_LOWER_THAN_MINIMUM_CREDIT_OPENING.selector);
         SELL_CREDIT_MARKET_ERRORS.push(Errors.CREDIT_LOWER_THAN_MINIMUM_CREDIT.selector);
         SELL_CREDIT_MARKET_ERRORS.push(Errors.NOT_ENOUGH_CASH.selector);
         SELL_CREDIT_MARKET_ERRORS.push(Errors.NOT_ENOUGH_CREDIT.selector);
         SELL_CREDIT_MARKET_ERRORS.push(IERC20Errors.ERC20InsufficientBalance.selector);
-        SELL_CREDIT_MARKET_ERRORS.push(Errors.STALE_RATE.selector);
         SELL_CREDIT_MARKET_ERRORS.push(Errors.CREDIT_POSITION_NOT_TRANSFERRABLE.selector);
-        SELL_CREDIT_MARKET_ERRORS.push(Errors.INVERTED_CURVES.selector);
+        SELL_CREDIT_MARKET_ERRORS.push(Errors.INVERTED_OFFERS.selector);
         SELL_CREDIT_MARKET_ERRORS.push(SafeCast.SafeCastOverflowedIntToUint.selector);
         for (uint256 i = 0; i < ___VAULT_ERRORS.length; i++) {
             SELL_CREDIT_MARKET_ERRORS.push(___VAULT_ERRORS[i]);
         }
 
         // SELL_CREDIT_LIMIT_ERRORS
-        SELL_CREDIT_LIMIT_ERRORS.push(Errors.PAST_MAX_DUE_DATE.selector);
-        SELL_CREDIT_LIMIT_ERRORS.push(Errors.TENOR_OUT_OF_RANGE.selector);
+        SELL_CREDIT_LIMIT_ERRORS.push(Errors.MATURITY_OUT_OF_RANGE.selector);
+        SELL_CREDIT_LIMIT_ERRORS.push(Errors.INVALID_MATURITY.selector);
+        SELL_CREDIT_LIMIT_ERRORS.push(Errors.NULL_ARRAY.selector);
+        SELL_CREDIT_LIMIT_ERRORS.push(Errors.ARRAY_LENGTHS_MISMATCH.selector);
+        SELL_CREDIT_LIMIT_ERRORS.push(Errors.MATURITIES_NOT_STRICTLY_INCREASING.selector);
+        SELL_CREDIT_LIMIT_ERRORS.push(Errors.PAST_MATURITY.selector);
 
         // BUY_CREDIT_MARKET_ERRORS
         BUY_CREDIT_MARKET_ERRORS.push(Errors.INVALID_OFFER.selector);
         BUY_CREDIT_MARKET_ERRORS.push(Errors.CR_BELOW_OPENING_LIMIT_BORROW_CR.selector);
-        BUY_CREDIT_MARKET_ERRORS.push(Errors.TENOR_OUT_OF_RANGE.selector);
+        BUY_CREDIT_MARKET_ERRORS.push(Errors.MATURITY_OUT_OF_RANGE.selector);
+        BUY_CREDIT_MARKET_ERRORS.push(Errors.INVALID_MATURITY.selector);
+        BUY_CREDIT_MARKET_ERRORS.push(Errors.PAST_MATURITY.selector);
+        BUY_CREDIT_MARKET_ERRORS.push(Errors.MATURITY_OUT_OF_RANGE.selector);
         BUY_CREDIT_MARKET_ERRORS.push(Errors.CREDIT_LOWER_THAN_MINIMUM_CREDIT_OPENING.selector);
         BUY_CREDIT_MARKET_ERRORS.push(Errors.CREDIT_LOWER_THAN_MINIMUM_CREDIT.selector);
         BUY_CREDIT_MARKET_ERRORS.push(Errors.CREDIT_POSITION_NOT_TRANSFERRABLE.selector);
         BUY_CREDIT_MARKET_ERRORS.push(Errors.NOT_ENOUGH_CASH.selector);
         BUY_CREDIT_MARKET_ERRORS.push(Errors.NULL_AMOUNT.selector);
-        BUY_CREDIT_MARKET_ERRORS.push(Errors.DUE_DATE_GREATER_THAN_MAX_DUE_DATE.selector);
         BUY_CREDIT_MARKET_ERRORS.push(Errors.NOT_ENOUGH_CREDIT.selector);
         BUY_CREDIT_MARKET_ERRORS.push(Errors.CREDIT_NOT_FOR_SALE.selector);
-        BUY_CREDIT_MARKET_ERRORS.push(Errors.STALE_RATE.selector);
         BUY_CREDIT_MARKET_ERRORS.push(IERC20Errors.ERC20InsufficientBalance.selector);
-        BUY_CREDIT_MARKET_ERRORS.push(Errors.INVERTED_CURVES.selector);
+        BUY_CREDIT_MARKET_ERRORS.push(Errors.INVERTED_OFFERS.selector);
         BUY_CREDIT_MARKET_ERRORS.push(SafeCast.SafeCastOverflowedIntToUint.selector);
         for (uint256 i = 0; i < ___VAULT_ERRORS.length; i++) {
             BUY_CREDIT_MARKET_ERRORS.push(___VAULT_ERRORS[i]);
         }
 
         // BUY_CREDIT_LIMIT_ERRORS
-        BUY_CREDIT_LIMIT_ERRORS.push(Errors.PAST_MAX_DUE_DATE.selector);
-        BUY_CREDIT_LIMIT_ERRORS.push(Errors.TENOR_OUT_OF_RANGE.selector);
+        BUY_CREDIT_LIMIT_ERRORS.push(Errors.MATURITY_OUT_OF_RANGE.selector);
+        BUY_CREDIT_LIMIT_ERRORS.push(Errors.INVALID_MATURITY.selector);
+        BUY_CREDIT_LIMIT_ERRORS.push(Errors.NULL_ARRAY.selector);
+        BUY_CREDIT_LIMIT_ERRORS.push(Errors.ARRAY_LENGTHS_MISMATCH.selector);
+        BUY_CREDIT_LIMIT_ERRORS.push(Errors.MATURITIES_NOT_STRICTLY_INCREASING.selector);
+        BUY_CREDIT_LIMIT_ERRORS.push(Errors.PAST_MATURITY.selector);
 
         // REPAY_ERRORS
         REPAY_ERRORS.push(Errors.LOAN_ALREADY_REPAID.selector);
@@ -130,23 +139,6 @@ abstract contract ExpectedErrors is Deploy, Properties {
         // SELF_LIQUIDATE_ERRORS
         SELF_LIQUIDATE_ERRORS.push(Errors.LOAN_NOT_SELF_LIQUIDATABLE.selector);
         SELF_LIQUIDATE_ERRORS.push(Errors.LIQUIDATOR_IS_NOT_LENDER.selector);
-
-        // LIQUIDATE_WITH_REPLACEMENT_ERRORS
-        LIQUIDATE_WITH_REPLACEMENT_ERRORS.push(IAccessControl.AccessControlUnauthorizedAccount.selector);
-        LIQUIDATE_WITH_REPLACEMENT_ERRORS.push(Errors.CR_BELOW_OPENING_LIMIT_BORROW_CR.selector);
-        LIQUIDATE_WITH_REPLACEMENT_ERRORS.push(Errors.LOAN_NOT_LIQUIDATABLE.selector);
-        LIQUIDATE_WITH_REPLACEMENT_ERRORS.push(Errors.LIQUIDATE_PROFIT_BELOW_MINIMUM_COLLATERAL_PROFIT.selector);
-        LIQUIDATE_WITH_REPLACEMENT_ERRORS.push(Errors.LOAN_NOT_ACTIVE.selector);
-        LIQUIDATE_WITH_REPLACEMENT_ERRORS.push(Errors.TENOR_OUT_OF_RANGE.selector);
-        LIQUIDATE_WITH_REPLACEMENT_ERRORS.push(Errors.INVALID_OFFER.selector);
-        LIQUIDATE_WITH_REPLACEMENT_ERRORS.push(Errors.STALE_RATE.selector);
-        LIQUIDATE_WITH_REPLACEMENT_ERRORS.push(Errors.DUE_DATE_GREATER_THAN_MAX_DUE_DATE.selector);
-        LIQUIDATE_WITH_REPLACEMENT_ERRORS.push(IERC20Errors.ERC20InsufficientBalance.selector);
-        LIQUIDATE_WITH_REPLACEMENT_ERRORS.push(Errors.INVERTED_CURVES.selector);
-        LIQUIDATE_WITH_REPLACEMENT_ERRORS.push(SafeCast.SafeCastOverflowedIntToUint.selector);
-        for (uint256 i = 0; i < ___VAULT_ERRORS.length; i++) {
-            LIQUIDATE_WITH_REPLACEMENT_ERRORS.push(___VAULT_ERRORS[i]);
-        }
 
         // COMPENSATE_ERRORS
         COMPENSATE_ERRORS.push(Errors.LOAN_ALREADY_REPAID.selector);

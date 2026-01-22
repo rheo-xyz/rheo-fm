@@ -3,8 +3,7 @@ pragma solidity 0.8.23;
 
 import {CreditPosition, DebtPosition, LoanLibrary, RESERVED_ID} from "@src/market/libraries/LoanLibrary.sol";
 import {Math, PERCENT} from "@src/market/libraries/Math.sol";
-import {LimitOrder, OfferLibrary} from "@src/market/libraries/OfferLibrary.sol";
-import {VariablePoolBorrowRateParams} from "@src/market/libraries/YieldCurveLibrary.sol";
+import {FixedMaturityLimitOrder, OfferLibrary} from "@src/market/libraries/OfferLibrary.sol";
 
 import {State} from "@src/market/SizeStorage.sol";
 
@@ -24,9 +23,9 @@ struct SellCreditMarketParams {
     uint256 creditPositionId;
     // The amount of credit to sell
     uint256 amount;
-    // The tenor of the loan
-    // If creditPositionId is not RESERVED_ID, this value is ignored and the tenor of the existing loan is used
-    uint256 tenor;
+    // The maturity of the loan
+    // If creditPositionId is not RESERVED_ID, this value is ignored and the maturity of the existing loan is used
+    uint256 maturity;
     // The deadline for the transaction
     uint256 deadline;
     // The maximum APR for the loan
@@ -34,10 +33,10 @@ struct SellCreditMarketParams {
     // Whether amount means credit or cash
     bool exactAmountIn;
     // The collection Id (introduced in v1.8)
-    // If collectionId is RESERVED_ID, selects the user-defined yield curve
+    // If collectionId is RESERVED_ID, selects the user-defined offer
     uint256 collectionId;
     // The rate provider (introduced in v1.8)
-    // If collectionId is RESERVED_ID, selects the user-defined yield curve
+    // If collectionId is RESERVED_ID, selects the user-defined offer
     address rateProvider;
 }
 
@@ -55,7 +54,7 @@ struct SellCreditMarketOnBehalfOfParams {
 /// @author Size (https://size.credit/)
 /// @notice Contains the logic for selling credit (borrowing) as a market order
 library SellCreditMarket {
-    using OfferLibrary for LimitOrder;
+    using OfferLibrary for FixedMaturityLimitOrder;
     using OfferLibrary for State;
     using LoanLibrary for DebtPosition;
     using LoanLibrary for CreditPosition;
@@ -69,7 +68,7 @@ library SellCreditMarket {
         uint256 cashAmountOut;
         uint256 swapFee;
         uint256 fragmentationFee;
-        uint256 tenor;
+        uint256 maturity;
     }
 
     /// @notice Validates the input parameters for selling credit as a market order
@@ -83,7 +82,7 @@ library SellCreditMarket {
         address onBehalfOf = externalParams.onBehalfOf;
         address recipient = externalParams.recipient;
 
-        uint256 tenor;
+        uint256 maturity;
 
         // validate msg.sender
         if (!state.data.sizeFactory.isAuthorized(msg.sender, onBehalfOf, Action.SELL_CREDIT_MARKET)) {
@@ -102,12 +101,7 @@ library SellCreditMarket {
 
         // validate creditPositionId
         if (params.creditPositionId == RESERVED_ID) {
-            tenor = params.tenor;
-
-            // validate tenor
-            if (tenor < state.riskConfig.minTenor || tenor > state.riskConfig.maxTenor) {
-                revert Errors.TENOR_OUT_OF_RANGE(tenor, state.riskConfig.minTenor, state.riskConfig.maxTenor);
-            }
+            maturity = params.maturity;
         } else {
             CreditPosition storage creditPosition = state.getCreditPosition(params.creditPositionId);
             DebtPosition storage debtPosition = state.getDebtPositionByCreditPositionId(params.creditPositionId);
@@ -121,7 +115,7 @@ library SellCreditMarket {
                     state.collateralRatio(debtPosition.borrower)
                 );
             }
-            tenor = debtPosition.dueDate - block.timestamp; // positive since the credit position is transferrable, so the loan must be ACTIVE
+            maturity = debtPosition.dueDate;
         }
 
         // validate amount
@@ -129,8 +123,8 @@ library SellCreditMarket {
             revert Errors.NULL_AMOUNT();
         }
 
-        // validate tenor
-        // N/A
+        // validate maturity
+        state.validateMaturity(maturity);
 
         // validate deadline
         if (params.deadline < block.timestamp) {
@@ -138,7 +132,7 @@ library SellCreditMarket {
         }
 
         // validate maxAPR
-        uint256 loanAPR = state.getLoanOfferAPR(params.lender, params.collectionId, params.rateProvider, tenor);
+        uint256 loanAPR = state.getLoanOfferAPR(params.lender, params.collectionId, params.rateProvider, maturity);
         if (loanAPR > params.maxAPR) {
             revert Errors.APR_GREATER_THAN_MAX_APR(loanAPR, params.maxAPR);
         }
@@ -146,9 +140,9 @@ library SellCreditMarket {
         // validate exactAmountIn
         // N/A
 
-        // validate inverted curve
-        if (!state.isLoanAPRGreaterThanBorrowOfferAPRs(params.lender, loanAPR, tenor)) {
-            revert Errors.INVERTED_CURVES(params.lender, tenor);
+        // validate inverted offers
+        if (!state.isLoanAPRGreaterThanBorrowOfferAPRs(params.lender, loanAPR, maturity)) {
+            revert Errors.INVERTED_OFFERS(params.lender, maturity);
         }
 
         // validate collectionId
@@ -166,16 +160,17 @@ library SellCreditMarket {
         returns (SwapDataSellCreditMarket memory swapData)
     {
         if (params.creditPositionId == RESERVED_ID) {
-            swapData.tenor = params.tenor;
+            swapData.maturity = params.maturity;
         } else {
             DebtPosition storage debtPosition = state.getDebtPositionByCreditPositionId(params.creditPositionId);
             swapData.creditPosition = state.getCreditPosition(params.creditPositionId);
 
-            swapData.tenor = debtPosition.dueDate - block.timestamp;
+            swapData.maturity = debtPosition.dueDate;
         }
 
         uint256 ratePerTenor =
-            state.getLoanOfferRatePerTenor(params.lender, params.collectionId, params.rateProvider, swapData.tenor);
+            state.getLoanOfferRatePerTenor(params.lender, params.collectionId, params.rateProvider, swapData.maturity);
+        uint256 tenor = swapData.maturity - block.timestamp;
 
         if (params.exactAmountIn) {
             swapData.creditAmountIn = params.amount;
@@ -184,7 +179,7 @@ library SellCreditMarket {
                 creditAmountIn: swapData.creditAmountIn,
                 maxCredit: params.creditPositionId == RESERVED_ID ? swapData.creditAmountIn : swapData.creditPosition.credit,
                 ratePerTenor: ratePerTenor,
-                tenor: swapData.tenor
+                tenor: tenor
             });
         } else {
             swapData.cashAmountOut = params.amount;
@@ -194,17 +189,13 @@ library SellCreditMarket {
                 maxCashAmountOut: params.creditPositionId == RESERVED_ID
                     ? swapData.cashAmountOut
                     : Math.mulDivDown(
-                        swapData.creditPosition.credit,
-                        PERCENT - state.getSwapFeePercent(swapData.tenor),
-                        PERCENT + ratePerTenor
+                        swapData.creditPosition.credit, PERCENT - state.getSwapFeePercent(tenor), PERCENT + ratePerTenor
                     ),
                 maxCredit: params.creditPositionId == RESERVED_ID
-                    ? Math.mulDivUp(
-                        swapData.cashAmountOut, PERCENT + ratePerTenor, PERCENT - state.getSwapFeePercent(swapData.tenor)
-                    )
+                    ? Math.mulDivUp(swapData.cashAmountOut, PERCENT + ratePerTenor, PERCENT - state.getSwapFeePercent(tenor))
                     : swapData.creditPosition.credit,
                 ratePerTenor: ratePerTenor,
-                tenor: swapData.tenor
+                tenor: tenor
             });
         }
     }
@@ -226,7 +217,7 @@ library SellCreditMarket {
             recipient,
             params.creditPositionId,
             params.amount,
-            params.tenor,
+            params.maturity,
             params.deadline,
             params.maxAPR,
             params.exactAmountIn,
@@ -242,7 +233,7 @@ library SellCreditMarket {
                 lender: onBehalfOf,
                 borrower: onBehalfOf,
                 futureValue: swapData.creditAmountIn,
-                dueDate: block.timestamp + swapData.tenor
+                dueDate: swapData.maturity
             });
         }
 
@@ -269,7 +260,7 @@ library SellCreditMarket {
             swapData.cashAmountOut,
             swapData.swapFee,
             swapData.fragmentationFee,
-            swapData.tenor
+            swapData.maturity
         );
     }
 }

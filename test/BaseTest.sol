@@ -12,10 +12,11 @@ import {UNISWAP_V3_FACTORY_BYTECODE} from "@test/mocks/UniswapV3FactoryBytecode.
 import {IUniswapV3Factory} from "@uniswap/v3-core/contracts/interfaces/IUniswapV3Factory.sol";
 
 import {IERC4626} from "@openzeppelin/contracts/interfaces/IERC4626.sol";
-import {Size} from "@src/market/Size.sol";
-import {YieldCurve} from "@src/market/libraries/YieldCurveLibrary.sol";
 
-import {YieldCurveHelper} from "@test/helpers/libraries/YieldCurveHelper.sol";
+import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
+import {Size} from "@src/market/Size.sol";
+import {FixedMaturityLimitOrder} from "@src/market/libraries/OfferLibrary.sol";
+import {FixedMaturityLimitOrderHelper} from "@test/helpers/libraries/FixedMaturityLimitOrderHelper.sol";
 
 import {DepositParams} from "@src/market/libraries/actions/Deposit.sol";
 import {WithdrawParams} from "@src/market/libraries/actions/Withdraw.sol";
@@ -34,7 +35,6 @@ import {LiquidateParams} from "@src/market/libraries/actions/Liquidate.sol";
 
 import {CompensateParams} from "@src/market/libraries/actions/Compensate.sol";
 
-import {LiquidateWithReplacementParams} from "@src/market/libraries/actions/LiquidateWithReplacement.sol";
 import {PartialRepayParams} from "@src/market/libraries/actions/PartialRepay.sol";
 import {RepayParams} from "@src/market/libraries/actions/Repay.sol";
 import {SelfLiquidateParams} from "@src/market/libraries/actions/SelfLiquidate.sol";
@@ -69,7 +69,7 @@ struct Vars {
 }
 
 contract BaseTest is Test, Deploy, AssertsHelper {
-    uint256 internal constant OVERDUE_LIQUIDATION_REWARD_SLOT = 30;
+    uint256 internal constant OVERDUE_LIQUIDATION_REWARD_SLOT = 29;
 
     address internal alice = address(0x10000);
     address internal bob = address(0x20000);
@@ -81,6 +81,98 @@ contract BaseTest is Test, Deploy, AssertsHelper {
     function setUp() public virtual {
         setupLocal(address(this), feeRecipient);
         _labels();
+    }
+
+    function _maturity(uint256 tenor) internal view returns (uint256) {
+        return _riskMaturityFromTenor(tenor);
+    }
+
+    function _tenorBounds(uint256 maxTenor) internal view returns (uint256 minTenor, uint256 maxTenorBound) {
+        minTenor = size.riskConfig().minTenor;
+        maxTenorBound = size.riskConfig().maxTenor;
+
+        if (maxTenorBound > maxTenor) {
+            maxTenorBound = maxTenor;
+        }
+        if (maxTenorBound < minTenor) {
+            maxTenorBound = minTenor;
+        }
+    }
+
+    function _riskMaturityBounds() internal view returns (uint256 minMaturity, uint256 maxMaturity) {
+        uint256[] memory maturities = size.riskConfig().maturities;
+        require(maturities.length != 0, "riskConfig.maturities is empty");
+
+        minMaturity = type(uint256).max;
+        maxMaturity = 0;
+        for (uint256 i = 0; i < maturities.length; i++) {
+            uint256 maturity = maturities[i];
+            if (maturity < minMaturity) {
+                minMaturity = maturity;
+            }
+            if (maturity > maxMaturity) {
+                maxMaturity = maturity;
+            }
+        }
+    }
+
+    function _riskMaturityAt(uint256 seed) internal view returns (uint256 maturity) {
+        uint256[] memory maturities = size.riskConfig().maturities;
+        require(maturities.length != 0, "riskConfig.maturities is empty");
+        uint256 count;
+        for (uint256 i = 0; i < maturities.length; i++) {
+            if (maturities[i] > block.timestamp) {
+                count++;
+            }
+        }
+        require(count != 0, "riskConfig.maturities has no future entries");
+        uint256 index = seed % count;
+        for (uint256 i = 0; i < maturities.length; i++) {
+            if (maturities[i] > block.timestamp) {
+                if (index == 0) {
+                    return maturities[i];
+                }
+                index--;
+            }
+        }
+        return maturities[0];
+    }
+
+    function _riskTenorAt(uint256 seed) internal view returns (uint256 tenor) {
+        uint256 maturity = _riskMaturityAt(seed);
+        tenor = maturity - block.timestamp;
+    }
+
+    function _riskMaturityAtIndex(uint256 index) internal view returns (uint256 maturity) {
+        uint256[] memory maturities = size.riskConfig().maturities;
+        require(index < maturities.length, "riskConfig.maturities index");
+        maturity = maturities[index];
+    }
+
+    function _riskTenorAtIndex(uint256 index) internal view returns (uint256 tenor) {
+        uint256 maturity = _riskMaturityAtIndex(index);
+        tenor = maturity > block.timestamp ? maturity - block.timestamp : 0;
+    }
+
+    function _pointOfferAtIndex(uint256 index, uint256 apr) internal view returns (FixedMaturityLimitOrder memory) {
+        uint256[] memory maturities = new uint256[](1);
+        uint256[] memory aprs = new uint256[](1);
+        maturities[0] = _riskMaturityAtIndex(index);
+        aprs[0] = apr;
+        return FixedMaturityLimitOrder({maturities: maturities, aprs: aprs});
+    }
+
+    function _offerAtIndexes(uint256[] memory indexes, uint256[] memory aprs)
+        internal
+        view
+        returns (FixedMaturityLimitOrder memory)
+    {
+        require(indexes.length == aprs.length, "offer indexes/aprs length");
+        uint256[] memory maturities = new uint256[](indexes.length);
+        for (uint256 i = 0; i < indexes.length; i++) {
+            maturities[i] = _riskMaturityAtIndex(indexes[i]);
+        }
+        return FixedMaturityLimitOrder({maturities: maturities, aprs: aprs});
     }
 
     function _labels() internal {
@@ -191,43 +283,43 @@ contract BaseTest is Test, Deploy, AssertsHelper {
         size.withdraw(WithdrawParams({token: token, amount: amount, to: to}));
     }
 
-    function _buyCreditLimit(
-        address lender,
-        uint256 maxDueDate,
-        int256[1] memory ratesArray,
-        uint256[1] memory tenorsArray
-    ) internal {
-        int256[] memory aprs = new int256[](1);
-        uint256[] memory tenors = new uint256[](1);
-        uint256[] memory marketRateMultipliers = new uint256[](1);
-        aprs[0] = ratesArray[0];
-        tenors[0] = tenorsArray[0];
-        YieldCurve memory curveRelativeTime =
-            YieldCurve({tenors: tenors, marketRateMultipliers: marketRateMultipliers, aprs: aprs});
-        return _buyCreditLimit(lender, maxDueDate, curveRelativeTime);
+    function _buyCreditLimit(address lender, FixedMaturityLimitOrder memory offer) internal {
+        vm.prank(lender);
+        size.buyCreditLimit(BuyCreditLimitParams({maturities: offer.maturities, aprs: offer.aprs}));
     }
 
-    function _buyCreditLimit(
-        address lender,
-        uint256 maxDueDate,
-        int256[2] memory ratesArray,
-        uint256[2] memory tenorsArray
-    ) internal {
-        int256[] memory aprs = new int256[](2);
+    function _buyCreditLimit(address lender, uint256 maturity, uint256 apr) internal {
+        uint256[] memory maturities = new uint256[](1);
+        uint256[] memory aprs = new uint256[](1);
+        maturities[0] = maturity;
+        aprs[0] = apr;
+        _buyCreditLimit(lender, FixedMaturityLimitOrder({maturities: maturities, aprs: aprs}));
+    }
+
+    function _buyCreditLimit(address lender, uint256, FixedMaturityLimitOrder memory offer) internal {
+        _buyCreditLimit(lender, offer);
+    }
+
+    function _buyCreditLimit(address lender, uint256, int256[1] memory ratesArray, uint256[1] memory tenorsArray)
+        internal
+    {
+        uint256[] memory tenors = new uint256[](1);
+        uint256[] memory aprs = new uint256[](1);
+        tenors[0] = tenorsArray[0];
+        aprs[0] = SafeCast.toUint256(ratesArray[0]);
+        _buyCreditLimit(lender, _offerFromTenors(tenors, aprs));
+    }
+
+    function _buyCreditLimit(address lender, uint256, int256[2] memory ratesArray, uint256[2] memory tenorsArray)
+        internal
+    {
         uint256[] memory tenors = new uint256[](2);
-        uint256[] memory marketRateMultipliers = new uint256[](2);
-        aprs[0] = ratesArray[0];
-        aprs[1] = ratesArray[1];
+        uint256[] memory aprs = new uint256[](2);
         tenors[0] = tenorsArray[0];
         tenors[1] = tenorsArray[1];
-        YieldCurve memory curveRelativeTime =
-            YieldCurve({tenors: tenors, marketRateMultipliers: marketRateMultipliers, aprs: aprs});
-        return _buyCreditLimit(lender, maxDueDate, curveRelativeTime);
-    }
-
-    function _buyCreditLimit(address lender, uint256 maxDueDate, YieldCurve memory curveRelativeTime) internal {
-        vm.prank(lender);
-        size.buyCreditLimit(BuyCreditLimitParams({maxDueDate: maxDueDate, curveRelativeTime: curveRelativeTime}));
+        aprs[0] = SafeCast.toUint256(ratesArray[0]);
+        aprs[1] = SafeCast.toUint256(ratesArray[1]);
+        _buyCreditLimit(lender, _offerFromTenors(tenors, aprs));
     }
 
     function _sellCreditMarket(
@@ -235,7 +327,7 @@ contract BaseTest is Test, Deploy, AssertsHelper {
         address lender,
         uint256 creditPositionId,
         uint256 amount,
-        uint256 tenor,
+        uint256 maturity,
         bool exactAmountIn
     ) internal returns (uint256) {
         vm.prank(borrower);
@@ -244,7 +336,7 @@ contract BaseTest is Test, Deploy, AssertsHelper {
                 lender: lender,
                 creditPositionId: creditPositionId,
                 amount: amount,
-                tenor: tenor,
+                maturity: maturity,
                 deadline: block.timestamp,
                 maxAPR: type(uint256).max,
                 exactAmountIn: exactAmountIn,
@@ -261,9 +353,9 @@ contract BaseTest is Test, Deploy, AssertsHelper {
         address lender,
         uint256 creditPositionId,
         uint256 amount,
-        uint256 tenor
+        uint256 maturity
     ) internal returns (uint256) {
-        return _sellCreditMarket(borrower, lender, creditPositionId, amount, tenor, true);
+        return _sellCreditMarket(borrower, lender, creditPositionId, amount, maturity, true);
     }
 
     function _sellCreditMarket(address borrower, address lender, uint256 creditPositionId) internal returns (uint256) {
@@ -272,48 +364,43 @@ contract BaseTest is Test, Deploy, AssertsHelper {
         );
     }
 
-    function _sellCreditLimit(address borrower, uint256 maxDueDate, YieldCurve memory curveRelativeTime) internal {
+    function _sellCreditLimit(address borrower, FixedMaturityLimitOrder memory offer) internal {
         vm.prank(borrower);
-        size.sellCreditLimit(SellCreditLimitParams({maxDueDate: maxDueDate, curveRelativeTime: curveRelativeTime}));
+        size.sellCreditLimit(SellCreditLimitParams({maturities: offer.maturities, aprs: offer.aprs}));
     }
 
-    function _sellCreditLimit(
-        address borrower,
-        uint256 maxDueDate,
-        int256[1] memory ratesArray,
-        uint256[1] memory tenorsArray
-    ) internal {
-        int256[] memory aprs = new int256[](1);
+    function _sellCreditLimit(address borrower, uint256 maturity, uint256 apr) internal {
+        uint256[] memory maturities = new uint256[](1);
+        uint256[] memory aprs = new uint256[](1);
+        maturities[0] = maturity;
+        aprs[0] = apr;
+        _sellCreditLimit(borrower, FixedMaturityLimitOrder({maturities: maturities, aprs: aprs}));
+    }
+
+    function _sellCreditLimit(address borrower, uint256, FixedMaturityLimitOrder memory offer) internal {
+        _sellCreditLimit(borrower, offer);
+    }
+
+    function _sellCreditLimit(address borrower, uint256, int256[1] memory ratesArray, uint256[1] memory tenorsArray)
+        internal
+    {
         uint256[] memory tenors = new uint256[](1);
-        uint256[] memory marketRateMultipliers = new uint256[](1);
-        aprs[0] = ratesArray[0];
+        uint256[] memory aprs = new uint256[](1);
         tenors[0] = tenorsArray[0];
-        YieldCurve memory curveRelativeTime =
-            YieldCurve({tenors: tenors, marketRateMultipliers: marketRateMultipliers, aprs: aprs});
-        return _sellCreditLimit(borrower, maxDueDate, curveRelativeTime);
+        aprs[0] = SafeCast.toUint256(ratesArray[0]);
+        _sellCreditLimit(borrower, _offerFromTenors(tenors, aprs));
     }
 
-    function _sellCreditLimit(
-        address borrower,
-        uint256 maxDueDate,
-        int256[2] memory ratesArray,
-        uint256[2] memory tenorsArray
-    ) internal {
-        int256[] memory aprs = new int256[](2);
+    function _sellCreditLimit(address borrower, uint256, int256[2] memory ratesArray, uint256[2] memory tenorsArray)
+        internal
+    {
         uint256[] memory tenors = new uint256[](2);
-        uint256[] memory marketRateMultipliers = new uint256[](2);
-        aprs[0] = ratesArray[0];
-        aprs[1] = ratesArray[1];
+        uint256[] memory aprs = new uint256[](2);
         tenors[0] = tenorsArray[0];
         tenors[1] = tenorsArray[1];
-        YieldCurve memory curveRelativeTime =
-            YieldCurve({tenors: tenors, marketRateMultipliers: marketRateMultipliers, aprs: aprs});
-        return _sellCreditLimit(borrower, maxDueDate, curveRelativeTime);
-    }
-
-    function _sellCreditLimit(address borrower, uint256 maxDueDate, int256 rate, uint256 tenor) internal {
-        YieldCurve memory curveRelativeTime = YieldCurveHelper.pointCurve(tenor, rate);
-        return _sellCreditLimit(borrower, maxDueDate, curveRelativeTime);
+        aprs[0] = SafeCast.toUint256(ratesArray[0]);
+        aprs[1] = SafeCast.toUint256(ratesArray[1]);
+        _sellCreditLimit(borrower, _offerFromTenors(tenors, aprs));
     }
 
     function _buyCreditMarket(address lender, uint256 creditPositionId, uint256 amount, bool exactAmountIn)
@@ -323,18 +410,18 @@ contract BaseTest is Test, Deploy, AssertsHelper {
         return _buyCreditMarket(lender, address(0), creditPositionId, amount, type(uint256).max, exactAmountIn);
     }
 
-    function _buyCreditMarket(address lender, address borrower, uint256 amount, uint256 tenor)
+    function _buyCreditMarket(address lender, address borrower, uint256 amount, uint256 maturity)
         internal
         returns (uint256)
     {
-        return _buyCreditMarket(lender, borrower, RESERVED_ID, amount, tenor, false);
+        return _buyCreditMarket(lender, borrower, RESERVED_ID, amount, maturity, false);
     }
 
-    function _buyCreditMarket(address lender, address borrower, uint256 amount, uint256 tenor, bool exactAmountIn)
+    function _buyCreditMarket(address lender, address borrower, uint256 amount, uint256 maturity, bool exactAmountIn)
         internal
         returns (uint256)
     {
-        return _buyCreditMarket(lender, borrower, RESERVED_ID, amount, tenor, exactAmountIn);
+        return _buyCreditMarket(lender, borrower, RESERVED_ID, amount, maturity, exactAmountIn);
     }
 
     function _buyCreditMarket(
@@ -342,7 +429,7 @@ contract BaseTest is Test, Deploy, AssertsHelper {
         address borrower,
         uint256 creditPositionId,
         uint256 amount,
-        uint256 tenor,
+        uint256 maturity,
         bool exactAmountIn
     ) internal returns (uint256) {
         vm.prank(user);
@@ -350,7 +437,7 @@ contract BaseTest is Test, Deploy, AssertsHelper {
             BuyCreditMarketParams({
                 borrower: borrower,
                 creditPositionId: creditPositionId,
-                tenor: tenor,
+                maturity: maturity,
                 amount: amount,
                 exactAmountIn: exactAmountIn,
                 deadline: block.timestamp,
@@ -408,33 +495,6 @@ contract BaseTest is Test, Deploy, AssertsHelper {
     function _selfLiquidate(address user, uint256 creditPositionId) internal {
         vm.prank(user);
         return size.selfLiquidate(SelfLiquidateParams({creditPositionId: creditPositionId}));
-    }
-
-    function _liquidateWithReplacement(address user, uint256 debtPositionId, address borrower)
-        internal
-        returns (uint256, uint256)
-    {
-        return _liquidateWithReplacement(user, debtPositionId, borrower, 1e18);
-    }
-
-    function _liquidateWithReplacement(
-        address user,
-        uint256 debtPositionId,
-        address borrower,
-        uint256 minimumCollateralProfit
-    ) internal returns (uint256, uint256) {
-        vm.prank(user);
-        return size.liquidateWithReplacement(
-            LiquidateWithReplacementParams({
-                debtPositionId: debtPositionId,
-                borrower: borrower,
-                minimumCollateralProfit: minimumCollateralProfit,
-                deadline: block.timestamp,
-                minAPR: 0,
-                collectionId: RESERVED_ID,
-                rateProvider: address(0)
-            })
-        );
     }
 
     function _compensate(address user, uint256 creditPositionWithDebtToRepayId, uint256 creditPositionToCompensateId)
@@ -509,6 +569,26 @@ contract BaseTest is Test, Deploy, AssertsHelper {
     function _setAuthorization(address user, address operator, ActionsBitmap actionsBitmap) internal {
         vm.prank(user);
         sizeFactory.setAuthorization(operator, actionsBitmap);
+    }
+
+    function _offerFromTenors(uint256[] memory tenors, uint256[] memory aprs)
+        internal
+        view
+        returns (FixedMaturityLimitOrder memory)
+    {
+        uint256[] memory maturities = new uint256[](tenors.length);
+        for (uint256 i = 0; i < tenors.length; i++) {
+            maturities[i] = _riskMaturityFromTenor(tenors[i]);
+        }
+
+        return FixedMaturityLimitOrder({maturities: maturities, aprs: aprs});
+    }
+
+    function _riskMaturityFromTenor(uint256 tenor) internal view returns (uint256 maturity) {
+        require(tenor % 30 days == 0, "tenor step");
+        uint256 index = tenor / 30 days;
+        require(index > 0, "tenor index");
+        maturity = _riskMaturityAtIndex(index - 1);
     }
 
     function _setLiquidityIndex(address token, uint256 index) internal {

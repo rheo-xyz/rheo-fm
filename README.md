@@ -65,7 +65,7 @@ In order to address donation and reentrancy attacks, the following measures were
 
 #### Maths
 
-All mathematical operations are implemented with explicit rounding (`mulDivUp` or `mulDivDown`) using Solady's [FixedPointMathLib](https://github.com/Vectorized/solady/blob/main/src/utils/FixedPointMathLib.sol). Whenever a taker-maker operation occurs, all rounding tries to favor the maker, who is the passive party. In some generic situations, such as in yield curve calculations, the rounding is always in one direction.
+All mathematical operations are implemented with explicit rounding (`mulDivUp` or `mulDivDown`) using Solady's [FixedPointMathLib](https://github.com/Vectorized/solady/blob/main/src/utils/FixedPointMathLib.sol). Whenever a taker-maker operation occurs, all rounding tries to favor the maker, who is the passive party. In some generic situations, the rounding is always in one direction.
 
 Decimal amounts are preserved until a conversion is necessary:
 
@@ -82,10 +82,6 @@ All percentages are expressed in 18 decimals. For example, a 150% liquidation co
 
 A contract that provides the price of ETH in terms of USDC in 18 decimals. For example, a price of 3327.39 ETH/USDC is represented as 3327390000000000000000.
 
-##### Variable Pool Borrow Rate Feed
-
-In order to set the current market average value of USDC variable borrow rates, we perform an off-chain calculation on Aave's rate, convert it to 18 decimals, and store it in the Size contract. For example, a rate of 2.49% on Aave v3 is represented as 24900000000000000. The admin can disable this feature by setting the stale interval to zero. If the oracle information is stale, orders relying on the variable rate feed cannot be matched.
-
 #### Factory
 
 After v1.5, markets can be deployed through a `SizeFactory` contract. This contract is a central point of the Size ecosystem, as it enables `NonTransferrableScaledTokenV1_5` contracts (such as `saUSDC`) to mint/burn deposit tokens to users who deposit/withdraw, essentially enabling shared liquidity across different markets. For example, a user may deposit USDC to the WETH/USDC market but use the same liquidity to lend on the cbBTC/USDC market.
@@ -98,18 +94,18 @@ In Size v1.6.1, a `copyLimitOrders` function was introduced so that users could 
 
 - Users could copy borrow/loan offers from other users
 - Users could copy both or a single offer from a single address
-- Users could specify safeguards per copied curve:
+- Users could specify safeguards per copied offer:
   - min/max APR (safety envelope): if the calculated APR fell outside of this range, the min/max would be used instead
   - min/max tenor: if the requested tenor went outside of this range, the market order would revert
-- Users could specify offset APRs to be applied to the curves
+- Users could specify offset APRs to be applied to the copied offers
 - Once a copy offer was set, the user's own offers would be ignored, even if they updated them. Copy offers had precedence until erased (setting them to null/default values)
 
-As an additional safety measure against inverted curves, market orders checked that the borrow offer was lower than the user's loan offer for a given tenor. This did not prevent the copy address from changing curves in a single multicall transaction and bypassing this check.
+As an additional safety measure against inverted offers, market orders checked that the borrow offer was lower than the user's loan offer for a given tenor. This did not prevent the copy address from changing offers in a single multicall transaction and bypassing this check.
 
 Notes:
 
 1. Copying another account's limit orders introduced the risk of them placing suboptimal rates and executing market orders against delegators, incurring monetary losses. Only trusted addresses should be copied.
-2. The max/min parameters from the `copyLimitOrder` method were not a global max/min for the user-defined limit orders; they were specific to copy offers. Once the copy address offer was no longer valid, max/min guards for mismatched curves would not be applied. The only reason to stop market orders was in the event of "self arbitrage," i.e., for a given tenor, when the borrow curve >= lending curve, since these users could be drained by an attacker by borrowing high and lending low in a single transaction.
+2. The max/min parameters from the `copyLimitOrder` method were not a global max/min for the user-defined limit orders; they were specific to copy offers. Once the copy address offer was no longer valid, max/min guards for mismatched offers would not be applied. The only reason to stop market orders was in the event of "self arbitrage," i.e., for a given tenor, when the borrow offer APR >= loan offer APR, since these users could be drained by an attacker by borrowing high and lending low in a single transaction.
 3. The offset APR parameters were not validated and could cause market orders to revert depending on the final APR result.
 
 After v1.8, the `CollectionsManager` core contract was introduced, which superseded the copy trading feature, making some of the previous behavior changed. See the corresponding section further down below for more information.
@@ -161,16 +157,16 @@ Since there can be an unlimited number of whitelisted vaults, the amount of unde
 Since Size v1.8, collections of markets, curators and rate providers are core entities of the ecosystem. This superseedes the previous `copyLimitOrders` feature from v1.6.1, but with more functionality:
 
 - A *collection* is a set of markets grouped under a curator.
-- A *Curator* defines *rate providers* (RPs) for each market, which sets yield curves and competes in pricing credit.
-- Collections are defined on-chain. Updates made by curators are automatically reflected across all subscribed users without backend or user intervention, since users' yield curves are just pointers.
+- A *Curator* defines *rate providers* (RPs) for each market, which publish fixed-maturity offers and compete in pricing credit.
+- Collections are defined on-chain. Updates made by curators are automatically reflected across all subscribed users without backend or user intervention, since users' offers are just pointers.
 - When a curator updates the RP for a market, all users subscribed to that collection inherit the new configuration.
 - Delegation logic remains under the control of curators, not rate providers, ensuring curators can update or reassign markets freely. In a sense, a curator "owns" the liquidity of users subscribing to their collections. If a RP is not performing well, they can be replaced without compromise to the curator.
 - Each market may support multiple rate providers. When overlapping offers exist, market order "takers" can pick the best available rate to them (e.g., lowest loan offer APR during a sell credit market order).
-- Curators can define copy limit order configurations, which include safeguard parameters for each market (min/max APR, min/max tenor), along with an offset APR that shifts the result of the yield curve linear interpolation.
+- Curators can define copy limit order configurations, which include safeguard parameters for each market (min/max APR, min/max tenor), along with an offset APR applied to the copied offer (exact-match only).
 - These copy limit order configurations apply when the user has not defined their own.
-- Users can also define their own yield curves and safeguards at the market level. If set, these take precedence over curator defaults.
-- If users want to rely exclusively on curator-defined curves, they must explicitly unset their own limit orders (changed behavior from v1.6).
-- Users now support multiple yield curves per market, one per collection they are subscribed to, plus an optional personal configuration.
+- Users can also define their own offers and safeguards at the market level. If set, these take precedence over curator defaults.
+- If users want to rely exclusively on curator-defined offers, they must explicitly unset their own limit orders (changed behavior from v1.6).
+- Users now support multiple offer sources per market, one per collection they are subscribed to, plus an optional personal configuration.
 - Curators can transfer ownership of their collections.
 - Since users can subscribe to multiple collections, each with potentially many rate providers, the "borrow offer should be lower than loan offer" check now has O(C × R) complexity, where C is the number of collections and R is the number of rate providers. Users should avoid subscribing to too many collections or collections with excessive rate providers, as this may cause market orders to revert due to high gas usage.
 - A rate provider in any market belonging to any collection can prevent all subscribed users from market orders if they set the borrow offer APR greater than or equal to the lend offer APR.
@@ -178,12 +174,12 @@ Since Size v1.8, collections of markets, curators and rate providers are core en
 
 ##### Breaking changes
 
-- Copy trading behavior was updated: rate providers' limit orders no longer take precedence over a user's own yield curve.
+- Copy trading behavior was updated: rate providers' limit orders no longer take precedence over a user's own offers.
 - During reinitialization:
   - All users who previously used the `copyLimitOrder` feature are now subscribed to a new collection that mirrors the rate provider they had copied.
   - Their existing limit orders are cleared, since these may now be used by the taker side of a market order.
 - To indicate "no copy," users should pass a `CopyLimitOrderConfig` with all fields set to null except `offsetAPR`.
-- For the sake of clarity, `getLoanOfferAPR` and `getBorrowOfferAPR` on the `SizeView` contract were renamed to `getUserDefinedLoanOfferAPR` and `getUserDefinedBorrowOfferAPR` to be explicit about whether the yield curve is from a rate provider or from the user themselves.
+- For the sake of clarity, `getLoanOfferAPR` and `getBorrowOfferAPR` on the `SizeView` contract were renamed to `getUserDefinedLoanOfferAPR` and `getUserDefinedBorrowOfferAPR` to be explicit about whether the offer is from a rate provider or from the user themselves.
 - Some infrequently utilized `SizeView` functions were removed to make room for the additional `WithCollection` functions and not break the max contract size limit.
 
 ## Test
@@ -243,9 +239,8 @@ for i in {0..5}; do halmos --loop $i; done
 - If the user vault (by default Aave v3) fails to deposit or withdraw for any reason, such as supply caps or low liquidity, Size's `deposit` and `withdraw` may be prevented.
 - Centralization risk related to integrations (USDC, Aave v3, Chainlink) are out of scope
 - The Variable Pool Borrow Rate feed is trusted and users of rate hook adopt oracle risk of buying/selling credit at unsatisfactory prices. In practice, this feature has never been turned on in production.
-- LiquidateWithReplacement might not be available for the big enough debt positions
 - The fragmentation fee meant to subsidize `claim` operations by protocol-owned keeper bots during credit splits are not charged during loan origination
-- The debt token cap can be inexpensively met with self-borrows, even if there is no benefit to the attacker. Reducing the debt cap does not affect currently open positions, but may prevent liquidation with replacement even if the total system health does not decrease 
+- The debt token cap can be inexpensively met with self-borrows, even if there is no benefit to the attacker. Reducing the debt cap does not affect currently open positions.
 - All issues acknowledged on previous audits and automated findings
 
 ## Deployment

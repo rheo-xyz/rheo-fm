@@ -74,10 +74,10 @@ interface ISizeFactoryV1_8 {
     /// @param collectionId The collection id
     /// @param market The market
     /// @param rateProvider The rate provider
-    /// @param tenor The tenor
+    /// @param maturity The maturity
     /// @return apr The APR
     /// @dev Since v1.8, this function is moved to the SizeFactory contract as it contains the link to the CollectionsManager, where collections provide APRs for different markets through rate providers
-    function getLoanOfferAPR(address user, uint256 collectionId, ISize market, address rateProvider, uint256 tenor)
+    function getLoanOfferAPR(address user, uint256 collectionId, ISize market, address rateProvider, uint256 maturity)
         external
         view
         returns (uint256);
@@ -87,10 +87,10 @@ interface ISizeFactoryV1_8 {
     /// @param collectionId The collection id
     /// @param market The market
     /// @param rateProvider The rate provider
-    /// @param tenor The tenor
+    /// @param maturity The maturity
     /// @return apr The APR
     /// @dev Since v1.8, this function is moved to the SizeFactory contract as it contains the link to the CollectionsManager, where collections provide APRs for different markets through rate providers
-    function getBorrowOfferAPR(address user, uint256 collectionId, ISize market, address rateProvider, uint256 tenor)
+    function getBorrowOfferAPR(address user, uint256 collectionId, ISize market, address rateProvider, uint256 maturity)
         external
         view
         returns (uint256);
@@ -99,9 +99,9 @@ interface ISizeFactoryV1_8 {
     /// @param user The user
     /// @param borrowAPR The borrow APR
     /// @param market The market
-    /// @param tenor The tenor
+    /// @param maturity The maturity
     /// @return isLower True if the borrow APR is lower than the loan offer APRs, false otherwise
-    function isBorrowAPRLowerThanLoanOfferAPRs(address user, uint256 borrowAPR, ISize market, uint256 tenor)
+    function isBorrowAPRLowerThanLoanOfferAPRs(address user, uint256 borrowAPR, ISize market, uint256 maturity)
         external
         view
         returns (bool);
@@ -110,9 +110,9 @@ interface ISizeFactoryV1_8 {
     /// @param user The user
     /// @param loanAPR The loan APR
     /// @param market The market
-    /// @param tenor The tenor
+    /// @param maturity The maturity
     /// @return isGreater True if the loan APR is greater than the borrow offer APRs, false otherwise
-    function isLoanAPRGreaterThanBorrowOfferAPRs(address user, uint256 loanAPR, ISize market, uint256 tenor)
+    function isLoanAPRGreaterThanBorrowOfferAPRs(address user, uint256 loanAPR, ISize market, uint256 maturity)
         external
         view
         returns (bool);

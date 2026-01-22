@@ -11,8 +11,6 @@ import {CopyLimitOrderConfig} from "@src/market/libraries/OfferLibrary.sol";
 
 struct MarketInformation {
     bool initialized;
-    CopyLimitOrderConfig ___deprecated_copyLoanOfferConfig;
-    CopyLimitOrderConfig ___deprecated_copyBorrowOfferConfig;
     EnumerableSet.AddressSet rateProviders;
 }
 

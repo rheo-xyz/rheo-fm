@@ -56,10 +56,6 @@ import {Multicall} from "@src/market/libraries/Multicall.sol";
 import {Compensate, CompensateOnBehalfOfParams, CompensateParams} from "@src/market/libraries/actions/Compensate.sol";
 import {PartialRepay, PartialRepayParams} from "@src/market/libraries/actions/PartialRepay.sol";
 
-import {
-    LiquidateWithReplacement,
-    LiquidateWithReplacementParams
-} from "@src/market/libraries/actions/LiquidateWithReplacement.sol";
 import {Repay, RepayParams} from "@src/market/libraries/actions/Repay.sol";
 import {
     SelfLiquidate,
@@ -115,7 +111,6 @@ contract Size is
     using Claim for State;
     using Liquidate for State;
     using SelfLiquidate for State;
-    using LiquidateWithReplacement for State;
     using Compensate for State;
     using PartialRepay for State;
     using SetUserConfiguration for State;
@@ -369,22 +364,6 @@ contract Size is
     {
         state.validateSelfLiquidate(externalParams);
         state.executeSelfLiquidate(externalParams);
-    }
-
-    /// @inheritdoc ISize
-    function liquidateWithReplacement(LiquidateWithReplacementParams calldata params)
-        external
-        payable
-        override(ISize)
-        nonReentrant
-        whenNotPaused
-        onlyRoleOrSizeFactoryHasRole(KEEPER_ROLE)
-        returns (uint256 liquidatorProfitCollateralToken, uint256 liquidatorProfitBorrowToken)
-    {
-        state.validateLiquidateWithReplacement(params);
-        (liquidatorProfitCollateralToken, liquidatorProfitBorrowToken) = state.executeLiquidateWithReplacement(params);
-        state.validateUserIsNotBelowOpeningLimitBorrowCR(params.borrower);
-        state.validateMinimumCollateralProfit(params, liquidatorProfitCollateralToken);
     }
 
     /// @inheritdoc ISize

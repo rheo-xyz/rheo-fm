@@ -4,7 +4,6 @@ pragma solidity 0.8.23;
 import {SizeStorage, State, User} from "@src/market/SizeStorage.sol";
 
 import {CopyLimitOrderConfig} from "@src/market/libraries/OfferLibrary.sol";
-import {VariablePoolBorrowRateParams} from "@src/market/libraries/YieldCurveLibrary.sol";
 
 import {IERC4626} from "@openzeppelin/contracts/interfaces/IERC4626.sol";
 
@@ -27,7 +26,7 @@ import {ReentrancyGuardUpgradeableWithViewModifier} from "@src/helpers/Reentranc
 import {ISizeView} from "@src/market/interfaces/ISizeView.sol";
 import {ISizeViewV1_8} from "@src/market/interfaces/v1.8/ISizeViewV1_8.sol";
 import {Errors} from "@src/market/libraries/Errors.sol";
-import {LimitOrder, OfferLibrary} from "@src/market/libraries/OfferLibrary.sol";
+import {FixedMaturityLimitOrder, OfferLibrary} from "@src/market/libraries/OfferLibrary.sol";
 import {BuyCreditMarket, BuyCreditMarketParams} from "@src/market/libraries/actions/BuyCreditMarket.sol";
 import {
     InitializeDataParams,
@@ -44,7 +43,7 @@ import {VERSION} from "@src/market/interfaces/ISize.sol";
 /// @author Size (https://size.credit/)
 /// @notice View methods for the Size protocol
 abstract contract SizeView is SizeStorage, ReentrancyGuardUpgradeableWithViewModifier, ISizeView {
-    using OfferLibrary for LimitOrder;
+    using OfferLibrary for FixedMaturityLimitOrder;
     using OfferLibrary for State;
     using LoanLibrary for DebtPosition;
     using LoanLibrary for CreditPosition;
@@ -124,31 +123,31 @@ abstract contract SizeView is SizeStorage, ReentrancyGuardUpgradeableWithViewMod
     }
 
     /// @inheritdoc ISizeViewV1_8
-    function getUserDefinedLoanOfferAPR(address lender, uint256 tenor) external view returns (uint256) {
-        return state.getUserDefinedLoanOfferAPR(lender, tenor);
+    function getUserDefinedLoanOfferAPR(address lender, uint256 maturity) external view returns (uint256) {
+        return state.getUserDefinedLoanOfferAPR(lender, maturity);
     }
 
     /// @inheritdoc ISizeViewV1_8
-    function getUserDefinedBorrowOfferAPR(address borrower, uint256 tenor) external view returns (uint256) {
-        return state.getUserDefinedBorrowOfferAPR(borrower, tenor);
+    function getUserDefinedBorrowOfferAPR(address borrower, uint256 maturity) external view returns (uint256) {
+        return state.getUserDefinedBorrowOfferAPR(borrower, maturity);
     }
 
     /// @inheritdoc ISizeViewV1_8
-    function getLoanOfferAPR(address user, uint256 collectionId, address rateProvider, uint256 tenor)
+    function getLoanOfferAPR(address user, uint256 collectionId, address rateProvider, uint256 maturity)
         external
         view
         returns (uint256)
     {
-        return state.getLoanOfferAPR(user, collectionId, rateProvider, tenor);
+        return state.getLoanOfferAPR(user, collectionId, rateProvider, maturity);
     }
 
     /// @inheritdoc ISizeViewV1_8
-    function getBorrowOfferAPR(address user, uint256 collectionId, address rateProvider, uint256 tenor)
+    function getBorrowOfferAPR(address user, uint256 collectionId, address rateProvider, uint256 maturity)
         external
         view
         returns (uint256)
     {
-        return state.getBorrowOfferAPR(user, collectionId, rateProvider, tenor);
+        return state.getBorrowOfferAPR(user, collectionId, rateProvider, maturity);
     }
 
     /// @inheritdoc ISizeViewV1_8

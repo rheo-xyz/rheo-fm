@@ -3,87 +3,70 @@ pragma solidity 0.8.23;
 
 import {BaseTest} from "@test/BaseTest.sol";
 
-import {LimitOrder, OfferLibrary} from "@src/market/libraries/OfferLibrary.sol";
-import {YieldCurve} from "@src/market/libraries/YieldCurveLibrary.sol";
+import {FixedMaturityLimitOrder, OfferLibrary} from "@src/market/libraries/OfferLibrary.sol";
 import {BuyCreditLimitParams} from "@src/market/libraries/actions/BuyCreditLimit.sol";
 
 import {Errors} from "@src/market/libraries/Errors.sol";
 
 contract BuyCreditLimitValidationTest is BaseTest {
-    using OfferLibrary for LimitOrder;
+    using OfferLibrary for FixedMaturityLimitOrder;
 
     function test_BuyCreditLimit_validation() public {
         _deposit(alice, usdc, 100e6);
-        uint256 maxDueDate = 12 days;
-        uint256[] memory marketRateMultipliers = new uint256[](2);
-        uint256[] memory tenors = new uint256[](2);
-        tenors[0] = 1 days;
-        tenors[1] = 2 days;
-        int256[] memory rates1 = new int256[](1);
+        uint256[] memory maturities = new uint256[](2);
+        maturities[0] = _riskMaturityAtIndex(0);
+        maturities[1] = _riskMaturityAtIndex(1);
+        uint256[] memory rates1 = new uint256[](1);
         rates1[0] = 1.01e18;
 
         vm.startPrank(alice);
         vm.expectRevert(abi.encodeWithSelector(Errors.ARRAY_LENGTHS_MISMATCH.selector));
-        size.buyCreditLimit(
-            BuyCreditLimitParams({
-                maxDueDate: maxDueDate,
-                curveRelativeTime: YieldCurve({tenors: tenors, marketRateMultipliers: marketRateMultipliers, aprs: rates1})
-            })
-        );
+        size.buyCreditLimit(BuyCreditLimitParams({maturities: maturities, aprs: rates1}));
 
-        int256[] memory empty;
+        uint256[] memory empty;
 
         vm.expectRevert(abi.encodeWithSelector(Errors.NULL_ARRAY.selector));
-        size.buyCreditLimit(
-            BuyCreditLimitParams({
-                maxDueDate: maxDueDate,
-                curveRelativeTime: YieldCurve({tenors: tenors, marketRateMultipliers: marketRateMultipliers, aprs: empty})
-            })
-        );
+        size.buyCreditLimit(BuyCreditLimitParams({maturities: maturities, aprs: empty}));
 
-        int256[] memory aprs = new int256[](2);
+        uint256[] memory aprs = new uint256[](2);
         aprs[0] = 1.01e18;
         aprs[1] = 1.02e18;
 
-        tenors[0] = 2 days;
-        tenors[1] = 1 days;
-        vm.expectRevert(abi.encodeWithSelector(Errors.TENORS_NOT_STRICTLY_INCREASING.selector));
-        size.buyCreditLimit(
-            BuyCreditLimitParams({
-                maxDueDate: maxDueDate,
-                curveRelativeTime: YieldCurve({tenors: tenors, marketRateMultipliers: marketRateMultipliers, aprs: aprs})
-            })
+        maturities[0] = _riskMaturityAtIndex(1);
+        maturities[1] = _riskMaturityAtIndex(0);
+        vm.expectRevert(abi.encodeWithSelector(Errors.MATURITIES_NOT_STRICTLY_INCREASING.selector));
+        size.buyCreditLimit(BuyCreditLimitParams({maturities: maturities, aprs: aprs}));
+
+        maturities[0] = block.timestamp + 6 minutes;
+        maturities[1] = _riskMaturityAtIndex(0);
+        uint256 minTenor = size.riskConfig().minTenor;
+        uint256 maxTenor = size.riskConfig().maxTenor;
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Errors.MATURITY_OUT_OF_RANGE.selector, block.timestamp + 6 minutes, minTenor, maxTenor
+            )
         );
+        size.buyCreditLimit(BuyCreditLimitParams({maturities: maturities, aprs: aprs}));
 
-        tenors[0] = 6 minutes;
-        tenors[1] = 1 days;
-        vm.expectRevert(abi.encodeWithSelector(Errors.TENOR_OUT_OF_RANGE.selector, 6 minutes, 1 hours, 5 * 365 days));
-        size.buyCreditLimit(
-            BuyCreditLimitParams({
-                maxDueDate: maxDueDate,
-                curveRelativeTime: YieldCurve({tenors: tenors, marketRateMultipliers: marketRateMultipliers, aprs: aprs})
-            })
-        );
+        maturities[0] = _riskMaturityAtIndex(0);
+        maturities[1] = _riskMaturityAtIndex(1);
 
-        tenors[0] = 1 days;
-        tenors[1] = 2 days;
+        vm.warp(block.timestamp + 3);
 
-        vm.warp(3);
+        vm.expectRevert(abi.encodeWithSelector(Errors.PAST_MATURITY.selector, 2));
+        size.buyCreditLimit(BuyCreditLimitParams({maturities: _singleMaturityArray(2), aprs: _singleAprArray(aprs[0])}));
 
-        vm.expectRevert(abi.encodeWithSelector(Errors.PAST_MAX_DUE_DATE.selector, 2));
-        size.buyCreditLimit(
-            BuyCreditLimitParams({
-                maxDueDate: 2,
-                curveRelativeTime: YieldCurve({tenors: tenors, marketRateMultipliers: marketRateMultipliers, aprs: aprs})
-            })
-        );
+        vm.expectRevert(abi.encodeWithSelector(Errors.NULL_ARRAY.selector));
+        size.buyCreditLimit(BuyCreditLimitParams({maturities: empty, aprs: aprs}));
+    }
 
-        vm.expectRevert(abi.encodeWithSelector(Errors.NULL_MAX_DUE_DATE.selector));
-        size.buyCreditLimit(
-            BuyCreditLimitParams({
-                maxDueDate: 0,
-                curveRelativeTime: YieldCurve({tenors: tenors, marketRateMultipliers: marketRateMultipliers, aprs: aprs})
-            })
-        );
+    function _singleMaturityArray(uint256 maturity) private pure returns (uint256[] memory maturities) {
+        maturities = new uint256[](1);
+        maturities[0] = maturity;
+    }
+
+    function _singleAprArray(uint256 apr) private pure returns (uint256[] memory aprs) {
+        aprs = new uint256[](1);
+        aprs[0] = apr;
     }
 }

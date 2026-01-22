@@ -57,12 +57,6 @@ interface ISizeV1_7 {
     /// @notice Same as `selfLiquidate` but `onBehalfOf`
     function selfLiquidateOnBehalfOf(SelfLiquidateOnBehalfOfParams memory params) external payable;
 
-    // liquidateWithReplacement is permissioned
-    // function liquidateWithReplacementOnBehalfOf(LiquidateWithReplacementOnBehalfOfParams memory params)
-    //     external
-    //     payable
-    //     returns (uint256 liquidatorProfitCollateralToken, uint256 liquidatorProfitBorrowToken);
-
     /// @notice Same as `compensate` but `onBehalfOf`
     function compensateOnBehalfOf(CompensateOnBehalfOfParams memory params) external payable;
 

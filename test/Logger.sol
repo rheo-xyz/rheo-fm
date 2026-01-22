@@ -11,44 +11,26 @@ import {
     DebtPosition,
     LoanLibrary
 } from "@src/market/libraries/LoanLibrary.sol";
-import {LimitOrder, OfferLibrary} from "@src/market/libraries/OfferLibrary.sol";
+import {FixedMaturityLimitOrder, OfferLibrary} from "@src/market/libraries/OfferLibrary.sol";
 
 import {console2 as console} from "forge-std/console2.sol";
 
 abstract contract Logger {
     using LoanLibrary for DebtPosition;
-    using OfferLibrary for LimitOrder;
-    using OfferLibrary for LimitOrder;
+    using OfferLibrary for FixedMaturityLimitOrder;
 
     function _log(UserView memory userView) internal pure {
         console.log("account", userView.account);
         if (!userView.user.loanOffer.isNull()) {
-            console.log("user.loanOffer.maxDueDate", userView.user.loanOffer.maxDueDate);
-            for (uint256 i = 0; i < userView.user.loanOffer.curveRelativeTime.aprs.length; i++) {
-                console.log(
-                    "user.loanOffer.curveRelativeTime.tenors[]", userView.user.loanOffer.curveRelativeTime.tenors[i]
-                );
-                console.log(
-                    "user.loanOffer.curveRelativeTime.aprs[]", userView.user.loanOffer.curveRelativeTime.aprs[i]
-                );
-                console.log(
-                    "user.loanOffer.curveRelativeTime.marketRateMultipliers[]",
-                    userView.user.loanOffer.curveRelativeTime.marketRateMultipliers[i]
-                );
+            for (uint256 i = 0; i < userView.user.loanOffer.aprs.length; i++) {
+                console.log("user.loanOffer.maturities[]", userView.user.loanOffer.maturities[i]);
+                console.log("user.loanOffer.aprs[]", userView.user.loanOffer.aprs[i]);
             }
         }
         if (!userView.user.borrowOffer.isNull()) {
-            for (uint256 i = 0; i < userView.user.borrowOffer.curveRelativeTime.aprs.length; i++) {
-                console.log(
-                    "user.borrowOffer.curveRelativeTime.tenors[]", userView.user.borrowOffer.curveRelativeTime.tenors[i]
-                );
-                console.log(
-                    "user.borrowOffer.curveRelativeTime.aprs[]", userView.user.borrowOffer.curveRelativeTime.aprs[i]
-                );
-                console.log(
-                    "user.borrowOffer.curveRelativeTime.marketRateMultipliers[]",
-                    userView.user.borrowOffer.curveRelativeTime.marketRateMultipliers[i]
-                );
+            for (uint256 i = 0; i < userView.user.borrowOffer.aprs.length; i++) {
+                console.log("user.borrowOffer.maturities[]", userView.user.borrowOffer.maturities[i]);
+                console.log("user.borrowOffer.aprs[]", userView.user.borrowOffer.aprs[i]);
             }
         }
         console.log("collateralBalance", userView.collateralTokenBalance);

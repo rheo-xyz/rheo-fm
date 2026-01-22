@@ -2,7 +2,7 @@
 pragma solidity 0.8.23;
 
 import {CryticAsserts} from "@chimera/CryticAsserts.sol";
-
+import {FixedMaturityLimitOrderHelper} from "@test/helpers/libraries/FixedMaturityLimitOrderHelper.sol";
 import {SetupLocal} from "@test/invariants/SetupLocal.sol";
 import {TargetFunctions} from "@test/invariants/TargetFunctions.sol";
 
@@ -11,5 +11,7 @@ import {TargetFunctions} from "@test/invariants/TargetFunctions.sol";
 contract CryticTester is TargetFunctions, SetupLocal, CryticAsserts {
     constructor() {
         setup();
+        // Keep helper library in the compilation set for echidna predeploys.
+        FixedMaturityLimitOrderHelper.normalizeTenor(0);
     }
 }

@@ -2,11 +2,13 @@
 pragma solidity 0.8.23;
 
 import {IPool} from "@aave/interfaces/IPool.sol";
+
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
+import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import {IWETH} from "@src/market/interfaces/IWETH.sol";
 
 import {CreditPosition, DebtPosition} from "@src/market/libraries/LoanLibrary.sol";
-import {CopyLimitOrderConfig, LimitOrder} from "@src/market/libraries/OfferLibrary.sol";
+import {CopyLimitOrderConfig, FixedMaturityLimitOrder} from "@src/market/libraries/OfferLibrary.sol";
 
 import {IPriceFeed} from "@src/oracle/IPriceFeed.sol";
 
@@ -17,9 +19,9 @@ import {ISizeFactory} from "@src/factory/interfaces/ISizeFactory.sol";
 
 struct User {
     // The user's loan offer
-    LimitOrder loanOffer;
+    FixedMaturityLimitOrder loanOffer;
     // The user's borrow offer
-    LimitOrder borrowOffer;
+    FixedMaturityLimitOrder borrowOffer;
     // The user-defined opening limit CR. If not set, the protocol's crOpening is used.
     uint256 openingLimitBorrowCR;
     // Whether the user has disabled all credit positions for sale
@@ -27,8 +29,6 @@ struct User {
 }
 
 struct UserCopyLimitOrderConfigs {
-    // deprecated in v1.8
-    address ___deprecated_copyAddress;
     // the loan offer copy parameters
     CopyLimitOrderConfig copyLoanOfferConfig;
     // the borrow offer copy parameters
@@ -57,23 +57,17 @@ struct RiskConfig {
     uint256 crLiquidation;
     // minimum credit value of loans
     uint256 minimumCreditBorrowToken;
-    // maximum amount of deposited borrowed tokens (deprecated in v1.8)
-    uint256 ___deprecated_borrowTokenCap;
     // minimum tenor for a loan
     uint256 minTenor;
     // maximum tenor for a loan
     uint256 maxTenor;
+    // allowed maturities (unix timestamps) for a loan
+    EnumerableSet.UintSet maturities;
 }
 
 struct Oracle {
     // price feed oracle
     IPriceFeed priceFeed;
-    // variable pool borrow rate
-    uint128 variablePoolBorrowRate;
-    // timestamp of the last update
-    uint64 variablePoolBorrowRateUpdatedAt;
-    // stale rate interval
-    uint64 variablePoolBorrowRateStaleRateInterval;
 }
 
 struct Data {
@@ -95,14 +89,10 @@ struct Data {
     IERC20Metadata underlyingBorrowToken;
     // Size deposit underlying collateral token
     NonTransferrableToken collateralToken;
-    // Size deposit underlying borrow aToken v1.2 (deprecated in v1.5)
-    address ___deprecated_borrowATokenV1_2;
     // Size tokenized debt
     NonTransferrableToken debtToken;
     // Variable Pool (Aave v3)
     IPool variablePool;
-    // Multicall lock to check if multicall is in progress (deprecated in v1.8)
-    bool ___deprecated_isMulticall;
     // Size deposit underlying borrow token (upgraded in v1.8)
     NonTransferrableRebasingTokenVault borrowTokenVault;
     // mapping of copy limit order configs (added in v1.6.1, updated in v1.8)

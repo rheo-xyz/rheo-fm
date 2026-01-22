@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 // https://github.com/morpho-org/morpho-blue/blob/f82d2c9cc39711a76fa77ced9e501600e5cb3170/src/interfaces/IOracle.sol#L9
-pragma solidity >=0.5.0;
+pragma solidity 0.8.23;
 
 /// @title IOracle
 /// @author Morpho Labs

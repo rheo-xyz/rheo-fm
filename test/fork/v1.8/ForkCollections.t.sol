@@ -64,41 +64,17 @@ contract ForkCollectionsTest is ForkTest, Networks {
         _labels();
     }
 
-    function testFork_ForkCollections_market_orders_on_users_subscribing_to_existing_RP_now_fail_if_no_collection_is_passed(
-    ) public {
-        _deposit(alice, weth, 100e18);
-        vm.prank(alice);
-        vm.expectRevert(abi.encodeWithSelector(Errors.TENOR_OUT_OF_RANGE.selector, tenor, 8640, 8640));
-        size.sellCreditMarketOnBehalfOf(
-            SellCreditMarketOnBehalfOfParams({
-                params: SellCreditMarketParams({
-                    lender: users[0],
-                    creditPositionId: RESERVED_ID,
-                    amount: 10e6,
-                    tenor: tenor,
-                    maxAPR: type(uint256).max,
-                    deadline: block.timestamp,
-                    exactAmountIn: false,
-                    collectionId: RESERVED_ID,
-                    rateProvider: address(0)
-                }),
-                onBehalfOf: alice,
-                recipient: alice
-            })
-        );
-    }
-
     function testFork_ForkCollections_v1_8_1() public {
         vm.createSelectFork("base_archive");
 
         _upgradeToV1_8_1();
 
         CopyLimitOrderConfig memory loanOfferConfig =
-            CopyLimitOrderConfig({minTenor: 20 days, maxTenor: 40 days, minAPR: 0.05e18, maxAPR: 0.1e18, offsetAPR: 0});
+            CopyLimitOrderConfig({minTenor: 30 days, maxTenor: 90 days, minAPR: 0.05e18, maxAPR: 0.1e18, offsetAPR: 0});
 
         CopyLimitOrderConfig memory borrowOfferConfig = CopyLimitOrderConfig({
-            minTenor: 10 days,
-            maxTenor: 20 days,
+            minTenor: 60 days,
+            maxTenor: 120 days,
             minAPR: 0.02e18,
             maxAPR: 0.05e18,
             offsetAPR: -0.01e18

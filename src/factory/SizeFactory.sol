@@ -11,7 +11,6 @@ import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {CopyLimitOrderConfig} from "@src/market/libraries/OfferLibrary.sol";
 
 import {ICollectionsManager} from "@src/collections/interfaces/ICollectionsManager.sol";
-import {YieldCurve} from "@src/market/libraries/YieldCurveLibrary.sol";
 import {BuyCreditLimitOnBehalfOfParams, BuyCreditLimitParams} from "@src/market/libraries/actions/BuyCreditLimit.sol";
 import {
     SellCreditLimitOnBehalfOfParams, SellCreditLimitParams
@@ -263,36 +262,36 @@ contract SizeFactory is
     }
 
     /// @inheritdoc ISizeFactoryV1_8
-    function getLoanOfferAPR(address user, uint256 collectionId, ISize market, address rateProvider, uint256 tenor)
+    function getLoanOfferAPR(address user, uint256 collectionId, ISize market, address rateProvider, uint256 maturity)
         external
         view
         returns (uint256)
     {
-        return collectionsManager.getLoanOfferAPR(user, collectionId, market, rateProvider, tenor);
+        return collectionsManager.getLoanOfferAPR(user, collectionId, market, rateProvider, maturity);
     }
 
     /// @inheritdoc ISizeFactoryV1_8
-    function getBorrowOfferAPR(address user, uint256 collectionId, ISize market, address rateProvider, uint256 tenor)
+    function getBorrowOfferAPR(address user, uint256 collectionId, ISize market, address rateProvider, uint256 maturity)
         external
         view
         returns (uint256)
     {
-        return collectionsManager.getBorrowOfferAPR(user, collectionId, market, rateProvider, tenor);
+        return collectionsManager.getBorrowOfferAPR(user, collectionId, market, rateProvider, maturity);
     }
 
-    function isBorrowAPRLowerThanLoanOfferAPRs(address user, uint256 borrowAPR, ISize market, uint256 tenor)
+    function isBorrowAPRLowerThanLoanOfferAPRs(address user, uint256 borrowAPR, ISize market, uint256 maturity)
         external
         view
         returns (bool)
     {
-        return collectionsManager.isBorrowAPRLowerThanLoanOfferAPRs(user, borrowAPR, market, tenor);
+        return collectionsManager.isBorrowAPRLowerThanLoanOfferAPRs(user, borrowAPR, market, maturity);
     }
 
-    function isLoanAPRGreaterThanBorrowOfferAPRs(address user, uint256 loanAPR, ISize market, uint256 tenor)
+    function isLoanAPRGreaterThanBorrowOfferAPRs(address user, uint256 loanAPR, ISize market, uint256 maturity)
         external
         view
         returns (bool)
     {
-        return collectionsManager.isLoanAPRGreaterThanBorrowOfferAPRs(user, loanAPR, market, tenor);
+        return collectionsManager.isLoanAPRGreaterThanBorrowOfferAPRs(user, loanAPR, market, maturity);
     }
 }

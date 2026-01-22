@@ -1,12 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
+import {Arrays} from "@openzeppelin/contracts/utils/Arrays.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
+import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import {State} from "@src/market/SizeStorage.sol";
 import {Errors} from "@src/market/libraries/Errors.sol";
 import {Events} from "@src/market/libraries/Events.sol";
 
-import {Math, PERCENT, YEAR} from "@src/market/libraries/Math.sol";
+import {PERCENT} from "@src/market/libraries/Math.sol";
+
+import {RiskLibrary} from "@src/market/libraries/RiskLibrary.sol";
 import {Initialize} from "@src/market/libraries/actions/Initialize.sol";
 
 import {IPriceFeed} from "@src/oracle/IPriceFeed.sol";
@@ -35,6 +39,8 @@ struct UpdateConfigParams {
 ///      In case where an address is being updated, the `value` is converted to `uint160` and then to `address`
 library UpdateConfig {
     using Initialize for State;
+    using EnumerableSet for EnumerableSet.UintSet;
+    using RiskLibrary for State;
 
     /// @notice Returns the current fee configuration parameters
     /// @param state The state of the protocol
@@ -52,6 +58,7 @@ library UpdateConfig {
 
     /// @notice Returns the current risk configuration parameters
     /// @param state The state of the protocol
+    /// @dev The maturities are returned sorted ascendingly, as EnumerableSet has no ordering guarantees.
     /// @return The current risk configuration parameters
     function riskConfigParams(State storage state) public view returns (InitializeRiskConfigParams memory) {
         return InitializeRiskConfigParams({
@@ -59,7 +66,8 @@ library UpdateConfig {
             crLiquidation: state.riskConfig.crLiquidation,
             minimumCreditBorrowToken: state.riskConfig.minimumCreditBorrowToken,
             minTenor: state.riskConfig.minTenor,
-            maxTenor: state.riskConfig.maxTenor
+            maxTenor: state.riskConfig.maxTenor,
+            maturities: Arrays.sort(state.riskConfig.maturities.values())
         });
     }
 
@@ -67,10 +75,7 @@ library UpdateConfig {
     /// @param state The state of the protocol
     /// @return The current oracle configuration parameters
     function oracleParams(State storage state) public view returns (InitializeOracleParams memory) {
-        return InitializeOracleParams({
-            priceFeed: address(state.oracle.priceFeed),
-            variablePoolBorrowRateStaleRateInterval: state.oracle.variablePoolBorrowRateStaleRateInterval
-        });
+        return InitializeOracleParams({priceFeed: address(state.oracle.priceFeed)});
     }
 
     /// @dev Validation is done at execution
@@ -95,31 +100,23 @@ library UpdateConfig {
         } else if (Strings.equal(params.key, "minimumCreditBorrowToken")) {
             state.riskConfig.minimumCreditBorrowToken = params.value;
         } else if (Strings.equal(params.key, "minTenor")) {
-            if (
-                state.feeConfig.swapFeeAPR != 0
-                    && params.value >= Math.mulDivDown(YEAR, PERCENT, state.feeConfig.swapFeeAPR)
-            ) {
-                revert Errors.VALUE_GREATER_THAN_MAX(
-                    params.value, Math.mulDivDown(YEAR, PERCENT, state.feeConfig.swapFeeAPR)
-                );
-            }
             state.riskConfig.minTenor = params.value;
         } else if (Strings.equal(params.key, "maxTenor")) {
-            if (
-                state.feeConfig.swapFeeAPR != 0
-                    && params.value >= Math.mulDivDown(YEAR, PERCENT, state.feeConfig.swapFeeAPR)
-            ) {
-                revert Errors.VALUE_GREATER_THAN_MAX(
-                    params.value, Math.mulDivDown(YEAR, PERCENT, state.feeConfig.swapFeeAPR)
-                );
-            }
             state.riskConfig.maxTenor = params.value;
-        } else if (Strings.equal(params.key, "swapFeeAPR")) {
-            if (params.value >= Math.mulDivDown(PERCENT, YEAR, state.riskConfig.maxTenor)) {
-                revert Errors.VALUE_GREATER_THAN_MAX(
-                    params.value, Math.mulDivDown(PERCENT, YEAR, state.riskConfig.maxTenor)
-                );
+        } else if (Strings.equal(params.key, "addMaturity")) {
+            if (params.value <= block.timestamp) {
+                revert Errors.PAST_MATURITY(params.value);
             }
+            uint256 tenor = params.value - block.timestamp;
+            if (tenor < state.riskConfig.minTenor || tenor > state.riskConfig.maxTenor) {
+                revert Errors.MATURITY_OUT_OF_RANGE(params.value, state.riskConfig.minTenor, state.riskConfig.maxTenor);
+            }
+            // slither-disable-next-line unused-return
+            state.riskConfig.maturities.add(params.value);
+        } else if (Strings.equal(params.key, "removeMaturity")) {
+            // slither-disable-next-line unused-return
+            state.riskConfig.maturities.remove(params.value);
+        } else if (Strings.equal(params.key, "swapFeeAPR")) {
             state.feeConfig.swapFeeAPR = params.value;
         } else if (Strings.equal(params.key, "fragmentationFee")) {
             state.feeConfig.fragmentationFee = params.value;
@@ -138,8 +135,6 @@ library UpdateConfig {
             state.feeConfig.feeRecipient = address(uint160(params.value));
         } else if (Strings.equal(params.key, "priceFeed")) {
             state.oracle.priceFeed = IPriceFeed(address(uint160(params.value)));
-        } else if (Strings.equal(params.key, "variablePoolBorrowRateStaleRateInterval")) {
-            state.oracle.variablePoolBorrowRateStaleRateInterval = uint64(params.value);
         } else if (Strings.equal(params.key, "debtTokenCap")) {
             state.data.debtTokenCap = params.value;
         } else {

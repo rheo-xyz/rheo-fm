@@ -16,21 +16,51 @@ contract UpdateConfigValidationTest is BaseTest {
         vm.expectRevert(abi.encodeWithSelector(Errors.INVALID_COLLATERAL_RATIO.selector, crLiquidation + 1));
         size.updateConfig(UpdateConfigParams({key: "crLiquidation", value: crLiquidation + 1}));
 
-        uint256 maxTenor = 200 * 365 days;
-        vm.expectRevert(abi.encodeWithSelector(Errors.VALUE_GREATER_THAN_MAX.selector, maxTenor + 1, maxTenor));
-        size.updateConfig(UpdateConfigParams({key: "minTenor", value: maxTenor + 1}));
-
-        vm.expectRevert(abi.encodeWithSelector(Errors.VALUE_GREATER_THAN_MAX.selector, maxTenor + 1, maxTenor));
-        size.updateConfig(UpdateConfigParams({key: "maxTenor", value: maxTenor + 1}));
-
-        uint256 maxSwapFeeAPR = 0.2e18;
+        uint256 invalidMaturity = block.timestamp + size.riskConfig().minTenor - 1;
         vm.expectRevert(
-            abi.encodeWithSelector(Errors.VALUE_GREATER_THAN_MAX.selector, maxSwapFeeAPR + 1, maxSwapFeeAPR)
+            abi.encodeWithSelector(
+                Errors.MATURITY_OUT_OF_RANGE.selector,
+                invalidMaturity,
+                size.riskConfig().minTenor,
+                size.riskConfig().maxTenor
+            )
         );
-        size.updateConfig(UpdateConfigParams({key: "swapFeeAPR", value: maxSwapFeeAPR + 1}));
+        size.updateConfig(UpdateConfigParams({key: "addMaturity", value: invalidMaturity}));
+
+        vm.expectRevert(abi.encodeWithSelector(Errors.PAST_MATURITY.selector, block.timestamp));
+        size.updateConfig(UpdateConfigParams({key: "addMaturity", value: block.timestamp}));
+
+        uint256 missingMaturity = block.timestamp + 45 days;
+        uint256 maturitiesLength = size.riskConfig().maturities.length;
+        size.updateConfig(UpdateConfigParams({key: "removeMaturity", value: missingMaturity}));
+        assertEq(size.riskConfig().maturities.length, maturitiesLength);
 
         vm.expectRevert(abi.encodeWithSelector(Errors.INVALID_COLLATERAL_PERCENTAGE_PREMIUM.selector, PERCENT + 1));
         size.updateConfig(UpdateConfigParams({key: "overdueLiquidationRewardPercent", value: PERCENT + 1}));
+
+        uint256[] memory maturities = size.riskConfig().maturities;
+        uint256 maxTenor = size.riskConfig().maxTenor;
+        size.updateConfig(UpdateConfigParams({key: "minTenor", value: maxTenor}));
+        assertEq(size.riskConfig().minTenor, maxTenor);
+
+        for (uint256 i = 0; i + 1 < maturities.length; i++) {
+            size.updateConfig(UpdateConfigParams({key: "removeMaturity", value: maturities[i]}));
+        }
+
+        vm.expectRevert(Errors.NULL_ARRAY.selector);
+        size.updateConfig(UpdateConfigParams({key: "removeMaturity", value: maturities[maturities.length - 1]}));
+    }
+
+    function test_UpdateConfig_riskConfigParams_returns_sorted_maturities() public {
+        uint256[] memory maturities = size.riskConfig().maturities;
+        assertGt(maturities.length, 1);
+
+        size.updateConfig(UpdateConfigParams({key: "removeMaturity", value: maturities[1]}));
+
+        uint256[] memory updated = size.riskConfig().maturities;
+        for (uint256 i = 1; i < updated.length; i++) {
+            assertLe(updated[i - 1], updated[i]);
+        }
     }
 
     function test_UpdateConfig_updateConfig_cannot_update_data() public {

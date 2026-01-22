@@ -31,7 +31,7 @@ library SetCopyLimitOrderConfigs {
 
     /// @notice Validates the input parameters for setting copy limit order configs
     /// @param externalParams The input parameters for setting copy limit order configs
-    /// @dev Does not validate against riskConfig.minTenor or riskConfig.maxTenor since these are already enforced during limit order creation
+    /// @dev Does not validate against riskConfig.maturities since these are already enforced during limit order creation
     function validateSetCopyLimitOrderConfigs(
         State storage state,
         SetCopyLimitOrderConfigsOnBehalfOfParams memory externalParams

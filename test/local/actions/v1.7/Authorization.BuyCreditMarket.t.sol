@@ -7,7 +7,7 @@ import {Errors} from "@src/market/libraries/Errors.sol";
 import {RESERVED_ID} from "@src/market/libraries/LoanLibrary.sol";
 import {Math, PERCENT} from "@src/market/libraries/Math.sol";
 import {BaseTest, Vars} from "@test/BaseTest.sol";
-import {YieldCurveHelper} from "@test/helpers/libraries/YieldCurveHelper.sol";
+import {FixedMaturityLimitOrderHelper} from "@test/helpers/libraries/FixedMaturityLimitOrderHelper.sol";
 
 import {Action, Authorization} from "@src/factory/libraries/Authorization.sol";
 import {CREDIT_POSITION_ID_START, DEBT_POSITION_ID_START} from "@src/market/libraries/LoanLibrary.sol";
@@ -23,41 +23,18 @@ contract AuthorizationBuyCreditMarketTest is BaseTest {
         _deposit(alice, usdc, 100e6);
         _deposit(bob, weth, 100e18);
         _deposit(bob, usdc, 100e6);
-        uint256 rate = 0.03e18;
-        _sellCreditLimit(alice, block.timestamp + 365 days, int256(rate), 365 days);
+        _sellCreditLimit(alice, block.timestamp + 150 days, 0.03e18);
 
-        uint256 issuanceValue = 10e6;
-        uint256 futureValue = Math.mulDivUp(issuanceValue, PERCENT + rate, PERCENT);
-        uint256 tenor = 365 days;
-        uint256 amountIn = Math.mulDivUp(futureValue, PERCENT, PERCENT + rate);
+        uint256 tenor = 150 days;
+        uint256 maturity = block.timestamp + tenor;
+        (uint256 futureValue, uint256 amountIn) = _computeBuyCreditMarketValues(tenor);
 
         Vars memory _before = _state();
-        (uint256 loansBefore,) = size.getPositionsCount();
+        uint256 loansBefore = _loansCount();
 
-        vm.prank(candy);
-        size.buyCreditMarketOnBehalfOf(
-            BuyCreditMarketOnBehalfOfParams({
-                params: BuyCreditMarketParams({
-                    borrower: alice,
-                    creditPositionId: RESERVED_ID,
-                    amount: amountIn,
-                    tenor: tenor,
-                    deadline: block.timestamp,
-                    minAPR: 0,
-                    exactAmountIn: true,
-                    collectionId: RESERVED_ID,
-                    rateProvider: address(0)
-                }),
-                onBehalfOf: bob,
-                recipient: candy
-            })
-        );
-        (uint256 debtPositionsCount, uint256 creditPositionsCount) = size.getPositionsCount();
-        uint256 debtPositionId = DEBT_POSITION_ID_START + debtPositionsCount - 1;
-        uint256 creditPositionId = CREDIT_POSITION_ID_START + creditPositionsCount - 1;
+        (uint256 debtPositionId, uint256 creditPositionId) = _buyCreditMarketOnBehalfOf(amountIn, maturity);
 
         Vars memory _after = _state();
-        (uint256 loansAfter,) = size.getPositionsCount();
 
         assertEq(
             _after.alice.borrowTokenBalance,
@@ -65,10 +42,10 @@ contract AuthorizationBuyCreditMarketTest is BaseTest {
         );
         assertEq(_after.bob.borrowTokenBalance, _before.bob.borrowTokenBalance - amountIn);
         assertEq(_after.alice.debtBalance, _before.alice.debtBalance + futureValue);
-        assertEq(loansAfter, loansBefore + 1);
+        assertEq(_loansCount(), loansBefore + 1);
         assertEq(size.getDebtPosition(debtPositionId).futureValue, futureValue);
         assertEq(size.getCreditPosition(creditPositionId).lender, candy);
-        assertEq(size.getDebtPosition(debtPositionId).dueDate, block.timestamp + tenor);
+        assertEq(size.getDebtPosition(debtPositionId).dueDate, maturity);
     }
 
     function test_AuthorizationBuyCreditMarket_validation() public {
@@ -82,7 +59,7 @@ contract AuthorizationBuyCreditMarketTest is BaseTest {
                     borrower: alice,
                     creditPositionId: RESERVED_ID,
                     amount: 100e6,
-                    tenor: 365 days,
+                    maturity: block.timestamp + 150 days,
                     deadline: block.timestamp,
                     minAPR: 0,
                     exactAmountIn: true,
@@ -102,7 +79,7 @@ contract AuthorizationBuyCreditMarketTest is BaseTest {
                     borrower: address(0),
                     creditPositionId: RESERVED_ID,
                     amount: 100e6,
-                    tenor: 365 days,
+                    maturity: block.timestamp + 150 days,
                     deadline: block.timestamp,
                     minAPR: 0,
                     exactAmountIn: true,
@@ -113,5 +90,48 @@ contract AuthorizationBuyCreditMarketTest is BaseTest {
                 recipient: address(0)
             })
         );
+    }
+
+    function _computeBuyCreditMarketValues(uint256 tenor)
+        internal
+        pure
+        returns (uint256 futureValue, uint256 amountIn)
+    {
+        uint256 issuanceValue = 10e6;
+        uint256 ratePerTenor = Math.aprToRatePerTenor(0.03e18, tenor);
+        futureValue = Math.mulDivUp(issuanceValue, PERCENT + ratePerTenor, PERCENT);
+        amountIn = Math.mulDivUp(futureValue, PERCENT, PERCENT + ratePerTenor);
+    }
+
+    function _buyCreditMarketOnBehalfOf(uint256 amountIn, uint256 maturity)
+        internal
+        returns (uint256 debtPositionId, uint256 creditPositionId)
+    {
+        vm.prank(candy);
+        size.buyCreditMarketOnBehalfOf(
+            BuyCreditMarketOnBehalfOfParams({
+                params: BuyCreditMarketParams({
+                    borrower: alice,
+                    creditPositionId: RESERVED_ID,
+                    amount: amountIn,
+                    maturity: maturity,
+                    deadline: block.timestamp,
+                    minAPR: 0,
+                    exactAmountIn: true,
+                    collectionId: RESERVED_ID,
+                    rateProvider: address(0)
+                }),
+                onBehalfOf: bob,
+                recipient: candy
+            })
+        );
+
+        (uint256 debtPositionsCount, uint256 creditPositionsCount) = size.getPositionsCount();
+        debtPositionId = DEBT_POSITION_ID_START + debtPositionsCount - 1;
+        creditPositionId = CREDIT_POSITION_ID_START + creditPositionsCount - 1;
+    }
+
+    function _loansCount() internal view returns (uint256 loansCount) {
+        (loansCount,) = size.getPositionsCount();
     }
 }

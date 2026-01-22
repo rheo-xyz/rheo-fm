@@ -56,4 +56,34 @@ contract UpdateConfigTest is BaseTest {
         size.updateConfig(UpdateConfigParams({key: "priceFeed", value: uint256(uint160(address(newPriceFeed)))}));
         assertTrue(size.oracle().priceFeed == address(newPriceFeed));
     }
+
+    function test_UpdateConfig_updateConfig_should_not_DoS_when_maturities_are_past() public {
+        uint256[] memory maturities = size.riskConfig().maturities;
+        assertGt(maturities.length, 2);
+
+        vm.warp(maturities[1] + 1);
+        assertLt(maturities[0], block.timestamp);
+        assertLt(maturities[1], block.timestamp);
+        assertGt(maturities[2], block.timestamp);
+
+        uint256 beforeLength = size.riskConfig().maturities.length;
+
+        uint256 nextSwapFeeAPR = size.feeConfig().swapFeeAPR + 1;
+        size.updateConfig(UpdateConfigParams({key: "swapFeeAPR", value: nextSwapFeeAPR}));
+        assertEq(size.feeConfig().swapFeeAPR, nextSwapFeeAPR);
+
+        size.updateConfig(UpdateConfigParams({key: "removeMaturity", value: maturities[0]}));
+        uint256[] memory afterFirst = size.riskConfig().maturities;
+        assertEq(afterFirst.length, beforeLength - 1);
+        for (uint256 i = 0; i < afterFirst.length; i++) {
+            assertTrue(afterFirst[i] != maturities[0]);
+        }
+
+        size.updateConfig(UpdateConfigParams({key: "removeMaturity", value: maturities[1]}));
+        uint256[] memory afterSecond = size.riskConfig().maturities;
+        assertEq(afterSecond.length, beforeLength - 2);
+        for (uint256 i = 0; i < afterSecond.length; i++) {
+            assertTrue(afterSecond[i] != maturities[1]);
+        }
+    }
 }

@@ -136,14 +136,18 @@ contract HalmosSizeTest is Test, HalmosHelpers {
             collateralProtocolPercent: 0.1e18,
             feeRecipient: feeRecipient
         });
+        uint256[] memory maturities = new uint256[](2);
+        maturities[0] = 1 hours;
+        maturities[1] = 5 * 365 days;
         r = InitializeRiskConfigParams({
             crOpening: 1.5e18,
             crLiquidation: 1.3e18,
             minimumCreditBorrowToken: 5e6,
             minTenor: 1 hours,
-            maxTenor: 5 * 365 days
+            maxTenor: 5 * 365 days,
+            maturities: maturities
         });
-        o = InitializeOracleParams({priceFeed: address(priceFeed), variablePoolBorrowRateStaleRateInterval: 0});
+        o = InitializeOracleParams({priceFeed: address(priceFeed)});
         d = InitializeDataParams({
             weth: address(weth),
             underlyingCollateralToken: address(weth),

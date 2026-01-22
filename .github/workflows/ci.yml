@@ -6,6 +6,7 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -292,7 +293,14 @@ jobs:
         run: |
           forge coverage --no-match-coverage "(script|test|deprecated)" --report lcov
 
+      - name: Archive coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-lcov
+          path: lcov.info
+
       - name: Coveralls
+        if: ${{ !github.event.repository.private }}
         uses: coverallsapp/github-action@v2
 
   upload-selectors:
