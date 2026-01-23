@@ -43,7 +43,6 @@ import {BuyCreditMarketParams} from "@src/market/libraries/actions/BuyCreditMark
 import {SetUserConfigurationParams} from "@src/market/libraries/actions/SetUserConfiguration.sol";
 import {SetVaultParams} from "@src/market/libraries/actions/SetVault.sol";
 
-import {KEEPER_ROLE} from "@src/factory/SizeFactory.sol";
 import {UserView} from "@src/market/SizeView.sol";
 import {CopyLimitOrderConfig} from "@src/market/libraries/OfferLibrary.sol";
 import {SetCopyLimitOrderConfigsParams} from "@src/market/libraries/actions/SetCopyLimitOrderConfigs.sol";
@@ -248,7 +247,6 @@ contract BaseTest is Test, Deploy, AssertsHelper {
 
     function _setKeeperRole(address user) internal {
         vm.prank(address(this));
-        size.grantRole(KEEPER_ROLE, user);
     }
 
     function _overdueLiquidationRewardPercent() internal view returns (uint256) {

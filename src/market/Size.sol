@@ -80,9 +80,7 @@ import {ISizeV1_7} from "@src/market/interfaces/v1.7/ISizeV1_7.sol";
 import {ISizeV1_8} from "@src/market/interfaces/v1.8/ISizeV1_8.sol";
 import {Errors} from "@src/market/libraries/Errors.sol";
 
-import {
-    BORROW_RATE_UPDATER_ROLE, ISizeFactory, KEEPER_ROLE, PAUSER_ROLE
-} from "@src/factory/interfaces/ISizeFactory.sol";
+import {PAUSER_ROLE} from "@src/factory/interfaces/ISizeFactory.sol";
 
 import {UserView} from "@src/market/SizeViewData.sol";
 import {ISizeView} from "@src/market/interfaces/ISizeView.sol";
@@ -141,8 +139,6 @@ contract Size is
         state.executeInitialize(f, r, o, d);
         _grantRole(DEFAULT_ADMIN_ROLE, owner);
         _grantRole(PAUSER_ROLE, owner);
-        _grantRole(KEEPER_ROLE, owner);
-        _grantRole(BORROW_RATE_UPDATER_ROLE, owner);
     }
 
     function _hasRole(bytes32 role, address account) internal view returns (bool) {

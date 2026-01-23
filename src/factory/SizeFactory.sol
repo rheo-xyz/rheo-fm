@@ -57,7 +57,7 @@ import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.s
 import {ERC721Holder} from "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
 import {CollectionsManager} from "@src/collections/CollectionsManager.sol";
 
-import {BORROW_RATE_UPDATER_ROLE, KEEPER_ROLE, PAUSER_ROLE} from "@src/factory/interfaces/ISizeFactory.sol";
+import {PAUSER_ROLE} from "@src/factory/interfaces/ISizeFactory.sol";
 
 /// @title SizeFactory
 /// @custom:security-contact security@size.credit
@@ -86,8 +86,6 @@ contract SizeFactory is
 
         _grantRole(DEFAULT_ADMIN_ROLE, _owner);
         _grantRole(PAUSER_ROLE, _owner);
-        _grantRole(KEEPER_ROLE, _owner);
-        _grantRole(BORROW_RATE_UPDATER_ROLE, _owner);
     }
 
     function _authorizeUpgrade(address newImplementation) internal override onlyRole(DEFAULT_ADMIN_ROLE) {}

@@ -190,6 +190,7 @@ library OfferLibrary {
     /// @param collectionId The collection id
     /// @param rateProvider The rate provider
     /// @param maturity The maturity
+    /// @dev Assumes maturity is validated by the caller via RiskLibrary.validateMaturity.
     /// @return ratePerTenor The absolute rate
     function getLoanOfferRatePerTenor(
         State storage state,
@@ -227,6 +228,7 @@ library OfferLibrary {
     /// @param collectionId The collection id
     /// @param rateProvider The rate provider
     /// @param maturity The maturity
+    /// @dev Assumes maturity is validated by the caller via RiskLibrary.validateMaturity.
     /// @return ratePerTenor The absolute rate
     function getBorrowOfferRatePerTenor(
         State storage state,

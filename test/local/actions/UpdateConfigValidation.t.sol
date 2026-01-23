@@ -5,6 +5,8 @@ import {BaseTest} from "@test/BaseTest.sol";
 
 import {Errors} from "@src/market/libraries/Errors.sol";
 import {Math, PERCENT, YEAR} from "@src/market/libraries/Math.sol";
+import {RESERVED_ID} from "@src/market/libraries/LoanLibrary.sol";
+import {BuyCreditMarketParams} from "@src/market/libraries/actions/BuyCreditMarket.sol";
 import {UpdateConfigParams} from "@src/market/libraries/actions/UpdateConfig.sol";
 
 contract UpdateConfigValidationTest is BaseTest {
@@ -54,12 +56,26 @@ contract UpdateConfigValidationTest is BaseTest {
         size.updateConfig(UpdateConfigParams({key: "maxTenor", value: maxTenorForFee}));
 
         uint256[] memory maturities = size.riskConfig().maturities;
-        for (uint256 i = 0; i + 1 < maturities.length; i++) {
+        for (uint256 i = 0; i < maturities.length; i++) {
             size.updateConfig(UpdateConfigParams({key: "removeMaturity", value: maturities[i]}));
         }
+        assertEq(size.riskConfig().maturities.length, 0);
 
-        vm.expectRevert(Errors.NULL_ARRAY.selector);
-        size.updateConfig(UpdateConfigParams({key: "removeMaturity", value: maturities[maturities.length - 1]}));
+        uint256 maturity = block.timestamp + size.riskConfig().minTenor;
+        vm.expectRevert(abi.encodeWithSelector(Errors.INVALID_MATURITY.selector, maturity));
+        size.buyCreditMarket(
+            BuyCreditMarketParams({
+                borrower: alice,
+                creditPositionId: RESERVED_ID,
+                maturity: maturity,
+                amount: 1e6,
+                deadline: block.timestamp,
+                minAPR: 0,
+                exactAmountIn: false,
+                collectionId: RESERVED_ID,
+                rateProvider: address(0)
+            })
+        );
     }
 
     function test_UpdateConfig_riskConfigParams_returns_sorted_maturities() public {

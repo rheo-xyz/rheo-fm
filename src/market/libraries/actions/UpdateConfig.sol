@@ -55,7 +55,7 @@ library UpdateConfig {
 
     /// @notice Returns the current risk configuration parameters
     /// @param state The state of the protocol
-    /// @dev The maturities are returned sorted ascendingly, as EnumerableSet has no ordering guarantees.
+    /// @dev The maturities are returned sorted ascendingly via Array.sort, as EnumerableSet has no ordering guarantees.
     /// @return The current risk configuration parameters
     function riskConfigParams(State storage state) public view returns (InitializeRiskConfigParams memory) {
         return InitializeRiskConfigParams({
