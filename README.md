@@ -1,8 +1,9 @@
-# rheo-solidity [![Coverage Status](https://coveralls.io/repos/github/rheo-xyz/rheo-solidity/badge.svg?branch=main)](https://coveralls.io/github/rheo-xyz/rheo-solidity?branch=main) [![CI](https://github.com/rheo-xyz/rheo-solidity/actions/workflows/ci.yml/badge.svg)](https://github.com/rheo-xyz/rheo-solidity/actions/workflows/ci.yml) [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/SizeCredit/size-solidity)
+# rheo-fm [![Coverage Status](https://coveralls.io/repos/github/rheo-xyz/rheo-fm/badge.svg?branch=main)](https://coveralls.io/github/rheo-xyz/rheo-fm?branch=main) [![CI](https://github.com/rheo-xyz/rheo-fm/actions/workflows/ci.yml/badge.svg)](https://github.com/rheo-xyz/rheo-fm/actions/workflows/ci.yml) [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/rheo-xyz/rheo-fm)
 
 <a href="https://github.com/rheo-xyz/rheo-solidity/raw/main/logo.PNG"><img src="https://github.com/rheo-xyz/rheo-solidity/raw/main/logo.PNG" width="300" alt="Logo"/></a>
 
 Rheo (prev. Size Credit) is a credit marketplace with unified liquidity across maturities.
+This repo implements fixed-maturity (FM) markets; see [SPECS.md](./SPECS.md).
 
 Networks:
 
@@ -238,7 +239,6 @@ for i in {0..5}; do halmos --loop $i; done
 - Users blacklisted by underlying tokens (e.g. USDC) may be unable to withdraw
 - If the user vault (by default Aave v3) fails to deposit or withdraw for any reason, such as supply caps or low liquidity, Size's `deposit` and `withdraw` may be prevented.
 - Centralization risk related to integrations (USDC, Aave v3, Chainlink) are out of scope
-- The Variable Pool Borrow Rate feed is trusted and users of rate hook adopt oracle risk of buying/selling credit at unsatisfactory prices. In practice, this feature has never been turned on in production.
 - The fragmentation fee meant to subsidize `claim` operations by protocol-owned keeper bots during credit splits are not charged during loan origination
 - The debt token cap can be inexpensively met with self-borrows, even if there is no benefit to the attacker. Reducing the debt cap does not affect currently open positions.
 - All issues acknowledged on previous audits and automated findings
