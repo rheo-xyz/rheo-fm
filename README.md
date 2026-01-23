@@ -239,7 +239,6 @@ for i in {0..5}; do halmos --loop $i; done
 - Users blacklisted by underlying tokens (e.g. USDC) may be unable to withdraw
 - If the user vault (by default Aave v3) fails to deposit or withdraw for any reason, such as supply caps or low liquidity, Size's `deposit` and `withdraw` may be prevented.
 - Centralization risk related to integrations (USDC, Aave v3, Chainlink) are out of scope
-- Variable pool borrow rate paths are removed; the rate hook is not supported.
 - The fragmentation fee meant to subsidize `claim` operations by protocol-owned keeper bots during credit splits are not charged during loan origination
 - The debt token cap can be inexpensively met with self-borrows, even if there is no benefit to the attacker. Reducing the debt cap does not affect currently open positions.
 - All issues acknowledged on previous audits and automated findings
