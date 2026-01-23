@@ -621,6 +621,19 @@ contract CollectionsTest is BaseTest {
         );
     }
 
+    function test_Collections_view_handles_reverting_limit_order_apr() public {
+        _buyCreditLimit(bob, block.timestamp + 150 days, _pointOfferAtIndex(0, 0.08e18));
+        _buyCreditLimit(alice, block.timestamp + 150 days, _pointOfferAtIndex(0, 0.07e18));
+
+        uint256 collectionId = _createCollection(james);
+        _addMarketToCollection(james, collectionId, size);
+        _addRateProviderToCollectionMarket(james, collectionId, size, bob);
+        _subscribeToCollection(alice, collectionId);
+
+        uint256 pastMaturity = block.timestamp;
+        assertTrue(collectionsManager.isBorrowAPRLowerThanLoanOfferAPRs(alice, 0.01e18, size, pastMaturity));
+    }
+
     function test_Collections_subscribeToCollection_rateProvider_removes_inverted_curve_then_market_order_succeeds()
         public
     {

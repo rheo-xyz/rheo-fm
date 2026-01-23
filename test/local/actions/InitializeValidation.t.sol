@@ -79,6 +79,13 @@ contract InitializeValidationTest is Test, BaseTest {
         vm.expectRevert(abi.encodeWithSelector(Errors.NULL_ARRAY.selector));
         proxy = new ERC1967Proxy(address(implementation), abi.encodeCall(Size.initialize, (owner, f, r, o, d)));
 
+        uint256[] memory unorderedMaturities = new uint256[](2);
+        unorderedMaturities[0] = block.timestamp + r.minTenor + 2;
+        unorderedMaturities[1] = block.timestamp + r.minTenor + 1;
+        r.maturities = unorderedMaturities;
+        vm.expectRevert(abi.encodeWithSelector(Errors.MATURITIES_NOT_STRICTLY_INCREASING.selector));
+        proxy = new ERC1967Proxy(address(implementation), abi.encodeCall(Size.initialize, (owner, f, r, o, d)));
+
         uint256[] memory pastMaturities = new uint256[](1);
         pastMaturities[0] = block.timestamp - 1;
         r.maturities = pastMaturities;

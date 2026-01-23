@@ -115,4 +115,23 @@ contract LiquidateValidationTest is BaseTest {
         );
         vm.stopPrank();
     }
+
+    function test_Liquidate_validation_reverts_when_deadline_passed() public {
+        _setPrice(1e18);
+        _deposit(alice, usdc, 100e6);
+        _deposit(bob, weth, 100e18);
+        _buyCreditLimit(alice, block.timestamp + 30 days, _pointOfferAtIndex(0, 0.03e18));
+
+        uint256 debtPositionId = _sellCreditMarket(bob, alice, RESERVED_ID, 50e6, _maturity(30 days), false);
+
+        _setPrice(0.1e18);
+        assertTrue(size.isDebtPositionLiquidatable(debtPositionId));
+
+        uint256 pastDeadline = block.timestamp - 1;
+        vm.expectRevert(abi.encodeWithSelector(Errors.PAST_DEADLINE.selector, pastDeadline));
+        vm.prank(liquidator);
+        size.liquidate(
+            LiquidateParams({debtPositionId: debtPositionId, minimumCollateralProfit: 0, deadline: pastDeadline})
+        );
+    }
 }

@@ -31,6 +31,29 @@ contract UpdateConfigTest is BaseTest {
         assertTrue(size.riskConfig().minimumCreditBorrowToken == 1e6);
     }
 
+    function test_UpdateConfig_updateConfig_addMaturity() public {
+        uint256[] memory maturities = size.riskConfig().maturities;
+        assertGt(maturities.length, 0);
+
+        uint256 maxMaturity = block.timestamp + size.riskConfig().maxTenor;
+        uint256 candidate = maturities[0] + 1;
+        if (candidate > maxMaturity) {
+            candidate = maturities[0];
+        }
+
+        bool alreadyPresent = _arrayContains(maturities, candidate);
+
+        size.updateConfig(UpdateConfigParams({key: "addMaturity", value: candidate}));
+
+        uint256[] memory updated = size.riskConfig().maturities;
+        if (alreadyPresent) {
+            assertEq(updated.length, maturities.length);
+        } else {
+            assertEq(updated.length, maturities.length + 1);
+        }
+        assertTrue(_arrayContains(updated, candidate));
+    }
+
     function test_UpdateConfig_updateConfig_cannot_maliciously_liquidate_all_positions() public {
         size.updateConfig(UpdateConfigParams({key: "crOpening", value: 10.0e18}));
         vm.expectRevert(abi.encodeWithSelector(Errors.INVALID_COLLATERAL_RATIO.selector, 9.99e18));
@@ -91,5 +114,14 @@ contract UpdateConfigTest is BaseTest {
         for (uint256 i = 0; i < afterSecond.length; i++) {
             assertTrue(afterSecond[i] != maturities[1]);
         }
+    }
+
+    function _arrayContains(uint256[] memory values, uint256 value) private pure returns (bool) {
+        for (uint256 i = 0; i < values.length; i++) {
+            if (values[i] == value) {
+                return true;
+            }
+        }
+        return false;
     }
 }
