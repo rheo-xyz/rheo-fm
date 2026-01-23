@@ -1,4 +1,4 @@
-# rheo-fm [![Coverage Status](https://coveralls.io/repos/github/rheo-xyz/rheo-solidity/badge.svg?branch=main)](https://coveralls.io/github/rheo-xyz/rheo-solidity?branch=main) [![CI](https://github.com/rheo-xyz/rheo-solidity/actions/workflows/ci.yml/badge.svg)](https://github.com/rheo-xyz/rheo-solidity/actions/workflows/ci.yml) [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/SizeCredit/size-solidity)
+# rheo-fm [![Coverage Status](https://coveralls.io/repos/github/rheo-xyz/rheo-fm/badge.svg?branch=main)](https://coveralls.io/github/rheo-xyz/rheo-fm?branch=main) [![CI](https://github.com/rheo-xyz/rheo-fm/actions/workflows/ci.yml/badge.svg)](https://github.com/rheo-xyz/rheo-fm/actions/workflows/ci.yml) [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/rheo-xyz/rheo-fm)
 
 <a href="https://github.com/rheo-xyz/rheo-solidity/raw/main/logo.PNG"><img src="https://github.com/rheo-xyz/rheo-solidity/raw/main/logo.PNG" width="300" alt="Logo"/></a>
 
