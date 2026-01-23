@@ -6,6 +6,7 @@ import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet
 import {CollectionsManagerBase} from "@src/collections/CollectionsManagerBase.sol";
 import {ICollectionsManagerView} from "@src/collections/interfaces/ICollectionsManagerView.sol";
 
+import {Errors} from "@src/market/libraries/Errors.sol";
 import {RESERVED_ID} from "@src/market/libraries/LoanLibrary.sol";
 
 import {ISize} from "@src/market/interfaces/ISize.sol";
@@ -131,6 +132,9 @@ abstract contract CollectionsManagerView is ICollectionsManagerView, Collections
             // validate min/max tenor
             CopyLimitOrderConfig memory copyLimitOrder =
                 _getCopyLimitOrderConfig(user, collectionId, market, isLoanOffer);
+            if (maturity <= block.timestamp) {
+                revert Errors.PAST_MATURITY(maturity);
+            }
             uint256 baseAPR = _getUserDefinedLimitOrderAPR(rateProvider, market, maturity, isLoanOffer);
             uint256 tenor = maturity - block.timestamp;
             if (tenor < copyLimitOrder.minTenor || tenor > copyLimitOrder.maxTenor) {

@@ -133,12 +133,10 @@ library Initialize {
             revert Errors.INVALID_TENOR_RANGE(r.minTenor, r.maxTenor);
         }
         // validate maturities (riskConfig.maturities)
-        if (r.maturities.length == 0) {
-            revert Errors.NULL_ARRAY();
-        }
+        // empty allowlist is allowed by design to block limit/market orders.
         uint256 lastMaturity = 0;
         // Past/out-of-range maturity validation is performed during market orders
-        // in RiskLibrary.validateMaturity to avoid blocking admin updates.
+        // in RiskLibrary.validateMaturity to avoid DoS in UpdateConfig.
         for (uint256 i = 0; i < r.maturities.length; i++) {
             uint256 maturity = r.maturities[i];
             if (maturity <= lastMaturity) {
@@ -242,6 +240,7 @@ library Initialize {
         state.riskConfig.crLiquidation = r.crLiquidation;
 
         state.riskConfig.minimumCreditBorrowToken = r.minimumCreditBorrowToken;
+
         state.riskConfig.minTenor = r.minTenor;
         state.riskConfig.maxTenor = r.maxTenor;
         for (uint256 i = 0; i < r.maturities.length; i++) {

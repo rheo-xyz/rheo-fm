@@ -55,7 +55,7 @@ state.validateInvariant(params);
 
 The `Multicall` pattern is also available to allow users to perform a sequence of multiple actions, such as depositing borrow tokens, liquidating an underwater borrower, and withdrawing all liquidated collateral. **Note:** in order to accept ether deposits through multicalls, all user-facing functions have the [`payable`](https://github.com/sherlock-audit/2023-06-tokemak-judging/issues/215) modifier, and `deposit` always uses `address(this).balance` to wrap ether. This means leftover amounts, if [sent forcibly](https://consensys.github.io/smart-contract-best-practices/development-recommendations/general/force-feeding/), are always credited to the depositor.
 
-Additional safety features were employed, such as different levels of Access Control (ADMIN, PAUSER_ROLE, KEEPER_ROLE, BORROW_RATE_UPDATER_ROLE), and Pause.
+Additional safety features were employed, such as different levels of Access Control (ADMIN, PAUSER_ROLE), and Pause.
 
 #### Tokens
 
@@ -231,7 +231,7 @@ for i in {0..5}; do halmos --loop $i; done
 - The protocol does not support rebasing/fee-on-transfer tokens
 - The protocol only supports tokens compliant with the IERC20Metadata interface
 - The protocol only supports pre-vetted tokens
-- The protocol owner, KEEPER_ROLE, PAUSER_ROLE, and BORROW_RATE_UPDATER_ROLE are trusted
+- The protocol owner and PAUSER_ROLE are trusted
 - The protocol uses Uniswap TWAP as a fallback oracle for certain markets in case Chainlink is stale.
 - In case Chainlink reports a wrong price, the protocol state cannot be guaranteed. This may cause incorrect liquidations, among other issues
 - In case the protocol is paused, the price of the collateral may change during the unpause event. This may cause unforseen liquidations, among other issues
@@ -286,9 +286,7 @@ If it does not work, try removing `--verify`
 
 0. Due dilligence on borrow/collateral tokens: non-rebasing, IERC20Metadata, price oracle, liquidation path
 1. Deploy
-2. Grant `KEEPER_ROLE` to liquidation contract
-3. Grant `BORROW_RATE_UPDATER_ROLE` to bot
-4. Grant `PAUSER_ROLE` to bot, multisig signers
+2. Grant `PAUSER_ROLE` to bot, multisig signers
 
 ## Upgrade
 

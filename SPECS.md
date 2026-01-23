@@ -23,6 +23,7 @@ High-level goals:
 - Maturities are strictly increasing and have exact-match APR lookup (no interpolation).
 - Allowed maturities are governance-controlled via `riskConfig.maturities`.
 - Offer and market actions must use maturities that are in the allowlist.
+- An empty `riskConfig.maturities` allowlist is permitted and disables market orders via `INVALID_MATURITY`.
 
 ### Bounds and Validation
 - Keep relative bounds: `minTenor`/`maxTenor` remain and are applied via

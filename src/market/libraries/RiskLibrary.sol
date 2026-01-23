@@ -37,13 +37,11 @@ library RiskLibrary {
     }
 
     /// @notice Validate the maturity of a loan
-    /// @dev Reverts if the maturity is not in the configured maturities set
+    /// @dev Reverts if the maturity is not in the configured maturities set.
+    ///      An empty allowlist is permitted and disables market orders via INVALID_MATURITY.
     /// @param state The state
     /// @param maturity The maturity
     function validateMaturity(State storage state, uint256 maturity) public view {
-        if (state.riskConfig.maturities.length() == 0) {
-            revert Errors.NULL_ARRAY();
-        }
         if (maturity <= block.timestamp) {
             revert Errors.PAST_MATURITY(maturity);
         }
