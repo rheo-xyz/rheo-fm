@@ -76,8 +76,9 @@ contract InitializeValidationTest is Test, BaseTest {
         r.minTenor = 1 hours;
 
         r.maturities = new uint256[](0);
-        vm.expectRevert(abi.encodeWithSelector(Errors.NULL_ARRAY.selector));
         proxy = new ERC1967Proxy(address(implementation), abi.encodeCall(Size.initialize, (owner, f, r, o, d)));
+        Size emptyMaturitiesSize = Size(address(proxy));
+        assertEq(emptyMaturitiesSize.riskConfig().maturities.length, 0);
 
         uint256[] memory pastMaturities = new uint256[](1);
         pastMaturities[0] = block.timestamp - 1;

@@ -133,9 +133,7 @@ library Initialize {
             revert Errors.INVALID_TENOR_RANGE(r.minTenor, r.maxTenor);
         }
         // validate maturities (riskConfig.maturities)
-        if (r.maturities.length == 0) {
-            revert Errors.NULL_ARRAY();
-        }
+        // empty allowlist is allowed by design to block limit/market orders.
         uint256 lastMaturity = 0;
         // Past/out-of-range maturity validation is performed during market orders
         // in RiskLibrary.validateMaturity to avoid DoS in UpdateConfig.
