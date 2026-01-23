@@ -245,10 +245,6 @@ contract BaseTest is Test, Deploy, AssertsHelper {
         size.updateConfig(UpdateConfigParams({key: key, value: value}));
     }
 
-    function _setKeeperRole(address user) internal {
-        vm.prank(address(this));
-    }
-
     function _overdueLiquidationRewardPercent() internal view returns (uint256) {
         return uint256(size.extSload(bytes32(OVERDUE_LIQUIDATION_REWARD_SLOT)));
     }

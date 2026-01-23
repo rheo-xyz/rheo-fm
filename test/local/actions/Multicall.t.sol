@@ -115,7 +115,6 @@ contract MulticallTest is BaseTest {
 
     function test_Multicall_liquidator_can_liquidate_and_withdraw() public {
         _setPrice(1e18);
-        _setKeeperRole(liquidator);
 
         _deposit(alice, weth, 100e18);
         _deposit(alice, usdc, 100e6);
