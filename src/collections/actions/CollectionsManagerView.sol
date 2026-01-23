@@ -6,8 +6,8 @@ import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet
 import {CollectionsManagerBase} from "@src/collections/CollectionsManagerBase.sol";
 import {ICollectionsManagerView} from "@src/collections/interfaces/ICollectionsManagerView.sol";
 
-import {RESERVED_ID} from "@src/market/libraries/LoanLibrary.sol";
 import {Errors} from "@src/market/libraries/Errors.sol";
+import {RESERVED_ID} from "@src/market/libraries/LoanLibrary.sol";
 
 import {ISize} from "@src/market/interfaces/ISize.sol";
 import {CopyLimitOrderConfig, FixedMaturityLimitOrder, OfferLibrary} from "@src/market/libraries/OfferLibrary.sol";

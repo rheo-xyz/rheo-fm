@@ -4,8 +4,9 @@ pragma solidity 0.8.23;
 import {BaseTest} from "@test/BaseTest.sol";
 
 import {Errors} from "@src/market/libraries/Errors.sol";
-import {Math, PERCENT, YEAR} from "@src/market/libraries/Math.sol";
+
 import {RESERVED_ID} from "@src/market/libraries/LoanLibrary.sol";
+import {Math, PERCENT, YEAR} from "@src/market/libraries/Math.sol";
 import {BuyCreditMarketParams} from "@src/market/libraries/actions/BuyCreditMarket.sol";
 import {UpdateConfigParams} from "@src/market/libraries/actions/UpdateConfig.sol";
 
