@@ -762,11 +762,11 @@ contract SellCreditMarketTest is BaseTest {
     }
 
     function test_SellCreditMarket_sellCreditMarket_debtTokenCap_exceeded() public {
-        assertEq(size.extSload(bytes32(uint256(28))), bytes32(uint256(type(uint256).max)));
+        assertEq(size.extSload(bytes32(uint256(DEBT_TOKEN_CAP_SLOT))), bytes32(uint256(type(uint256).max)));
 
         _updateConfig("debtTokenCap", 10e6);
 
-        assertEq(size.extSload(bytes32(uint256(28))), bytes32(uint256(10e6)));
+        assertEq(size.extSload(bytes32(uint256(DEBT_TOKEN_CAP_SLOT))), bytes32(uint256(10e6)));
 
         _deposit(alice, weth, 100e18);
 
