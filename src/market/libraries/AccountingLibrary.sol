@@ -86,6 +86,7 @@ library AccountingLibrary {
         uint256 creditPositionId = state.data.nextCreditPositionId++;
         state.data.creditPositions[creditPositionId] = creditPosition;
         state.validateMinimumCreditOpening(creditPosition.credit);
+        // Keep maturity validation here as a defense-in-depth check for new credit creation paths.
         state.validateMaturity(dueDate);
 
         emit Events.CreateCreditPosition(
