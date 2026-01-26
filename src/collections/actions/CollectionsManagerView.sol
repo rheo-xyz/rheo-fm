@@ -132,6 +132,9 @@ abstract contract CollectionsManagerView is ICollectionsManagerView, Collections
             CopyLimitOrderConfig memory copyLimitOrder =
                 _getCopyLimitOrderConfig(user, collectionId, market, isLoanOffer);
             uint256 baseAPR = _getUserDefinedLimitOrderAPR(rateProvider, market, maturity, isLoanOffer);
+            if (maturity <= block.timestamp) {
+                revert InvalidMaturity(maturity, copyLimitOrder.minTenor, copyLimitOrder.maxTenor);
+            }
             uint256 tenor = maturity - block.timestamp;
             if (tenor < copyLimitOrder.minTenor || tenor > copyLimitOrder.maxTenor) {
                 revert InvalidMaturity(maturity, copyLimitOrder.minTenor, copyLimitOrder.maxTenor);
