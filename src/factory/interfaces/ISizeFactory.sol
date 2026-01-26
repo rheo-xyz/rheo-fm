@@ -61,4 +61,8 @@ interface ISizeFactory is ISizeFactoryOffchainGetters, ISizeFactoryV1_7, ISizeFa
     /// @param candidate The candidate to check
     /// @return True if the candidate is a registered market
     function isMarket(address candidate) external view returns (bool);
+
+    /// @notice Removes a market from the registered markets
+    /// @param market The market to remove
+    function removeMarket(address market) external;
 }
