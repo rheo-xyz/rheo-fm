@@ -185,6 +185,7 @@ library OfferLibrary {
     }
 
     /// @notice Get the absolute rate per tenor of a loan offer
+    /// @dev Caller must validate maturity (e.g., via {RiskLibrary.validateMaturity}) before calling.
     /// @param state The state
     /// @param user The user
     /// @param collectionId The collection id
