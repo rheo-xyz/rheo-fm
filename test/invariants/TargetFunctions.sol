@@ -50,7 +50,6 @@ import {SetVaultParams} from "@src/market/libraries/actions/SetVault.sol";
 
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import {CREDIT_POSITION_ID_START, DEBT_POSITION_ID_START, RESERVED_ID} from "@src/market/libraries/LoanLibrary.sol";
-import {console} from "forge-std/console.sol";
 
 abstract contract TargetFunctions is Helper, ExpectedErrors, ITargetFunctions {
     using EnumerableSet for EnumerableSet.AddressSet;
@@ -129,18 +128,10 @@ abstract contract TargetFunctions is Helper, ExpectedErrors, ITargetFunctions {
     ) public getSender checkExpectedErrors(SELL_CREDIT_MARKET_ERRORS) {
         __before();
 
-        _logRiskConfig("sellCreditMarket");
-
         lender = _getRandomUser(lender);
         creditPositionId = _getCreditPositionId(creditPositionId);
         amount = between(amount, 0, MAX_AMOUNT_USDC);
         maturity = _riskMaturityAtFromConfig(maturity);
-        console.log("sellCreditMarket - chosen maturity", maturity);
-        if (maturity > block.timestamp) {
-            console.log("sellCreditMarket - tenor", maturity - block.timestamp);
-        } else {
-            console.log("sellCreditMarket - tenor", uint256(0));
-        }
 
         hevm.prank(sender);
         (success, returnData) = address(size).call(
@@ -174,8 +165,8 @@ abstract contract TargetFunctions is Helper, ExpectedErrors, ITargetFunctions {
             if (creditPositionId == RESERVED_ID) {
                 eq(_after.debtPositionsCount, _before.debtPositionsCount + 1, BORROW_02);
                 uint256 debtPositionId = DEBT_POSITION_ID_START + _after.debtPositionsCount - 1;
-                uint256 maturity = size.getDebtPosition(debtPositionId).dueDate;
-                t(_isRiskMaturity(maturity), LOAN_01);
+                uint256 m = size.getDebtPosition(debtPositionId).dueDate;
+                t(_isRiskMaturity(m), LOAN_01);
             }
         }
     }
@@ -188,19 +179,7 @@ abstract contract TargetFunctions is Helper, ExpectedErrors, ITargetFunctions {
         maturity;
         __before();
 
-        _logRiskConfig("sellCreditLimit");
-
         FixedMaturityLimitOrder memory offer = _getRandomOffer(offerSeed);
-        console.log("sellCreditLimit - offer maturities length", offer.maturities.length);
-        for (uint256 i = 0; i < offer.maturities.length; i++) {
-            uint256 offerMaturity = offer.maturities[i];
-            console.log("sellCreditLimit - offer maturity", i, offerMaturity);
-            if (offerMaturity > block.timestamp) {
-                console.log("sellCreditLimit - offer tenor", i, offerMaturity - block.timestamp);
-            } else {
-                console.log("sellCreditLimit - offer tenor", i, uint256(0));
-            }
-        }
 
         hevm.prank(sender);
         (success, returnData) = address(size).call(
@@ -220,18 +199,10 @@ abstract contract TargetFunctions is Helper, ExpectedErrors, ITargetFunctions {
     ) public getSender checkExpectedErrors(BUY_CREDIT_MARKET_ERRORS) {
         __before();
 
-        _logRiskConfig("buyCreditMarket");
-
         borrower = _getRandomUser(borrower);
         creditPositionId = _getCreditPositionId(creditPositionId);
         maturity = _riskMaturityAtFromConfig(maturity);
         amount = between(amount, 0, MAX_AMOUNT_USDC);
-        console.log("buyCreditMarket - chosen maturity", maturity);
-        if (maturity > block.timestamp) {
-            console.log("buyCreditMarket - tenor", maturity - block.timestamp);
-        } else {
-            console.log("buyCreditMarket - tenor", uint256(0));
-        }
 
         hevm.prank(sender);
         (success, returnData) = address(size).call(
@@ -255,8 +226,8 @@ abstract contract TargetFunctions is Helper, ExpectedErrors, ITargetFunctions {
             if (creditPositionId == RESERVED_ID) {
                 eq(_after.debtPositionsCount, _before.debtPositionsCount + 1, BORROW_02);
                 uint256 debtPositionId = DEBT_POSITION_ID_START + _after.debtPositionsCount - 1;
-                uint256 maturity = size.getDebtPosition(debtPositionId).dueDate;
-                t(_isRiskMaturity(maturity), LOAN_01);
+                uint256 m = size.getDebtPosition(debtPositionId).dueDate;
+                t(_isRiskMaturity(m), LOAN_01);
             }
         }
     }
@@ -269,19 +240,7 @@ abstract contract TargetFunctions is Helper, ExpectedErrors, ITargetFunctions {
         maturity;
         __before();
 
-        _logRiskConfig("buyCreditLimit");
-
         FixedMaturityLimitOrder memory offer = _getRandomOffer(offerSeed);
-        console.log("buyCreditLimit - offer maturities length", offer.maturities.length);
-        for (uint256 i = 0; i < offer.maturities.length; i++) {
-            uint256 offerMaturity = offer.maturities[i];
-            console.log("buyCreditLimit - offer maturity", i, offerMaturity);
-            if (offerMaturity > block.timestamp) {
-                console.log("buyCreditLimit - offer tenor", i, offerMaturity - block.timestamp);
-            } else {
-                console.log("buyCreditLimit - offer tenor", i, uint256(0));
-            }
-        }
 
         hevm.prank(sender);
         (success, returnData) = address(size).call(
@@ -554,36 +513,8 @@ abstract contract TargetFunctions is Helper, ExpectedErrors, ITargetFunctions {
         }
     }
 
-    function _logRiskConfig(string memory tag) internal {
-        InitializeRiskConfigParams memory riskConfig = size.riskConfig();
-        console.log(string.concat(tag, " - timestamp"), block.timestamp);
-        console.log(string.concat(tag, " - minTenor"), riskConfig.minTenor);
-        console.log(string.concat(tag, " - maxTenor"), riskConfig.maxTenor);
-        console.log(string.concat(tag, " - maturities length"), riskConfig.maturities.length);
-        for (uint256 i = 0; i < riskConfig.maturities.length; i++) {
-            uint256 maturityValue = riskConfig.maturities[i];
-            console.log(string.concat(tag, " - maturity"), i, maturityValue);
-            if (maturityValue > block.timestamp) {
-                console.log(string.concat(tag, " - tenor"), i, maturityValue - block.timestamp);
-            } else {
-                console.log(string.concat(tag, " - tenor"), i, uint256(0));
-            }
-        }
-    }
-
     function updateConfig(uint256 i, uint256 value) public clear {
         InitializeRiskConfigParams memory beforeRiskConfig = size.riskConfig();
-        console.log("updateConfig - sender", sender);
-        console.log("updateConfig - raw index", i);
-        console.log("updateConfig - raw value", value);
-        console.log("updateConfig - before crOpening", beforeRiskConfig.crOpening);
-        console.log("updateConfig - before crLiquidation", beforeRiskConfig.crLiquidation);
-        console.log("updateConfig - before minTenor", beforeRiskConfig.minTenor);
-        console.log("updateConfig - before maxTenor", beforeRiskConfig.maxTenor);
-        console.log("updateConfig - before maturities length", beforeRiskConfig.maturities.length);
-        for (uint256 m = 0; m < beforeRiskConfig.maturities.length; m++) {
-            console.log("updateConfig - before maturity", m, beforeRiskConfig.maturities[m]);
-        }
         string[11] memory keys = [
             "crOpening",
             "crLiquidation",
@@ -614,50 +545,30 @@ abstract contract TargetFunctions is Helper, ExpectedErrors, ITargetFunctions {
         string memory key = keys[index];
         uint256 seed = value;
         value = between(seed, 0, maxValues[index]);
-        console.log("updateConfig - chosen index", index);
-        console.log("updateConfig - key", key);
-        console.log("updateConfig - max", maxValues[index]);
-        console.log("updateConfig - clamped value", value);
         if (index == 10) {
-            console.log("updateConfig - skip unsupported key", key);
             return;
         }
         if (index == 3 || index == 4) {
             uint256 nextMinTenor = index == 3 ? value : beforeRiskConfig.minTenor;
             uint256 nextMaxTenor = index == 4 ? value : beforeRiskConfig.maxTenor;
-            console.log("updateConfig - next minTenor", nextMinTenor);
-            console.log("updateConfig - next maxTenor", nextMaxTenor);
             if (nextMinTenor == 0 || nextMaxTenor == 0 || nextMinTenor > nextMaxTenor) {
-                console.log("updateConfig - skip invalid tenor bounds");
                 return;
             }
             if (beforeRiskConfig.maturities.length == 0) {
-                console.log("updateConfig - skip empty maturities");
                 return;
             }
             for (uint256 m = 0; m < beforeRiskConfig.maturities.length; m++) {
                 uint256 maturity = beforeRiskConfig.maturities[m];
                 if (maturity <= block.timestamp) {
-                    console.log("updateConfig - skip past maturity", m, maturity);
                     return;
                 }
                 uint256 tenor = maturity - block.timestamp;
                 if (tenor < nextMinTenor || tenor > nextMaxTenor) {
-                    console.log("updateConfig - skip maturity out of range", m, maturity, tenor);
                     return;
                 }
             }
         }
         size.updateConfig(UpdateConfigParams({key: key, value: value}));
-        InitializeRiskConfigParams memory afterRiskConfig = size.riskConfig();
-        console.log("updateConfig - after crOpening", afterRiskConfig.crOpening);
-        console.log("updateConfig - after crLiquidation", afterRiskConfig.crLiquidation);
-        console.log("updateConfig - after minTenor", afterRiskConfig.minTenor);
-        console.log("updateConfig - after maxTenor", afterRiskConfig.maxTenor);
-        console.log("updateConfig - after maturities length", afterRiskConfig.maturities.length);
-        for (uint256 m = 0; m < afterRiskConfig.maturities.length; m++) {
-            console.log("updateConfig - after maturity", m, afterRiskConfig.maturities[m]);
-        }
     }
 
     function _riskMaturityAtFromConfig(uint256 seed) internal view returns (uint256) {

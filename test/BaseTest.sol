@@ -68,6 +68,7 @@ struct Vars {
 }
 
 contract BaseTest is Test, Deploy, AssertsHelper {
+    uint256 internal constant DEBT_TOKEN_CAP_SLOT = 28;
     uint256 internal constant OVERDUE_LIQUIDATION_REWARD_SLOT = 29;
 
     address internal alice = address(0x10000);

@@ -137,14 +137,14 @@ contract HalmosSizeTest is Test, HalmosHelpers {
             feeRecipient: feeRecipient
         });
         uint256[] memory maturities = new uint256[](2);
-        maturities[0] = 1 hours;
-        maturities[1] = 5 * 365 days;
+        maturities[0] = 30 days;
+        maturities[1] = 60 days;
         r = InitializeRiskConfigParams({
             crOpening: 1.5e18,
             crLiquidation: 1.3e18,
             minimumCreditBorrowToken: 5e6,
-            minTenor: 1 hours,
-            maxTenor: 5 * 365 days,
+            minTenor: 30 days,
+            maxTenor: 60 days,
             maturities: maturities
         });
         o = InitializeOracleParams({priceFeed: address(priceFeed)});
