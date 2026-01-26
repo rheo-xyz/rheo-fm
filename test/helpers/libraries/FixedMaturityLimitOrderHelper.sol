@@ -229,6 +229,7 @@ library FixedMaturityLimitOrderHelper {
         return aprs;
     }
 
+    /// @dev Converts tenor-based offers into maturity-based offers used by the protocol.
     function _fromTenors(uint256[] memory tenors, uint256[] memory aprs)
         private
         view
