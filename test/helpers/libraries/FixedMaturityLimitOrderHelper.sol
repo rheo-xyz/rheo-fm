@@ -4,31 +4,11 @@ pragma solidity 0.8.23;
 import {FixedMaturityLimitOrder} from "@src/market/libraries/OfferLibrary.sol";
 
 library FixedMaturityLimitOrderHelper {
-    function normalizeTenor(uint256 tenor) public pure returns (uint256) {
-        uint256 step = 30 days;
-        if (tenor <= step) {
-            return step;
-        }
-        if (tenor <= 2 * step) {
-            return 2 * step;
-        }
-        if (tenor <= 3 * step) {
-            return 3 * step;
-        }
-        if (tenor <= 4 * step) {
-            return 4 * step;
-        }
-        if (tenor <= 5 * step) {
-            return 5 * step;
-        }
-        return 6 * step;
-    }
-
     function pointOffer(uint256 tenor, uint256 apr) public view returns (FixedMaturityLimitOrder memory) {
         uint256[] memory maturities = new uint256[](1);
         uint256[] memory aprs = new uint256[](1);
 
-        maturities[0] = block.timestamp + normalizeTenor(tenor);
+        maturities[0] = block.timestamp + tenor;
         aprs[0] = apr;
 
         return FixedMaturityLimitOrder({maturities: maturities, aprs: aprs});
@@ -42,8 +22,8 @@ library FixedMaturityLimitOrderHelper {
         uint256[] memory maturities = new uint256[](2);
         uint256[] memory aprs = new uint256[](2);
 
-        maturities[0] = block.timestamp + normalizeTenor(tenor1);
-        maturities[1] = block.timestamp + normalizeTenor(tenor2);
+        maturities[0] = block.timestamp + tenor1;
+        maturities[1] = block.timestamp + tenor2;
 
         aprs[0] = apr1;
         aprs[1] = apr2;
@@ -59,9 +39,9 @@ library FixedMaturityLimitOrderHelper {
         uint256[] memory maturities = new uint256[](3);
         uint256[] memory aprs = new uint256[](3);
 
-        maturities[0] = block.timestamp + normalizeTenor(tenor1);
-        maturities[1] = block.timestamp + normalizeTenor(tenor2);
-        maturities[2] = block.timestamp + normalizeTenor(tenor3);
+        maturities[0] = block.timestamp + tenor1;
+        maturities[1] = block.timestamp + tenor2;
+        maturities[2] = block.timestamp + tenor3;
 
         aprs[0] = apr1;
         aprs[1] = apr2;
@@ -256,7 +236,7 @@ library FixedMaturityLimitOrderHelper {
     {
         uint256[] memory maturities = new uint256[](tenors.length);
         for (uint256 i = 0; i < tenors.length; i++) {
-            maturities[i] = block.timestamp + normalizeTenor(tenors[i]);
+            maturities[i] = block.timestamp + tenors[i];
         }
 
         return FixedMaturityLimitOrder({maturities: maturities, aprs: aprs});

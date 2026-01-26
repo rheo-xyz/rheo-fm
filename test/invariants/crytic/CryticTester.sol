@@ -12,6 +12,6 @@ contract CryticTester is TargetFunctions, SetupLocal, CryticAsserts {
     constructor() {
         setup();
         // Keep helper library in the compilation set for echidna predeploys.
-        FixedMaturityLimitOrderHelper.normalizeTenor(0);
+        FixedMaturityLimitOrderHelper.normalOffer();
     }
 }
