@@ -165,8 +165,8 @@ abstract contract TargetFunctions is Helper, ExpectedErrors, ITargetFunctions {
             if (creditPositionId == RESERVED_ID) {
                 eq(_after.debtPositionsCount, _before.debtPositionsCount + 1, BORROW_02);
                 uint256 debtPositionId = DEBT_POSITION_ID_START + _after.debtPositionsCount - 1;
-                uint256 maturity = size.getDebtPosition(debtPositionId).dueDate;
-                t(_isRiskMaturity(maturity), LOAN_01);
+                uint256 m = size.getDebtPosition(debtPositionId).dueDate;
+                t(_isRiskMaturity(m), LOAN_01);
             }
         }
     }
@@ -226,8 +226,8 @@ abstract contract TargetFunctions is Helper, ExpectedErrors, ITargetFunctions {
             if (creditPositionId == RESERVED_ID) {
                 eq(_after.debtPositionsCount, _before.debtPositionsCount + 1, BORROW_02);
                 uint256 debtPositionId = DEBT_POSITION_ID_START + _after.debtPositionsCount - 1;
-                uint256 maturity = size.getDebtPosition(debtPositionId).dueDate;
-                t(_isRiskMaturity(maturity), LOAN_01);
+                uint256 m = size.getDebtPosition(debtPositionId).dueDate;
+                t(_isRiskMaturity(m), LOAN_01);
             }
         }
     }
@@ -569,7 +569,6 @@ abstract contract TargetFunctions is Helper, ExpectedErrors, ITargetFunctions {
             }
         }
         size.updateConfig(UpdateConfigParams({key: key, value: value}));
-        InitializeRiskConfigParams memory afterRiskConfig = size.riskConfig();
     }
 
     function _riskMaturityAtFromConfig(uint256 seed) internal view returns (uint256) {
