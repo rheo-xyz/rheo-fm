@@ -33,7 +33,6 @@ contract SellCreditLimitTest is BaseTest {
         public
     {
         uint256[] memory availableMaturities = size.riskConfig().maturities;
-        _sortTenors(availableMaturities);
         buckets = bound(buckets, 1, availableMaturities.length);
         uint256[] memory tenors = new uint256[](buckets);
         uint256[] memory aprs = new uint256[](buckets);
@@ -153,17 +152,5 @@ contract SellCreditLimitTest is BaseTest {
         uint256 expectedProfit = borrowedAmount - expected.cashAmountIn;
         assertEqApprox(_state().bob.borrowTokenBalance, expectedProfit, 1e6);
         assertEq(_state().bob.debtBalance, 0);
-    }
-
-    function _sortTenors(uint256[] memory tenors) internal pure {
-        for (uint256 i = 1; i < tenors.length; i++) {
-            uint256 value = tenors[i];
-            uint256 j = i;
-            while (j > 0 && tenors[j - 1] > value) {
-                tenors[j] = tenors[j - 1];
-                j--;
-            }
-            tenors[j] = value;
-        }
     }
 }
