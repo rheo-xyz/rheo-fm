@@ -28,6 +28,7 @@ interface ICollectionsManagerUserActions {
     /// @param user The user to subscribe
     /// @param collectionIds The collection IDs to subscribe the user to
     /// @dev Only callable by the SizeFactory
+    /// @dev Calling this function resets the copy limit order configs to full copy.
     function subscribeUserToCollections(address user, uint256[] memory collectionIds) external;
 
     /// @notice Unsubscribe a user from collections
