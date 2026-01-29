@@ -50,6 +50,7 @@ High-level goals:
 ### Limit Orders
 - Limit order actions store fixed-maturity offers and emit maturities + APRs.
 - Exact-match maturity lookup only.
+- When setting a limit order, the system allows only a subset of the maturities allowlist.
 
 ### Collections and Copies
 - Collections copy configs use relative `minTenor`/`maxTenor` bounds.
