@@ -22,7 +22,7 @@ High-level goals:
 - Limit orders use fixed-maturity offers: `maturities[]` + `aprs[]`.
 - Maturities are strictly increasing and have exact-match APR lookup (no interpolation).
 - Allowed maturities are governance-controlled via `riskConfig.maturities`.
-- Offer and market actions must use maturities that are in the allowlist.
+- Limir orders and market orders must use maturities that are in the allowlist, which means exits revert if a maturity removed from allowlist
 - An empty `riskConfig.maturities` allowlist is permitted and disables market orders via `INVALID_MATURITY`.
 
 ### Bounds and Validation
