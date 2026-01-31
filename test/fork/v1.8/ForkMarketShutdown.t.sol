@@ -4,8 +4,8 @@ pragma solidity 0.8.23;
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
-import {Contract, Networks} from "@script/Networks.sol";
 import {GetMarketShutdownCalldataScript} from "@script/GetMarketShutdownCalldata.s.sol";
+import {Contract, Networks} from "@script/Networks.sol";
 import {ForkTest} from "@test/fork/ForkTest.sol";
 
 import {SizeFactory} from "@src/factory/SizeFactory.sol";
@@ -20,8 +20,8 @@ import {DepositParams} from "@src/market/libraries/actions/Deposit.sol";
 import {WithdrawParams} from "@src/market/libraries/actions/Withdraw.sol";
 import {NonTransferrableRebasingTokenVault} from "@src/market/token/NonTransferrableRebasingTokenVault.sol";
 
-import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 
 contract ForkMarketShutdownTest is ForkTest, Networks {
     ISize private cbEthUsdc;
