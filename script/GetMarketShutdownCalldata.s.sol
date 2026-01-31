@@ -30,7 +30,16 @@ contract GetMarketShutdownCalldataScript is BaseScript, Networks {
     function run() public pure {}
 
     function getMarketShutdownCalldata(ISize market) public returns (bytes memory calldata_) {
-        MarketShutdownParams memory shutdownParams = _collectPositions(market);
+        MarketShutdownParams memory shutdownParams =
+            _collectPositions(market, type(uint256).max, type(uint256).max);
+        calldata_ = abi.encodeCall(ISizeAdmin.marketShutdown, (shutdownParams));
+    }
+
+    function getMarketShutdownCalldataWithMaxIds(ISize market, uint256 maxDebtIds, uint256 maxCreditIds)
+        public
+        returns (bytes memory calldata_)
+    {
+        MarketShutdownParams memory shutdownParams = _collectPositions(market, maxDebtIds, maxCreditIds);
         calldata_ = abi.encodeCall(ISizeAdmin.marketShutdown, (shutdownParams));
     }
 
@@ -54,7 +63,10 @@ contract GetMarketShutdownCalldataScript is BaseScript, Networks {
         return sumFutureValueByMarket[market];
     }
 
-    function _collectPositions(ISize market) private returns (MarketShutdownParams memory params) {
+    function _collectPositions(ISize market, uint256 maxDebtIds, uint256 maxCreditIds)
+        private
+        returns (MarketShutdownParams memory params)
+    {
         ISizeView marketView = ISizeView(address(market));
         DataView memory dataView = marketView.data();
 
@@ -69,11 +81,12 @@ contract GetMarketShutdownCalldataScript is BaseScript, Networks {
         creditPositionIds.clear();
         sumFutureValueByMarket[market] = 0;
 
-        for (
-            uint256 debtPositionId = DEBT_POSITION_ID_START;
-            debtPositionId < dataView.nextDebtPositionId;
-            debtPositionId++
-        ) {
+        uint256 debtStop = dataView.nextDebtPositionId;
+        if (maxDebtIds < debtStop) {
+            debtStop = maxDebtIds;
+        }
+
+        for (uint256 debtPositionId = DEBT_POSITION_ID_START; debtPositionId < debtStop; debtPositionId++) {
             DebtPosition memory debtPosition = marketView.getDebtPosition(debtPositionId);
             if (debtPosition.futureValue > 0) {
                 borrowers.add(debtPosition.borrower);
@@ -84,11 +97,15 @@ contract GetMarketShutdownCalldataScript is BaseScript, Networks {
             }
         }
 
-        for (
-            uint256 creditPositionId = CREDIT_POSITION_ID_START;
-            creditPositionId < dataView.nextCreditPositionId;
-            creditPositionId++
-        ) {
+        uint256 creditStop = dataView.nextCreditPositionId;
+        if (maxCreditIds != type(uint256).max) {
+            uint256 creditLimitId = CREDIT_POSITION_ID_START + maxCreditIds;
+            if (creditLimitId < creditStop) {
+                creditStop = creditLimitId;
+            }
+        }
+
+        for (uint256 creditPositionId = CREDIT_POSITION_ID_START; creditPositionId < creditStop; creditPositionId++) {
             CreditPosition memory creditPosition = marketView.getCreditPosition(creditPositionId);
             if (creditPosition.credit == 0 || !debtPositionIds.contains(creditPosition.debtPositionId)) {
                 continue;

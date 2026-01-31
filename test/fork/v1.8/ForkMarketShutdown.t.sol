@@ -35,8 +35,8 @@ contract ForkMarketShutdownTest is ForkTest, Networks {
         sizeFactory = SizeFactory(contracts[block.chainid][Contract.SIZE_FACTORY]);
         owner = Networks.contracts[block.chainid][Contract.SIZE_GOVERNANCE];
 
-        cbEthUsdc = _findMarket("cbETH", "USDC");
-        wethUsdc = _findMarket("WETH", "USDC");
+        cbEthUsdc = sizeFactory.getMarket(2);
+        wethUsdc = sizeFactory.getMarket(0);
 
         DataView memory dataView = ISizeView(address(cbEthUsdc)).data();
         borrowTokenLocal = dataView.underlyingBorrowToken;
@@ -47,7 +47,7 @@ contract ForkMarketShutdownTest is ForkTest, Networks {
         public
     {
         GetMarketShutdownCalldataScript shutdownScript = new GetMarketShutdownCalldataScript();
-        bytes memory shutdownCalldata = shutdownScript.getMarketShutdownCalldata(cbEthUsdc);
+        bytes memory shutdownCalldata = shutdownScript.getMarketShutdownCalldataWithMaxIds(cbEthUsdc, 50, 50);
 
         uint256[] memory debtPositionIdsArray = shutdownScript.getDebtPositionIds(cbEthUsdc);
         uint256[] memory creditPositionIdsArray = shutdownScript.getCreditPositionIds(cbEthUsdc);
