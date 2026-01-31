@@ -19,11 +19,11 @@ import {
 
 import {IPriceFeed} from "@src/oracle/IPriceFeed.sol";
 
+import {PriceFeedChainlinkOnly4x} from "@deprecated/oracle/v1.8/PriceFeedChainlinkOnly4x.sol";
 import {IMorphoChainlinkOracleV2} from "@src/oracle/adapters/morpho/IMorphoChainlinkOracleV2.sol";
 import {IOracle} from "@src/oracle/adapters/morpho/IOracle.sol";
 import {MorphoPriceFeedV2} from "@src/oracle/adapters/morpho/MorphoPriceFeedV2.sol";
 import {PriceFeedMorphoChainlinkOracleV2} from "@src/oracle/v1.7.1/PriceFeedMorphoChainlinkOracleV2.sol";
-import {PriceFeedChainlinkOnly4x} from "@src/oracle/v1.8/PriceFeedChainlinkOnly4x.sol";
 import {Tenderly} from "@tenderly-utils/Tenderly.sol";
 
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";

@@ -135,6 +135,16 @@ contract SizeFactory is
     }
 
     /// @inheritdoc ISizeFactory
+    function removeMarket(address market) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        if (!markets.contains(market)) {
+            revert Errors.INVALID_MARKET(market);
+        }
+        // slither-disable-next-line unused-return
+        markets.remove(market);
+        emit RemoveMarket(market);
+    }
+
+    /// @inheritdoc ISizeFactory
     function createBorrowTokenVault(IPool variablePool, IERC20Metadata underlyingBorrowToken)
         external
         onlyRole(DEFAULT_ADMIN_ROLE)

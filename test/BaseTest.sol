@@ -47,6 +47,8 @@ import {UserView} from "@src/market/SizeView.sol";
 import {CopyLimitOrderConfig} from "@src/market/libraries/OfferLibrary.sol";
 import {SetCopyLimitOrderConfigsParams} from "@src/market/libraries/actions/SetCopyLimitOrderConfigs.sol";
 
+import {DataView} from "@src/market/SizeViewData.sol";
+import {ISizeView} from "@src/market/interfaces/ISizeView.sol";
 import {UpdateConfigParams} from "@src/market/libraries/actions/UpdateConfig.sol";
 
 import {PoolMock} from "@test/mocks/PoolMock.sol";
@@ -214,6 +216,24 @@ contract BaseTest is Test, Deploy, AssertsHelper {
 
         vm.label(address(0), "address(0)");
         vm.label(address(this), "Test");
+    }
+
+    function _findMarket(string memory collateralSymbol, string memory borrowSymbol) internal view returns (ISize) {
+        ISize[] memory markets = sizeFactory.getMarkets();
+        bytes32 collateralHash = keccak256(bytes(collateralSymbol));
+        bytes32 borrowHash = keccak256(bytes(borrowSymbol));
+
+        for (uint256 i = 0; i < markets.length; i++) {
+            DataView memory dataView = ISizeView(address(markets[i])).data();
+            if (
+                keccak256(bytes(dataView.underlyingCollateralToken.symbol())) == collateralHash
+                    && keccak256(bytes(dataView.underlyingBorrowToken.symbol())) == borrowHash
+            ) {
+                return markets[i];
+            }
+        }
+
+        revert("market not found");
     }
 
     function _mint(address token, address user, uint256 amount) internal {

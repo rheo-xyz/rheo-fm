@@ -86,7 +86,9 @@ library Initialize {
         // N/A
 
         // validate liquidationRewardPercent
-        // N/A
+        if (f.liquidationRewardPercent > PERCENT) {
+            revert Errors.INVALID_AMOUNT(f.liquidationRewardPercent);
+        }
 
         // validate overdueCollateralProtocolPercent
         if (f.overdueCollateralProtocolPercent > PERCENT) {

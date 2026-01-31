@@ -89,7 +89,8 @@ abstract contract CollectionsManagerView is ICollectionsManagerView, Collections
 
     function _isUserDefinedLimitOrderNull(address user, ISize market, bool isLoanOffer) private view returns (bool) {
         // slither-disable-next-line calls-loop
-        return isLoanOffer ? market.isUserDefinedLoanOfferNull(user) : market.isUserDefinedBorrowOfferNull(user);
+        (bool isLoanOfferNull, bool isBorrowOfferNull) = market.isUserDefinedLimitOrdersNull(user);
+        return isLoanOffer ? isLoanOfferNull : isBorrowOfferNull;
     }
 
     /// @inheritdoc ICollectionsManagerView
@@ -277,9 +278,9 @@ abstract contract CollectionsManagerView is ICollectionsManagerView, Collections
         view
         returns (CopyLimitOrderConfig memory copyLimitOrder)
     {
-        return isLoanOffer
-            ? market.getUserDefinedCopyLoanOfferConfig(user)
-            : market.getUserDefinedCopyBorrowOfferConfig(user);
+        (CopyLimitOrderConfig memory copyLoanOfferConfig, CopyLimitOrderConfig memory copyBorrowOfferConfig) =
+            market.getUserDefinedCopyLimitOrderConfigs(user);
+        return isLoanOffer ? copyLoanOfferConfig : copyBorrowOfferConfig;
     }
 
     function _getUserDefinedCollectionCopyLimitOrderConfig(address user, uint256 collectionId, bool isLoanOffer)

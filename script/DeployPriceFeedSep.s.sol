@@ -19,8 +19,8 @@ import {PriceFeedPendleSparkLinearDiscountChainlink} from
     "@src/oracle/v1.7.1/PriceFeedPendleSparkLinearDiscountChainlink.sol";
 import {PriceFeedPendleTWAPChainlink} from "@src/oracle/v1.7.2/PriceFeedPendleTWAPChainlink.sol";
 
+import {PriceFeedChainlinkOnly4x} from "@deprecated/oracle/v1.8/PriceFeedChainlinkOnly4x.sol";
 import {ChainlinkPriceFeed} from "@src/oracle/adapters/ChainlinkPriceFeed.sol";
-import {PriceFeedChainlinkOnly4x} from "@src/oracle/v1.8/PriceFeedChainlinkOnly4x.sol";
 
 import {PriceFeedIPriceFeed2x} from "@src/oracle/v1.8/PriceFeedIPriceFeed2x.sol";
 
