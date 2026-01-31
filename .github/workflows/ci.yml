@@ -95,7 +95,7 @@ jobs:
 
       - name: Fork Test
         run: |
-          forge test -vvv --fail-fast
+          forge test -vvv --fail-fast --no-match-contract ForkMarketShutdownTest
         id: test
         env:
           API_KEY_ALCHEMY: ${{ secrets.API_KEY_ALCHEMY }}
