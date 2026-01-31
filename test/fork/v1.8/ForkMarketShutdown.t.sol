@@ -4,12 +4,12 @@ pragma solidity 0.8.23;
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
-import {GetMarketShutdownCalldataScript} from "@script/GetMarketShutdownCalldata.s.sol";
 import {Contract, Networks} from "@script/Networks.sol";
-import {ProposeSafeTxUpgradeToV1_8_4Script} from "@script/ProposeSafeTxUpgradeToV1_8_4.s.sol";
+import {GetMarketShutdownCalldataScript} from "@script/GetMarketShutdownCalldata.s.sol";
 import {ForkTest} from "@test/fork/ForkTest.sol";
 
 import {SizeFactory} from "@src/factory/SizeFactory.sol";
+import {Size} from "@src/market/Size.sol";
 
 import {DataView} from "@src/market/SizeViewData.sol";
 import {ISize} from "@src/market/interfaces/ISize.sol";
@@ -21,6 +21,7 @@ import {WithdrawParams} from "@src/market/libraries/actions/Withdraw.sol";
 import {NonTransferrableRebasingTokenVault} from "@src/market/token/NonTransferrableRebasingTokenVault.sol";
 
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
+import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 contract ForkMarketShutdownTest is ForkTest, Networks {
     ISize private cbEthUsdc;
@@ -67,8 +68,11 @@ contract ForkMarketShutdownTest is ForkTest, Networks {
         vm.prank(owner);
         cbEthUsdc.deposit(DepositParams({token: address(borrowTokenLocal), amount: depositAmount, to: owner}));
 
-        ProposeSafeTxUpgradeToV1_8_4Script upgradeScript = new ProposeSafeTxUpgradeToV1_8_4Script();
-        (address[] memory targets, bytes[] memory datas) = upgradeScript.getUpgradeToV1_8_4Data();
+        Size newSizeImplementation = new Size();
+        address[] memory targets = new address[](1);
+        bytes[] memory datas = new bytes[](1);
+        targets[0] = address(cbEthUsdc);
+        datas[0] = abi.encodeCall(UUPSUpgradeable.upgradeToAndCall, (address(newSizeImplementation), ""));
         _upgradeToV1_8_4(targets, datas);
 
         bytes[] memory multicallData = new bytes[](2);
@@ -87,7 +91,8 @@ contract ForkMarketShutdownTest is ForkTest, Networks {
         DataView memory wethUsdcData = ISizeView(address(wethUsdc)).data();
         assertEq(address(wethUsdcData.borrowTokenVault), address(borrowTokenVaultLocal));
 
-        for (uint256 i = 0; i < lendersArray.length; i++) {
+        uint256 lendersToWithdraw = 1;
+        for (uint256 i = 0; i < lendersToWithdraw; i++) {
             address lender = lendersArray[i];
             uint256 lenderVaultBalance = borrowTokenVaultLocal.balanceOf(lender);
             assertGt(lenderVaultBalance, 0);

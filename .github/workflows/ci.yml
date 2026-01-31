@@ -95,7 +95,7 @@ jobs:
 
       - name: Fork Test
         run: |
-          forge test -vvv --fail-fast --threads 1
+          forge test -vvv --fail-fast
         id: test
         env:
           API_KEY_ALCHEMY: ${{ secrets.API_KEY_ALCHEMY }}
