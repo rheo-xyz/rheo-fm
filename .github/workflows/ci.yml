@@ -302,7 +302,6 @@ jobs:
       - name: Coveralls
         if: ${{ !github.event.repository.private }}
         uses: coverallsapp/github-action@v2
-        if: ${{ !github.event.repository.private }}
         with:
           coverage-reporter-version: v0.6.15
           fail-on-error: false
