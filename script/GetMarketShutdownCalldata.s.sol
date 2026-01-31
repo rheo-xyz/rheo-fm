@@ -30,8 +30,7 @@ contract GetMarketShutdownCalldataScript is BaseScript, Networks {
     function run() public pure {}
 
     function getMarketShutdownCalldata(ISize market) public returns (bytes memory calldata_) {
-        MarketShutdownParams memory shutdownParams =
-            _collectPositions(market, type(uint256).max, type(uint256).max);
+        MarketShutdownParams memory shutdownParams = _collectPositions(market, type(uint256).max, type(uint256).max);
         calldata_ = abi.encodeCall(ISizeAdmin.marketShutdown, (shutdownParams));
     }
 
