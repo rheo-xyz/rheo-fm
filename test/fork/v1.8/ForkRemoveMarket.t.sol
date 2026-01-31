@@ -21,10 +21,7 @@ contract ForkRemoveMarketTest is ForkTest, Networks {
     address private factoryOwner;
 
     function setUp() public override(ForkTest) {
-        string memory alchemyKey = vm.envOr("API_KEY_ALCHEMY", string(""));
-        string memory rpcAlias = bytes(alchemyKey).length == 0 ? "base_archive" : "base";
-        vm.createSelectFork(rpcAlias);
-        vm.chainId(8453);
+        vm.createSelectFork("base_archive", 41515430);
 
         factory = SizeFactory(contracts[BASE_MAINNET][Contract.SIZE_FACTORY]);
         factoryOwner = contracts[BASE_MAINNET][Contract.SIZE_GOVERNANCE];
@@ -33,14 +30,18 @@ contract ForkRemoveMarketTest is ForkTest, Networks {
         console.log("ForkRemoveMarketTest: factoryOwner", factoryOwner);
     }
 
-    function testFork_removeMarket_afterUpgrade() public {
+    function testFork_RemoveMarket_after_upgrade_removes_active_market() public {
         // Get initial markets count
         uint256 initialMarketsCount = factory.getMarketsCount();
         console.log("Initial markets count:", initialMarketsCount);
         assertTrue(initialMarketsCount > 0, "Should have at least one market");
 
-        // Get a market to remove
-        ISize marketToRemove = factory.getMarket(0);
+        // Get a non-paused market to remove so the upgrade doesn't remove it.
+        ISize marketToRemove = _findMarket(false);
+        if (address(marketToRemove) == address(0)) {
+            console.log("No active market found, skipping test");
+            return;
+        }
         address marketAddress = address(marketToRemove);
         console.log("Market to remove:", marketAddress);
 
@@ -49,6 +50,9 @@ contract ForkRemoveMarketTest is ForkTest, Networks {
 
         // Perform the upgrade
         _upgradeSizeFactory();
+
+        uint256 postUpgradeMarketsCount = factory.getMarketsCount();
+        console.log("Post-upgrade markets count:", postUpgradeMarketsCount);
 
         // Verify the market is still registered after upgrade
         assertTrue(factory.isMarket(marketAddress), "Market should still be registered after upgrade");
@@ -62,13 +66,13 @@ contract ForkRemoveMarketTest is ForkTest, Networks {
 
         // Verify markets count decreased
         uint256 finalMarketsCount = factory.getMarketsCount();
-        assertEq(finalMarketsCount, initialMarketsCount - 1, "Markets count should decrease by 1");
+        assertEq(finalMarketsCount, postUpgradeMarketsCount - 1, "Markets count should decrease by 1");
 
         console.log("Final markets count:", finalMarketsCount);
-        console.log("testFork_removeMarket_afterUpgrade: PASSED");
+        console.log("testFork_RemoveMarket_after_upgrade_removes_active_market: PASSED");
     }
 
-    function testFork_removeMarket_revertsForNonAdmin() public {
+    function testFork_RemoveMarket_reverts_for_non_admin() public {
         // Perform the upgrade
         _upgradeSizeFactory();
 
@@ -83,7 +87,7 @@ contract ForkRemoveMarketTest is ForkTest, Networks {
         factory.removeMarket(marketAddress);
     }
 
-    function testFork_removeMarket_revertsForInvalidMarket() public {
+    function testFork_RemoveMarket_reverts_for_invalid_market() public {
         // Perform the upgrade
         _upgradeSizeFactory();
 
@@ -94,16 +98,10 @@ contract ForkRemoveMarketTest is ForkTest, Networks {
         factory.removeMarket(invalidMarket);
     }
 
-    function testFork_removeMarket_withdrawFromRemovedMarketReverts() public {
-        // Perform the upgrade first
-        _upgradeSizeFactory();
-
+    function testFork_RemoveMarket_withdraw_from_removed_market_reverts() public {
         // Find a paused market (expired PT market)
-        ISize pausedMarket = _findPausedMarket();
-        if (address(pausedMarket) == address(0)) {
-            console.log("No paused market found, skipping test");
-            return;
-        }
+        ISize pausedMarket = _findMarket(true);
+        assertTrue(address(pausedMarket) != address(0), "Paused market should exist");
 
         address marketAddress = address(pausedMarket);
         console.log("Found paused market:", marketAddress);
@@ -138,10 +136,9 @@ contract ForkRemoveMarketTest is ForkTest, Networks {
         ISizeAdmin(marketAddress).pause();
         console.log("Market re-paused");
 
-        // Remove the market from factory
-        vm.prank(factoryOwner);
-        factory.removeMarket(marketAddress);
-        console.log("Market removed from factory");
+        // Upgrade removes paused markets from the factory
+        _upgradeSizeFactory();
+        console.log("Factory upgraded (paused markets removed)");
 
         // Verify market is no longer registered
         assertFalse(factory.isMarket(marketAddress), "Market should not be registered after removal");
@@ -163,7 +160,7 @@ contract ForkRemoveMarketTest is ForkTest, Networks {
             WithdrawParams({token: address(underlyingBorrowToken), amount: depositAmount, to: testUser})
         );
 
-        console.log("testFork_removeMarket_withdrawFromRemovedMarketReverts: PASSED");
+        console.log("testFork_RemoveMarket_withdraw_from_removed_market_reverts: PASSED");
     }
 
     function _upgradeSizeFactory() internal {
@@ -178,11 +175,11 @@ contract ForkRemoveMarketTest is ForkTest, Networks {
         }
     }
 
-    function _findPausedMarket() internal view returns (ISize) {
+    function _findMarket(bool paused) internal view returns (ISize) {
         uint256 marketsCount = factory.getMarketsCount();
         for (uint256 i = 0; i < marketsCount; i++) {
             ISize market = factory.getMarket(i);
-            if (PausableUpgradeable(address(market)).paused()) {
+            if (PausableUpgradeable(address(market)).paused() == paused) {
                 return market;
             }
         }
