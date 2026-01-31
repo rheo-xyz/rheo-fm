@@ -161,4 +161,12 @@ library Events {
         uint256 fragmentationFee,
         uint256 tenor
     );
+
+    // introduced in v1.8.4
+    event MarketShutdown(
+        address indexed sender,
+        uint256[] debtPositionIdsToForceLiquidate,
+        uint256[] creditPositionIdsToClaim,
+        address[] usersToForceWithdraw
+    );
 }

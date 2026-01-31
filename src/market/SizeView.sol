@@ -93,7 +93,8 @@ abstract contract SizeView is SizeStorage, ReentrancyGuardUpgradeableWithViewMod
     }
 
     /// @inheritdoc ISizeView
-    function getUserView(address user) external view nonReentrantView returns (UserView memory) {
+    /// @dev Changed in v1.8.4 to remove nonReentrantView for contract size limit optimization
+    function getUserView(address user) external view returns (UserView memory) {
         return UserView({
             user: state.data.users[user],
             account: user,
@@ -104,13 +105,15 @@ abstract contract SizeView is SizeStorage, ReentrancyGuardUpgradeableWithViewMod
     }
 
     /// @inheritdoc ISizeViewV1_8
-    function getUserDefinedCopyLoanOfferConfig(address user) external view returns (CopyLimitOrderConfig memory) {
-        return state.data.usersCopyLimitOrderConfigs[user].copyLoanOfferConfig;
-    }
-
-    /// @inheritdoc ISizeViewV1_8
-    function getUserDefinedCopyBorrowOfferConfig(address user) external view returns (CopyLimitOrderConfig memory) {
-        return state.data.usersCopyLimitOrderConfigs[user].copyBorrowOfferConfig;
+    function getUserDefinedCopyLimitOrderConfigs(address user)
+        external
+        view
+        returns (CopyLimitOrderConfig memory, CopyLimitOrderConfig memory)
+    {
+        return (
+            state.data.usersCopyLimitOrderConfigs[user].copyLoanOfferConfig,
+            state.data.usersCopyLimitOrderConfigs[user].copyBorrowOfferConfig
+        );
     }
 
     /// @inheritdoc ISizeView
@@ -152,13 +155,12 @@ abstract contract SizeView is SizeStorage, ReentrancyGuardUpgradeableWithViewMod
     }
 
     /// @inheritdoc ISizeViewV1_8
-    function isUserDefinedLoanOfferNull(address user) external view returns (bool) {
-        return state.data.users[user].loanOffer.isNull();
-    }
-
-    /// @inheritdoc ISizeViewV1_8
-    function isUserDefinedBorrowOfferNull(address user) external view returns (bool) {
-        return state.data.users[user].borrowOffer.isNull();
+    function isUserDefinedLimitOrdersNull(address user)
+        external
+        view
+        returns (bool isLoanOfferNull, bool isBorrowOfferNull)
+    {
+        return (state.data.users[user].loanOffer.isNull(), state.data.users[user].borrowOffer.isNull());
     }
 
     /// @inheritdoc ISizeView

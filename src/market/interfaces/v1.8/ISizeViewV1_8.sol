@@ -44,21 +44,21 @@ interface ISizeViewV1_8 {
 
     /// @notice Get the user copy loan offer for a given user
     /// @param user The address of the user
-    /// @return The user copy loan offer
-    function getUserDefinedCopyLoanOfferConfig(address user) external view returns (CopyLimitOrderConfig memory);
-
-    /// @notice Get the user copy borrow offer for a given user
-    /// @param user The address of the user
-    /// @return The user copy borrow offer
-    function getUserDefinedCopyBorrowOfferConfig(address user) external view returns (CopyLimitOrderConfig memory);
+    /// @dev Added in v1.8.4
+    /// @return copyLoanOfferConfig The user copy loan offer
+    /// @return copyBorrowOfferConfig The user copy borrow offer
+    function getUserDefinedCopyLimitOrderConfigs(address user)
+        external
+        view
+        returns (CopyLimitOrderConfig memory copyLoanOfferConfig, CopyLimitOrderConfig memory copyBorrowOfferConfig);
 
     /// @notice Check if a user-defined loan offer is null
     /// @param user The address of the user
-    /// @return True if the user-defined loan offer is null, false otherwise
-    function isUserDefinedLoanOfferNull(address user) external view returns (bool);
-
-    /// @notice Check if a user-defined borrow offer is null
-    /// @param user The address of the user
-    /// @return True if the user-defined borrow offer is null, false otherwise
-    function isUserDefinedBorrowOfferNull(address user) external view returns (bool);
+    /// @dev Added in v1.8.4
+    /// @return isLoanOfferNull True if the user-defined loan offer is null, false otherwise
+    /// @return isBorrowOfferNull True if the user-defined borrow offer is null, false otherwise
+    function isUserDefinedLimitOrdersNull(address user)
+        external
+        view
+        returns (bool isLoanOfferNull, bool isBorrowOfferNull);
 }

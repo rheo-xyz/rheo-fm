@@ -15,6 +15,8 @@ import {
     InitializeOracleParams,
     InitializeRiskConfigParams
 } from "@src/market/libraries/actions/Initialize.sol";
+
+import {MarketShutdown, MarketShutdownParams} from "@src/market/libraries/actions/MarketShutdown.sol";
 import {UpdateConfig, UpdateConfigParams} from "@src/market/libraries/actions/UpdateConfig.sol";
 
 import {
@@ -50,7 +52,6 @@ import {
 } from "@src/market/libraries/actions/BuyCreditLimit.sol";
 import {Liquidate, LiquidateParams} from "@src/market/libraries/actions/Liquidate.sol";
 
-import {ReentrancyGuardUpgradeableWithViewModifier} from "@src/helpers/ReentrancyGuardUpgradeableWithViewModifier.sol";
 import {State} from "@src/market/SizeStorage.sol";
 import {Multicall} from "@src/market/libraries/Multicall.sol";
 import {Compensate, CompensateOnBehalfOfParams, CompensateParams} from "@src/market/libraries/actions/Compensate.sol";
@@ -95,16 +96,10 @@ import {ISizeView} from "@src/market/interfaces/ISizeView.sol";
 /// @custom:security-contact security@size.credit
 /// @author Size (https://size.credit/)
 /// @notice See the documentation in {ISize}.
-contract Size is
-    ISize,
-    SizeView,
-    AccessControlUpgradeable,
-    PausableUpgradeable,
-    /*ReentrancyGuardUpgradeableWithViewModifier,*/
-    UUPSUpgradeable
-{
+contract Size is ISize, SizeView, AccessControlUpgradeable, PausableUpgradeable, UUPSUpgradeable {
     using Initialize for State;
     using UpdateConfig for State;
+    using MarketShutdown for State;
     using Deposit for State;
     using Withdraw for State;
     using SellCreditMarket for State;
@@ -147,14 +142,11 @@ contract Size is
         _grantRole(DEFAULT_ADMIN_ROLE, owner);
         _grantRole(PAUSER_ROLE, owner);
         _grantRole(KEEPER_ROLE, owner);
-        _grantRole(BORROW_RATE_UPDATER_ROLE, owner);
     }
 
     function _hasRole(bytes32 role, address account) internal view returns (bool) {
         if (hasRole(role, account)) {
             return true;
-        } else if (address(state.data.sizeFactory) == address(0)) {
-            return false;
         } else {
             return AccessControlUpgradeable(address(state.data.sizeFactory)).hasRole(role, account);
         }
@@ -173,14 +165,14 @@ contract Size is
         onlyRoleOrSizeFactoryHasRole(DEFAULT_ADMIN_ROLE)
     {}
 
-    /// @notice Validate that the user has not decreased their collateral ratio
-    modifier mustImproveCollateralRatio(address onBehalfOf) {
-        uint256 collateralRatioBefore = state.collateralRatio(onBehalfOf);
-        _;
-        uint256 collateralRatioAfter = state.collateralRatio(onBehalfOf);
-        if (collateralRatioAfter <= collateralRatioBefore) {
-            revert Errors.MUST_IMPROVE_COLLATERAL_RATIO(onBehalfOf, collateralRatioBefore, collateralRatioAfter);
-        }
+    /// @inheritdoc ISizeAdmin
+    function marketShutdown(MarketShutdownParams calldata params)
+        external
+        override(ISizeAdmin)
+        onlyRoleOrSizeFactoryHasRole(DEFAULT_ADMIN_ROLE)
+    {
+        // state.validateMarketShutdown(params); // no-op
+        state.executeMarketShutdown(params);
     }
 
     /// @inheritdoc ISizeAdmin
@@ -189,7 +181,7 @@ contract Size is
         override(ISizeAdmin)
         onlyRoleOrSizeFactoryHasRole(DEFAULT_ADMIN_ROLE)
     {
-        state.validateUpdateConfig(params);
+        // state.validateUpdateConfig(params); // no-op
         state.executeUpdateConfig(params);
     }
 
@@ -204,13 +196,7 @@ contract Size is
     }
 
     /// @inheritdoc IMulticall
-    function multicall(bytes[] calldata _data)
-        public
-        payable
-        override(IMulticall)
-        whenNotPaused
-        returns (bytes[] memory results)
-    {
+    function multicall(bytes[] calldata _data) public payable override(IMulticall) returns (bytes[] memory results) {
         results = state.multicall(_data);
     }
 
@@ -399,10 +385,18 @@ contract Size is
         override(ISizeV1_7)
         nonReentrant
         whenNotPaused
-        mustImproveCollateralRatio(externalParams.onBehalfOf)
     {
+        uint256 collateralRatioBefore = state.collateralRatio(externalParams.onBehalfOf);
+
         state.validateCompensate(externalParams);
         state.executeCompensate(externalParams);
+
+        uint256 collateralRatioAfter = state.collateralRatio(externalParams.onBehalfOf);
+        if (collateralRatioAfter <= collateralRatioBefore) {
+            revert Errors.MUST_IMPROVE_COLLATERAL_RATIO(
+                externalParams.onBehalfOf, collateralRatioBefore, collateralRatioAfter
+            );
+        }
     }
 
     /// @inheritdoc ISize
