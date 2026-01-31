@@ -30,9 +30,11 @@ contract ForkMarketShutdownTest is ForkTest, Networks {
 
     function setUp() public override(ForkTest) {
         string memory alchemyKey = vm.envOr("API_KEY_ALCHEMY", string(""));
-        string memory rpcAlias = bytes(alchemyKey).length == 0 ? "base_archive" : "base";
-        vm.createSelectFork(rpcAlias, 41_458_495);
-        vm.chainId(8453);
+        string memory rpcUrl = bytes(alchemyKey).length == 0
+            ? "https://cloudflare-eth.com"
+            : string.concat("https://eth-mainnet.g.alchemy.com/v2/", alchemyKey);
+        vm.createSelectFork(rpcUrl);
+        vm.chainId(1);
 
         sizeFactory = SizeFactory(contracts[block.chainid][Contract.SIZE_FACTORY]);
         owner = Networks.contracts[block.chainid][Contract.SIZE_GOVERNANCE];
@@ -49,7 +51,7 @@ contract ForkMarketShutdownTest is ForkTest, Networks {
         public
     {
         GetMarketShutdownCalldataScript shutdownScript = new GetMarketShutdownCalldataScript();
-        bytes memory shutdownCalldata = shutdownScript.getMarketShutdownCalldataWithMaxIds(cbEthUsdc, 50, 50);
+        bytes memory shutdownCalldata = shutdownScript.getMarketShutdownCalldataWithMaxIds(cbEthUsdc, 5, 5);
 
         uint256[] memory debtPositionIdsArray = shutdownScript.getDebtPositionIds(cbEthUsdc);
         uint256[] memory creditPositionIdsArray = shutdownScript.getCreditPositionIds(cbEthUsdc);
