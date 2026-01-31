@@ -29,7 +29,9 @@ contract ForkMarketShutdownTest is ForkTest, Networks {
     NonTransferrableRebasingTokenVault private borrowTokenVaultLocal;
 
     function setUp() public override(ForkTest) {
-        vm.createSelectFork("base_archive", 41_458_495);
+        string memory alchemyKey = vm.envOr("API_KEY_ALCHEMY", string(""));
+        string memory rpcAlias = bytes(alchemyKey).length == 0 ? "base_archive" : "base";
+        vm.createSelectFork(rpcAlias, 41_458_495);
         vm.chainId(8453);
 
         sizeFactory = SizeFactory(contracts[block.chainid][Contract.SIZE_FACTORY]);
