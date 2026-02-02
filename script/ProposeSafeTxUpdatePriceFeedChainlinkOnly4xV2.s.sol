@@ -4,7 +4,6 @@ pragma solidity 0.8.23;
 import {Safe} from "@safe-utils/Safe.sol";
 import {BaseScript} from "@script/BaseScript.sol";
 import {Contract, Networks} from "@script/Networks.sol";
-import {Tenderly} from "@tenderly-utils/Tenderly.sol";
 
 import {PriceFeedChainlinkOnly4x} from "@deprecated/oracle/v1.8/PriceFeedChainlinkOnly4x.sol";
 import {MainnetAddresses} from "@script/MainnetAddresses.s.sol";
@@ -24,7 +23,6 @@ import {console} from "forge-std/console.sol";
 
 contract ProposeSafeTxUpdatePriceFeedChainlinkOnly4xV2Script is BaseScript, Networks, MainnetAddresses {
     using Safe for *;
-    using Tenderly for *;
     using EnumerableSet for EnumerableSet.AddressSet;
 
     address signer;
@@ -34,29 +32,22 @@ contract ProposeSafeTxUpdatePriceFeedChainlinkOnly4xV2Script is BaseScript, Netw
 
     modifier parseEnv() {
         safe.initialize(contracts[block.chainid][Contract.SIZE_GOVERNANCE]);
-        tenderly.initialize(
-            vm.envString("TENDERLY_ACCOUNT_NAME"),
-            vm.envString("TENDERLY_PROJECT_NAME"),
-            vm.envString("TENDERLY_ACCESS_KEY")
-        );
         signer = vm.envAddress("SIGNER");
         derivationPath = vm.envString("LEDGER_PATH");
         sizeFactory = ISizeFactory(contracts[block.chainid][Contract.SIZE_FACTORY]);
         _;
     }
 
-    function run() external parseEnv deleteVirtualTestnets {
+    function run() external parseEnv {
         vm.createSelectFork("mainnet");
+
+        vm.startBroadcast();
 
         (address[] memory targets, bytes[] memory datas) = getUpdatePriceFeedsCalldata();
 
-        safe.proposeTransactions(targets, datas, signer, derivationPath);
+        vm.stopBroadcast();
 
-        Tenderly.VirtualTestnet memory vnet = tenderly.createVirtualTestnet("update-chainlinkonly4xv2", block.chainid);
-        tenderly.setStorageAt(vnet, safe.instance().safe, bytes32(uint256(4)), bytes32(uint256(1)));
-        tenderly.sendTransaction(
-            vnet.id, signer, safe.instance().safe, safe.getExecTransactionsData(targets, datas, signer, derivationPath)
-        );
+        safe.proposeTransactions(targets, datas, signer, derivationPath);
     }
 
     function getUpdatePriceFeedsCalldata() public returns (address[] memory targets, bytes[] memory datas) {
