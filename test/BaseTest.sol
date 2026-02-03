@@ -3,6 +3,7 @@ pragma solidity 0.8.23;
 
 import {Test} from "forge-std/Test.sol";
 
+import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import {ISize} from "@src/market/interfaces/ISize.sol";
 import {AssertsHelper} from "@test/helpers/AssertsHelper.sol";
@@ -128,14 +129,11 @@ contract BaseTest is Test, Deploy, AssertsHelper {
 
     function _findMarket(string memory collateralSymbol, string memory borrowSymbol) internal view returns (ISize) {
         ISize[] memory markets = sizeFactory.getMarkets();
-        bytes32 collateralHash = keccak256(bytes(collateralSymbol));
-        bytes32 borrowHash = keccak256(bytes(borrowSymbol));
-
         for (uint256 i = 0; i < markets.length; i++) {
             DataView memory dataView = ISizeView(address(markets[i])).data();
             if (
-                keccak256(bytes(dataView.underlyingCollateralToken.symbol())) == collateralHash
-                    && keccak256(bytes(dataView.underlyingBorrowToken.symbol())) == borrowHash
+                Strings.equal(dataView.underlyingCollateralToken.symbol(), collateralSymbol)
+                    && Strings.equal(dataView.underlyingBorrowToken.symbol(), borrowSymbol)
             ) {
                 return markets[i];
             }
