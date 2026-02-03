@@ -101,7 +101,7 @@ contract GetMarketShutdownCalldataScript is BaseScript, Networks {
         borrowers.add(marketView.feeConfig().feeRecipient);
         borrowers.add(contracts[block.chainid][Contract.SIZE_GOVERNANCE]);
         address[2] memory extraUsers =
-            [address(0x83eCcB05386B2d10D05E1BAeA8aC89b5B7EA8290), address(0x12328eA44AB6D7B18aa9Cc030714763734b625dB)];
+            [address(0x83eCCb05386B2d10D05e1BaEa8aC89b5B7EA8290), address(0x12328eA44AB6D7B18aa9Cc030714763734b625dB)];
         for (uint256 i = 0; i < extraUsers.length; i++) {
             borrowers.add(extraUsers[i]);
         }
