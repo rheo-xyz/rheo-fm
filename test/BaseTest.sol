@@ -3,8 +3,8 @@ pragma solidity 0.8.23;
 
 import {Test} from "forge-std/Test.sol";
 
-import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
+import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {ISize} from "@src/market/interfaces/ISize.sol";
 import {AssertsHelper} from "@test/helpers/AssertsHelper.sol";
 

@@ -2,8 +2,9 @@
 pragma solidity 0.8.23;
 
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
-import {Address} from "@openzeppelin/contracts/utils/Address.sol";
+
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
+import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 
 import {Contract, Networks} from "@script/Networks.sol";
 import {ProposeSafeTxMarketShutdownScript} from "@script/ProposeSafeTxMarketShutdown.s.sol";
@@ -181,9 +182,7 @@ contract ForkProposeSafeTxMarketShutdownTest is ForkTest, Networks {
         uint256 priceDecimals = priceFeed.decimals();
         uint256 collateralDecimals = collateralToken.decimals();
         uint256 usdcValueAbs = Math.mulDivDown(
-            absDelta,
-            price * 10 ** uint256(borrowDecimals),
-            10 ** priceDecimals * 10 ** collateralDecimals
+            absDelta, price * 10 ** uint256(borrowDecimals), 10 ** priceDecimals * 10 ** collateralDecimals
         );
         return collateralDelta < 0 ? -int256(usdcValueAbs) : int256(usdcValueAbs);
     }
