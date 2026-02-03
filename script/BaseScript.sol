@@ -4,6 +4,7 @@ pragma solidity ^0.8.19;
 import {EnumerableMap} from "@openzeppelin/contracts/utils/structs/EnumerableMap.sol";
 
 import {SizeFactory} from "@src/factory/SizeFactory.sol";
+import {ISizeFactory} from "@src/factory/interfaces/ISizeFactory.sol";
 import {ISize} from "@src/market/interfaces/ISize.sol";
 
 import {ISizeV1_5} from "@deprecated/interfaces/ISizeV1_5.sol";
@@ -231,10 +232,12 @@ abstract contract BaseScript is Script {
         string memory underlyingBorrowTokenSymbol
     ) internal view returns (ISize market) {
         ISize[] memory markets = sizeFactory.getMarkets();
+        bytes32 collateralHash = keccak256(bytes(underlyingCollateralTokenSymbol));
+        bytes32 borrowHash = keccak256(bytes(underlyingBorrowTokenSymbol));
         for (uint256 i = 0; i < markets.length; i++) {
             if (
-                markets[i].data().underlyingCollateralToken.symbol() == underlyingCollateralTokenSymbol
-                    && markets[i].data().underlyingBorrowToken.symbol() == underlyingBorrowTokenSymbol
+                keccak256(bytes(markets[i].data().underlyingCollateralToken.symbol())) == collateralHash
+                    && keccak256(bytes(markets[i].data().underlyingBorrowToken.symbol())) == borrowHash
             ) {
                 return markets[i];
             }

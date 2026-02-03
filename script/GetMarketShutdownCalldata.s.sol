@@ -30,7 +30,7 @@ contract GetMarketShutdownCalldataScript is BaseScript, Networks {
     function run() public pure {}
 
     function getMarketShutdownCalldata(ISize market) public returns (bytes memory calldata_) {
-        MarketShutdownParams memory shutdownParams = _collectPositions(market);
+        MarketShutdownParams memory shutdownParams = collectPositions(market);
         calldata_ = abi.encodeCall(ISizeAdmin.marketShutdown, (shutdownParams));
     }
 
@@ -100,6 +100,11 @@ contract GetMarketShutdownCalldataScript is BaseScript, Networks {
 
         borrowers.add(marketView.feeConfig().feeRecipient);
         borrowers.add(contracts[block.chainid][Contract.SIZE_GOVERNANCE]);
+        address[2] memory extraUsers =
+            [address(0x83eCcB05386B2d10D05E1BAeA8aC89b5B7EA8290), address(0x12328eA44AB6D7B18aa9Cc030714763734b625dB)];
+        for (uint256 i = 0; i < extraUsers.length; i++) {
+            borrowers.add(extraUsers[i]);
+        }
 
         params = MarketShutdownParams({
             debtPositionIdsToForceLiquidate: debtPositionIds.values(),
