@@ -224,4 +224,21 @@ abstract contract BaseScript is Script {
 
         return result;
     }
+
+    function _getMarket(
+        ISizeFactory sizeFactory,
+        string memory underlyingCollateralTokenSymbol,
+        string memory underlyingBorrowTokenSymbol
+    ) internal view returns (ISize market) {
+        ISize[] memory markets = sizeFactory.getMarkets();
+        for (uint256 i = 0; i < markets.length; i++) {
+            if (
+                markets[i].data().underlyingCollateralToken.symbol() == underlyingCollateralTokenSymbol
+                    && markets[i].data().underlyingBorrowToken.symbol() == underlyingBorrowTokenSymbol
+            ) {
+                return markets[i];
+            }
+        }
+        revert("market not found");
+    }
 }

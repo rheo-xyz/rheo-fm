@@ -54,7 +54,7 @@ contract GetMarketShutdownCalldataScript is BaseScript, Networks {
         return sumFutureValueByMarket[market];
     }
 
-    function _collectPositions(ISize market) private returns (MarketShutdownParams memory params) {
+    function collectPositions(ISize market) public returns (MarketShutdownParams memory params) {
         ISizeView marketView = ISizeView(address(market));
         DataView memory dataView = marketView.data();
 
