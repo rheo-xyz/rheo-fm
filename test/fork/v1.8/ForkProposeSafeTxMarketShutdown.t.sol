@@ -21,9 +21,8 @@ import {IPriceFeed} from "@src/oracle/IPriceFeed.sol";
 import {console} from "forge-std/console.sol";
 
 contract ForkProposeSafeTxMarketShutdownTest is ForkTest, Networks {
-    uint256 private constant MAINNET_BLOCK = 24_377_145;
-    uint256 private constant BASE_BLOCK = 41_671_100;
-    uint256 private constant SUPPLEMENT_USDC = 1_000e6;
+    uint256 private constant MAINNET_BLOCK = 24_385_645;
+    uint256 private constant BASE_BLOCK = 41_722_440;
     uint256 private constant MAINNET_MARKETS = 4;
     uint256 private constant BASE_MARKETS = 2;
 
@@ -54,26 +53,29 @@ contract ForkProposeSafeTxMarketShutdownTest is ForkTest, Networks {
         (address[] memory targets, bytes[] memory datas) = script.getMarketShutdownData();
 
         ISize[] memory marketsToShutdown = _getMarketsToShutdown(script);
-        uint256 expectedCalls = marketsToShutdown.length * 2 + 2;
+
+        ISize[] memory remainingMarkets = script.difference(getUnpausedMarkets(sizeFactory), marketsToShutdown);
+        ISize remainingMarket = remainingMarkets[0];
+
+        (IERC20Metadata underlyingBorrowToken, uint256 expectedCalls) =
+            _getExpectedCalls(remainingMarket, marketsToShutdown);
         assertEq(targets.length, expectedCalls);
         assertEq(datas.length, expectedCalls);
 
-        ISize remainingMarket = ISize(targets[0]);
-        assertEq(targets[expectedCalls - 1], address(remainingMarket));
-        assertEq(bytes4(datas[0]), ISize.deposit.selector);
-        assertEq(bytes4(datas[expectedCalls - 1]), ISize.withdraw.selector);
+        _executeShutdown(targets, datas, marketsToShutdown, remainingMarket, underlyingBorrowToken);
+    }
 
-        IERC20Metadata borrowTokenLocal = ISizeView(address(remainingMarket)).data().underlyingBorrowToken;
-
-        // Supplement the admin once before executing the batch.
-        deal(address(borrowTokenLocal), owner, SUPPLEMENT_USDC);
-        vm.prank(owner);
-        borrowTokenLocal.approve(address(remainingMarket), SUPPLEMENT_USDC);
-
+    function _executeShutdown(
+        address[] memory targets,
+        bytes[] memory datas,
+        ISize[] memory marketsToShutdown,
+        ISize remainingMarket,
+        IERC20Metadata underlyingBorrowToken
+    ) internal {
         (IERC20Metadata[] memory collateralTokens, IPriceFeed[] memory priceFeeds, uint256 collateralCount) =
             _collectCollateralTokens(marketsToShutdown);
 
-        uint256 borrowBefore = borrowTokenLocal.balanceOf(owner);
+        uint256 borrowBefore = underlyingBorrowToken.balanceOf(owner);
         uint256[] memory collateralBefore = new uint256[](collateralCount);
         for (uint256 i = 0; i < collateralCount; i++) {
             collateralBefore[i] = collateralTokens[i].balanceOf(owner);
@@ -85,13 +87,15 @@ contract ForkProposeSafeTxMarketShutdownTest is ForkTest, Networks {
         }
 
         _assertMarketsShutdown(marketsToShutdown);
+        _assertMarketsRemoved(marketsToShutdown);
         assertFalse(PausableUpgradeable(address(remainingMarket)).paused());
+        assertTrue(sizeFactory.isMarket(address(remainingMarket)));
 
-        uint256 borrowAfter = borrowTokenLocal.balanceOf(owner);
+        uint256 borrowAfter = underlyingBorrowToken.balanceOf(owner);
         int256 borrowDelta = int256(borrowAfter) - int256(borrowBefore);
-        uint8 borrowDecimals = borrowTokenLocal.decimals();
+        uint8 borrowDecimals = underlyingBorrowToken.decimals();
 
-        _logTokenDelta(borrowTokenLocal.symbol(), borrowDelta, borrowDecimals);
+        _logTokenDelta(underlyingBorrowToken.symbol(), borrowDelta, borrowDecimals);
 
         int256 usdcDelta = borrowDelta;
         for (uint256 i = 0; i < collateralCount; i++) {
@@ -102,6 +106,18 @@ contract ForkProposeSafeTxMarketShutdownTest is ForkTest, Networks {
         }
 
         _logUsdcAggregate(usdcDelta, borrowDecimals);
+    }
+
+    function _getExpectedCalls(ISize remainingMarket, ISize[] memory marketsToShutdown)
+        internal
+        view
+        returns (IERC20Metadata underlyingBorrowToken, uint256 expectedCalls)
+    {
+        underlyingBorrowToken = ISizeView(address(remainingMarket)).data().underlyingBorrowToken;
+        uint256 depositAmount = underlyingBorrowToken.balanceOf(owner);
+        uint256 allowance = underlyingBorrowToken.allowance(owner, address(remainingMarket));
+        bool needsApproval = depositAmount > 0 && allowance < depositAmount;
+        expectedCalls = marketsToShutdown.length + 2 + (depositAmount > 0 ? 1 : 0) + (needsApproval ? 1 : 0);
     }
 
     function _upgradeToV1_8_4() internal {
@@ -140,6 +156,12 @@ contract ForkProposeSafeTxMarketShutdownTest is ForkTest, Networks {
             DataView memory dataView = ISizeView(address(market)).data();
             assertEq(dataView.debtToken.totalSupply(), 0);
             assertEq(dataView.collateralToken.totalSupply(), 0);
+        }
+    }
+
+    function _assertMarketsRemoved(ISize[] memory markets) internal view {
+        for (uint256 i = 0; i < markets.length; i++) {
+            assertFalse(sizeFactory.isMarket(address(markets[i])));
         }
     }
 
@@ -187,13 +209,21 @@ contract ForkProposeSafeTxMarketShutdownTest is ForkTest, Networks {
         return collateralDelta < 0 ? -int256(usdcValueAbs) : int256(usdcValueAbs);
     }
 
-    function _logTokenDelta(string memory symbol, int256 delta, uint8 decimals) internal {
+    function _logTokenDelta(string memory symbol, int256 delta, uint8 decimals) internal pure {
+        if (delta == 0) {
+            console.log(string.concat("admin delta ", symbol, ": ZERO"));
+            return;
+        }
         string memory sign = delta >= 0 ? "+" : "-";
         uint256 absDelta = delta >= 0 ? uint256(delta) : uint256(-delta);
         console.log(string.concat("admin delta ", symbol, ": ", sign, format(absDelta, decimals, 2)));
     }
 
-    function _logUsdcAggregate(int256 usdcDelta, uint8 usdcDecimals) internal {
+    function _logUsdcAggregate(int256 usdcDelta, uint8 usdcDecimals) internal pure {
+        if (usdcDelta == 0) {
+            console.log("admin aggregate usdcDelta: ZERO");
+            return;
+        }
         string memory sign = usdcDelta >= 0 ? "+" : "-";
         uint256 absDelta = usdcDelta >= 0 ? uint256(usdcDelta) : uint256(-usdcDelta);
         console.log(string.concat("admin aggregate usdcDelta: ", sign, format(absDelta, usdcDecimals, 2)));
