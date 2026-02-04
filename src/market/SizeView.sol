@@ -93,8 +93,7 @@ abstract contract SizeView is SizeStorage, ReentrancyGuardUpgradeableWithViewMod
     }
 
     /// @inheritdoc ISizeView
-    /// @dev Changed in v1.8.4 to remove nonReentrantView for contract size limit optimization
-    function getUserView(address user) external view returns (UserView memory) {
+    function getUserView(address user) external view nonReentrantView returns (UserView memory) {
         return UserView({
             user: state.data.users[user],
             account: user,
