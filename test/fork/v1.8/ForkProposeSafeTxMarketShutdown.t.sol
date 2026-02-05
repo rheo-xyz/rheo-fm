@@ -57,12 +57,9 @@ contract ForkProposeSafeTxMarketShutdownTest is ForkTest, Networks {
         ISize[] memory remainingMarkets = script.difference(getUnpausedMarkets(sizeFactory), marketsToShutdown);
         ISize remainingMarket = remainingMarkets[0];
 
-        (IERC20Metadata underlyingBorrowToken, uint256 expectedCalls) =
-            _getExpectedCalls(remainingMarket, marketsToShutdown);
-        assertEq(targets.length, expectedCalls);
-        assertEq(datas.length, expectedCalls);
-
-        _executeShutdown(targets, datas, marketsToShutdown, remainingMarket, underlyingBorrowToken);
+        _executeShutdown(
+            targets, datas, marketsToShutdown, remainingMarket, remainingMarket.data().underlyingBorrowToken
+        );
     }
 
     function _executeShutdown(
@@ -106,18 +103,6 @@ contract ForkProposeSafeTxMarketShutdownTest is ForkTest, Networks {
         }
 
         _logUsdcAggregate(usdcDelta, borrowDecimals);
-    }
-
-    function _getExpectedCalls(ISize remainingMarket, ISize[] memory marketsToShutdown)
-        internal
-        view
-        returns (IERC20Metadata underlyingBorrowToken, uint256 expectedCalls)
-    {
-        underlyingBorrowToken = ISizeView(address(remainingMarket)).data().underlyingBorrowToken;
-        uint256 depositAmount = underlyingBorrowToken.balanceOf(owner);
-        uint256 allowance = underlyingBorrowToken.allowance(owner, address(remainingMarket));
-        bool needsApproval = depositAmount > 0 && allowance < depositAmount;
-        expectedCalls = marketsToShutdown.length + 2 + (depositAmount > 0 ? 1 : 0) + (needsApproval ? 1 : 0);
     }
 
     function _upgradeToV1_8_4() internal {

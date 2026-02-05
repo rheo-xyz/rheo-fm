@@ -49,41 +49,32 @@ contract ProposeSafeTxMarketShutdownScript is BaseScript, Networks {
         ISizeFactory sizeFactory = ISizeFactory(contracts[block.chainid][Contract.SIZE_FACTORY]);
         ISize[] memory marketsToShutdown = _getMarketsToShutdown(sizeFactory);
         ISize remainingMarket = _getRemainingMarket(sizeFactory, marketsToShutdown);
-        (IERC20Metadata underlyingBorrowToken, address admin, uint256 depositAmount, bool needsApproval) =
-            _getDepositContext(remainingMarket);
 
-        return _buildMarketShutdownData(
-            sizeFactory, marketsToShutdown, remainingMarket, underlyingBorrowToken, admin, depositAmount, needsApproval
-        );
-    }
+        IERC20Metadata underlyingBorrowToken = remainingMarket.data().underlyingBorrowToken;
+        uint256 depositAmount = underlyingBorrowToken.balanceOf(contracts[block.chainid][Contract.SIZE_GOVERNANCE]);
 
-    function _buildMarketShutdownData(
-        ISizeFactory sizeFactory,
-        ISize[] memory marketsToShutdown,
-        ISize remainingMarket,
-        IERC20Metadata underlyingBorrowToken,
-        address admin,
-        uint256 depositAmount,
-        bool needsApproval
-    ) internal returns (address[] memory targets, bytes[] memory datas) {
-        uint256 totalCalls = marketsToShutdown.length + 2 + (depositAmount > 0 ? 1 : 0) + (needsApproval ? 1 : 0);
+        uint256 totalCalls = marketsToShutdown.length + 2 + (depositAmount > 0 ? 3 : 0);
         targets = new address[](totalCalls);
         datas = new bytes[](totalCalls);
 
         uint256 index = 0;
         GetMarketShutdownCalldataScript getMarketShutdownCalldataScript = new GetMarketShutdownCalldataScript();
 
-        if (needsApproval) {
+        if (depositAmount > 0) {
             targets[index] = address(underlyingBorrowToken);
             datas[index] = abi.encodeCall(IERC20.approve, (address(remainingMarket), depositAmount));
             index++;
-        }
 
-        if (depositAmount > 0) {
             targets[index] = address(remainingMarket);
             datas[index] = abi.encodeCall(
                 ISize.deposit,
-                (DepositParams({token: address(underlyingBorrowToken), amount: depositAmount, to: admin}))
+                (
+                    DepositParams({
+                        token: address(underlyingBorrowToken),
+                        amount: depositAmount,
+                        to: contracts[block.chainid][Contract.SIZE_GOVERNANCE]
+                    })
+                )
             );
             index++;
         }
@@ -110,6 +101,12 @@ contract ProposeSafeTxMarketShutdownScript is BaseScript, Networks {
         targets[index] = address(sizeFactory);
         datas[index] = abi.encodeCall(IMulticall.multicall, (removeMarketData));
         index++;
+
+        if (depositAmount > 0) {
+            targets[index] = address(underlyingBorrowToken);
+            datas[index] = abi.encodeCall(IERC20.approve, (address(remainingMarket), 0));
+            index++;
+        }
 
         require(index == totalCalls, "invalid index");
     }
@@ -147,18 +144,6 @@ contract ProposeSafeTxMarketShutdownScript is BaseScript, Networks {
         returns (ISize)
     {
         return difference(getUnpausedMarkets(sizeFactory), marketsToShutdown)[0];
-    }
-
-    function _getDepositContext(ISize remainingMarket)
-        internal
-        view
-        returns (IERC20Metadata underlyingBorrowToken, address admin, uint256 depositAmount, bool needsApproval)
-    {
-        underlyingBorrowToken = remainingMarket.data().underlyingBorrowToken;
-        admin = contracts[block.chainid][Contract.SIZE_GOVERNANCE];
-        depositAmount = underlyingBorrowToken.balanceOf(admin);
-        uint256 allowance = underlyingBorrowToken.allowance(admin, address(remainingMarket));
-        needsApproval = depositAmount > 0 && allowance < depositAmount;
     }
 
     function _buildMarketShutdownCall(GetMarketShutdownCalldataScript script, ISize market)
