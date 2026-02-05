@@ -121,7 +121,7 @@ contract ProposeSafeTxMarketShutdownScript is BaseScript, Networks {
         for (uint256 i = 0; i < marketsToShutdown.length; i++) {
             ISize market = marketsToShutdown[i];
             targets[index] = address(market);
-            datas[index] = _buildMarketShutdownCall(script, market);
+            datas[index] = _buildMarketShutdownAndOrPauseCall(script, market);
             index++;
         }
         return index;
@@ -146,25 +146,22 @@ contract ProposeSafeTxMarketShutdownScript is BaseScript, Networks {
         return difference(getUnpausedMarkets(sizeFactory), marketsToShutdown)[0];
     }
 
-    function _buildMarketShutdownCall(GetMarketShutdownCalldataScript script, ISize market)
+    function _buildMarketShutdownAndOrPauseCall(GetMarketShutdownCalldataScript script, ISize market)
         internal
         returns (bytes memory)
     {
         DataView memory dataView = ISizeView(address(market)).data();
         bool isEmptyMarket = dataView.debtToken.totalSupply() == 0 && dataView.collateralToken.totalSupply() == 0;
 
-        bytes[] memory multicallData;
         if (isEmptyMarket) {
-            multicallData = new bytes[](1);
-            multicallData[0] = abi.encodeCall(ISizeAdmin.pause, ());
+            return abi.encodeCall(ISizeAdmin.pause, ());
         } else {
             MarketShutdownParams memory params = script.collectPositions(market);
-            multicallData = new bytes[](2);
-            multicallData[0] = abi.encodeCall(ISizeAdmin.marketShutdown, (params));
-            multicallData[1] = abi.encodeCall(ISizeAdmin.pause, ());
+            bytes[] memory multicallDatas = new bytes[](2);
+            multicallDatas[0] = abi.encodeCall(ISizeAdmin.marketShutdown, (params));
+            multicallDatas[1] = abi.encodeCall(ISizeAdmin.pause, ());
+            return abi.encodeCall(IMulticall.multicall, (multicallDatas));
         }
-
-        return abi.encodeCall(IMulticall.multicall, (multicallData));
     }
 
     function difference(ISize[] memory outer, ISize[] memory inner) public pure returns (ISize[] memory result) {
