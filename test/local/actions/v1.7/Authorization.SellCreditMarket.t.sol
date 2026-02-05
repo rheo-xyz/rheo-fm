@@ -7,7 +7,7 @@ import {Errors} from "@src/market/libraries/Errors.sol";
 import {RESERVED_ID} from "@src/market/libraries/LoanLibrary.sol";
 import {Math, PERCENT} from "@src/market/libraries/Math.sol";
 import {BaseTest, Vars} from "@test/BaseTest.sol";
-import {YieldCurveHelper} from "@test/helpers/libraries/YieldCurveHelper.sol";
+import {FixedMaturityLimitOrderHelper} from "@test/helpers/libraries/FixedMaturityLimitOrderHelper.sol";
 
 import {Action, Authorization} from "@src/factory/libraries/Authorization.sol";
 import {DEBT_POSITION_ID_START} from "@src/market/libraries/LoanLibrary.sol";
@@ -20,14 +20,15 @@ contract AuthorizationSellCreditMarketTest is BaseTest {
     function test_AuthorizationSellCreditMarket_sellCreditMarketOnBehalfOf() public {
         _deposit(alice, usdc, 200e6);
         _deposit(bob, weth, 100e18);
-        _buyCreditLimit(alice, block.timestamp + 365 days, YieldCurveHelper.pointCurve(365 days, 0.03e18));
+        _buyCreditLimit(alice, block.timestamp + 150 days, _pointOfferAtIndex(4, 0.03e18));
 
         _setAuthorization(bob, candy, Authorization.getActionsBitmap(Action.SELL_CREDIT_MARKET));
 
         Vars memory _before = _state();
 
         uint256 amount = 100e6;
-        uint256 tenor = 365 days;
+        uint256 tenor = 150 days;
+        uint256 maturity = _maturity(tenor);
 
         vm.prank(candy);
         size.sellCreditMarketOnBehalfOf(
@@ -36,7 +37,7 @@ contract AuthorizationSellCreditMarketTest is BaseTest {
                     lender: alice,
                     creditPositionId: RESERVED_ID,
                     amount: amount,
-                    tenor: tenor,
+                    maturity: maturity,
                     deadline: block.timestamp,
                     maxAPR: type(uint256).max,
                     exactAmountIn: false,
@@ -50,7 +51,8 @@ contract AuthorizationSellCreditMarketTest is BaseTest {
         (uint256 debtPositionsCount,) = size.getPositionsCount();
         uint256 debtPositionId = DEBT_POSITION_ID_START + debtPositionsCount - 1;
         uint256 futureValue = size.getDebtPosition(debtPositionId).futureValue;
-        uint256 issuanceValue = Math.mulDivDown(futureValue, PERCENT, PERCENT + 0.03e18);
+        uint256 ratePerTenor = Math.aprToRatePerTenor(0.03e18, tenor);
+        uint256 issuanceValue = Math.mulDivDown(futureValue, PERCENT, PERCENT + ratePerTenor);
         uint256 swapFee = size.getSwapFee(issuanceValue, tenor);
 
         Vars memory _after = _state();
@@ -72,7 +74,7 @@ contract AuthorizationSellCreditMarketTest is BaseTest {
                     lender: james,
                     creditPositionId: RESERVED_ID,
                     amount: 100e6,
-                    tenor: 365 days,
+                    maturity: block.timestamp + 150 days,
                     deadline: block.timestamp,
                     maxAPR: type(uint256).max,
                     exactAmountIn: false,
@@ -92,7 +94,7 @@ contract AuthorizationSellCreditMarketTest is BaseTest {
                     lender: alice,
                     creditPositionId: RESERVED_ID,
                     amount: 100e6,
-                    tenor: 365 days,
+                    maturity: block.timestamp + 150 days,
                     deadline: block.timestamp,
                     maxAPR: type(uint256).max,
                     exactAmountIn: false,

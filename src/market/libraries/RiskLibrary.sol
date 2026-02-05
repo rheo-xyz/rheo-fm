@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
+import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import {State} from "@src/market/SizeStorage.sol";
 
 import {Errors} from "@src/market/libraries/Errors.sol";
@@ -12,6 +13,7 @@ import {Math, PERCENT} from "@src/market/libraries/Math.sol";
 /// @custom:security-contact security@size.credit
 /// @author Size (https://size.credit/)
 library RiskLibrary {
+    using EnumerableSet for EnumerableSet.UintSet;
     using LoanLibrary for State;
 
     /// @notice Validate the credit amount during an exit
@@ -34,13 +36,21 @@ library RiskLibrary {
         }
     }
 
-    /// @notice Validate the tenor of a loan
-    /// @dev Reverts if the tenor is out of range defined by minTenor and maxTenor
+    /// @notice Validate the maturity of a loan
+    /// @dev Reverts if the maturity is not in the configured maturities set.
+    ///      An empty allowlist is permitted and disables market orders via INVALID_MATURITY.
     /// @param state The state
-    /// @param tenor The tenor
-    function validateTenor(State storage state, uint256 tenor) public view {
+    /// @param maturity The maturity
+    function validateMaturity(State storage state, uint256 maturity) public view {
+        if (maturity <= block.timestamp) {
+            revert Errors.PAST_MATURITY(maturity);
+        }
+        uint256 tenor = maturity - block.timestamp;
         if (tenor < state.riskConfig.minTenor || tenor > state.riskConfig.maxTenor) {
-            revert Errors.TENOR_OUT_OF_RANGE(tenor, state.riskConfig.minTenor, state.riskConfig.maxTenor);
+            revert Errors.MATURITY_OUT_OF_RANGE(maturity, state.riskConfig.minTenor, state.riskConfig.maxTenor);
+        }
+        if (!state.riskConfig.maturities.contains(maturity)) {
+            revert Errors.INVALID_MATURITY(maturity);
         }
     }
 

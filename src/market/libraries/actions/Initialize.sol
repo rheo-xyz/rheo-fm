@@ -9,12 +9,12 @@ import {ISizeFactory} from "@src/factory/interfaces/ISizeFactory.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import {IWETH} from "@src/market/interfaces/IWETH.sol";
 
-import {Math} from "@src/market/libraries/Math.sol";
+import {Math, PERCENT, YEAR} from "@src/market/libraries/Math.sol";
 
 import {CREDIT_POSITION_ID_START, DEBT_POSITION_ID_START} from "@src/market/libraries/LoanLibrary.sol";
-import {PERCENT} from "@src/market/libraries/Math.sol";
 
 import {IPriceFeed} from "@src/oracle/IPriceFeed.sol";
 
@@ -42,11 +42,11 @@ struct InitializeRiskConfigParams {
     uint256 minimumCreditBorrowToken;
     uint256 minTenor;
     uint256 maxTenor;
+    uint256[] maturities;
 }
 
 struct InitializeOracleParams {
     address priceFeed;
-    uint64 variablePoolBorrowRateStaleRateInterval;
 }
 
 struct InitializeDataParams {
@@ -66,6 +66,7 @@ struct InitializeDataParams {
 ///      The borrowTokenVault (e.g. svUSDC) must have been deployed before the initialization
 library Initialize {
     using SafeERC20 for IERC20;
+    using EnumerableSet for EnumerableSet.UintSet;
 
     /// @notice Validates the owner address
     /// @param owner The owner address
@@ -126,13 +127,24 @@ library Initialize {
             revert Errors.NULL_AMOUNT();
         }
 
-        // validate minTenor
-        if (r.minTenor == 0) {
+        // validate min/max tenor
+        if (r.minTenor == 0 || r.maxTenor == 0) {
             revert Errors.NULL_AMOUNT();
         }
-
-        if (r.maxTenor <= r.minTenor) {
-            revert Errors.INVALID_MAXIMUM_TENOR(r.maxTenor);
+        if (r.minTenor > r.maxTenor) {
+            revert Errors.INVALID_TENOR_RANGE(r.minTenor, r.maxTenor);
+        }
+        // validate maturities (riskConfig.maturities)
+        // empty allowlist is allowed by design to block limit/market orders.
+        uint256 lastMaturity = 0;
+        // Past/out-of-range maturity validation is performed during market orders
+        // in RiskLibrary.validateMaturity to avoid DoS in UpdateConfig.
+        for (uint256 i = 0; i < r.maturities.length; i++) {
+            uint256 maturity = r.maturities[i];
+            if (maturity <= lastMaturity) {
+                revert Errors.MATURITIES_NOT_STRICTLY_INCREASING();
+            }
+            lastMaturity = maturity;
         }
     }
 
@@ -145,9 +157,6 @@ library Initialize {
         }
         // slither-disable-next-line unused-return
         IPriceFeed(o.priceFeed).getPrice();
-
-        // validate variablePoolBorrowRateStaleRateInterval
-        // N/A
     }
 
     /// @notice Validates the parameters for the data configuration
@@ -236,6 +245,10 @@ library Initialize {
 
         state.riskConfig.minTenor = r.minTenor;
         state.riskConfig.maxTenor = r.maxTenor;
+        for (uint256 i = 0; i < r.maturities.length; i++) {
+            // slither-disable-next-line unused-return
+            state.riskConfig.maturities.add(r.maturities[i]);
+        }
     }
 
     /// @notice Executes the initialization of the oracle configuration
@@ -243,7 +256,6 @@ library Initialize {
     /// @param o The oracle configuration parameters
     function executeInitializeOracle(State storage state, InitializeOracleParams memory o) internal {
         state.oracle.priceFeed = IPriceFeed(o.priceFeed);
-        state.oracle.variablePoolBorrowRateStaleRateInterval = o.variablePoolBorrowRateStaleRateInterval;
     }
 
     /// @notice Executes the initialization of the data configuration

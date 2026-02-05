@@ -7,7 +7,7 @@ import {Action, ActionsBitmap, Authorization} from "@src/factory/libraries/Autho
 import {RESERVED_ID} from "@src/market/libraries/LoanLibrary.sol";
 import {Math, PERCENT} from "@src/market/libraries/Math.sol";
 import {BaseTest, Vars} from "@test/BaseTest.sol";
-import {YieldCurveHelper} from "@test/helpers/libraries/YieldCurveHelper.sol";
+import {FixedMaturityLimitOrderHelper} from "@test/helpers/libraries/FixedMaturityLimitOrderHelper.sol";
 
 contract AuthorizationSetAuthorizationTest is BaseTest {
     function test_AuthorizationSetAuthorization_setAuthorization() public {

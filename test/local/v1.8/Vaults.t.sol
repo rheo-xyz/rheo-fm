@@ -12,7 +12,7 @@ import {PERCENT} from "@src/market/libraries/Math.sol";
 import {NonTransferrableRebasingTokenVault} from "@src/market/token/NonTransferrableRebasingTokenVault.sol";
 import {DEFAULT_VAULT, ERC4626_ADAPTER_ID} from "@src/market/token/NonTransferrableRebasingTokenVault.sol";
 import {BaseTest, Vars} from "@test/BaseTest.sol";
-import {YieldCurveHelper} from "@test/helpers/libraries/YieldCurveHelper.sol";
+import {FixedMaturityLimitOrderHelper} from "@test/helpers/libraries/FixedMaturityLimitOrderHelper.sol";
 
 import {BuyCreditMarketParams} from "@src/market/libraries/actions/BuyCreditMarket.sol";
 import {DepositParams} from "@src/market/libraries/actions/Deposit.sol";
@@ -59,59 +59,57 @@ contract VaultsTest is BaseTest {
     function test_Vaults_borrower_vault_lender_aave() public {
         _deposit(alice, usdc, 200e6);
         _deposit(bob, weth, 100e18);
-        _buyCreditLimit(alice, block.timestamp + 365 days, YieldCurveHelper.pointCurve(365 days, 0.03e18));
+        _buyCreditLimit(alice, block.timestamp + 150 days, _pointOfferAtIndex(4, 0.03e18));
 
         uint256 amount = 100e6;
-        uint256 tenor = 365 days;
-
+        uint256 tenor = 150 days;
         _setVaultAdapter(vaultSolady, ERC4626_ADAPTER_ID);
         _setVault(bob, address(vaultSolady), false);
 
-        _sellCreditMarket(bob, alice, RESERVED_ID, amount, tenor, false);
+        _sellCreditMarket(bob, alice, RESERVED_ID, amount, _maturity(tenor), false);
     }
 
     function test_Vaults_borrower_aave_lender_vault() public {
         _deposit(alice, usdc, 200e6);
         _deposit(bob, weth, 100e18);
-        _buyCreditLimit(alice, block.timestamp + 365 days, YieldCurveHelper.pointCurve(365 days, 0.03e18));
+        _buyCreditLimit(alice, block.timestamp + 150 days, _pointOfferAtIndex(4, 0.03e18));
 
         uint256 amount = 100e6;
-        uint256 tenor = 365 days;
-
+        uint256 tenor = 150 days;
         _setVaultAdapter(vaultSolady, ERC4626_ADAPTER_ID);
         _setVault(alice, address(vaultSolady), false);
 
-        _sellCreditMarket(bob, alice, RESERVED_ID, amount, tenor, false);
+        _sellCreditMarket(bob, alice, RESERVED_ID, amount, _maturity(tenor), false);
     }
 
     function test_Vaults_borrower_vault_lender_vault() public {
         _deposit(alice, usdc, 200e6);
         _deposit(bob, weth, 100e18);
-        _buyCreditLimit(alice, block.timestamp + 365 days, YieldCurveHelper.pointCurve(365 days, 0.03e18));
+        _buyCreditLimit(alice, block.timestamp + 150 days, _pointOfferAtIndex(4, 0.03e18));
 
         uint256 amount = 100e6;
-        uint256 tenor = 365 days;
+        uint256 tenor = 150 days;
 
         _setVaultAdapter(vaultSolady, ERC4626_ADAPTER_ID);
         _setVault(alice, address(vaultSolady), false);
         _setVault(bob, address(vaultSolady), false);
 
-        _sellCreditMarket(bob, alice, RESERVED_ID, amount, tenor, false);
+        _sellCreditMarket(bob, alice, RESERVED_ID, amount, _maturity(tenor), false);
     }
 
     function test_Vaults_borrower_aave_lender_changes_vault_2_times_after_repay() public {
         _deposit(alice, usdc, 200e6);
         _deposit(bob, weth, 100e18);
-        _buyCreditLimit(alice, block.timestamp + 365 days, YieldCurveHelper.pointCurve(365 days, 0.03e18));
+        _buyCreditLimit(alice, block.timestamp + 150 days, _pointOfferAtIndex(4, 0.03e18));
 
         uint256 amount = 100e6;
-        uint256 tenor = 365 days;
+        uint256 tenor = 150 days;
 
         _setVaultAdapter(vaultSolady, ERC4626_ADAPTER_ID);
         _setVault(alice, address(vaultSolady), false);
         _setVault(bob, address(vaultSolady), false);
 
-        uint256 debtPositionId = _sellCreditMarket(bob, alice, RESERVED_ID, amount, tenor, false);
+        uint256 debtPositionId = _sellCreditMarket(bob, alice, RESERVED_ID, amount, _maturity(tenor), false);
         uint256 creditPositionId = size.getCreditPositionIdsByDebtPositionId(debtPositionId)[0];
 
         _deposit(bob, usdc, 100e6);
@@ -131,13 +129,14 @@ contract VaultsTest is BaseTest {
         _deposit(alice, usdc, 100e6);
         _deposit(bob, weth, 100e18);
 
-        _buyCreditLimit(alice, block.timestamp + 365 days, YieldCurveHelper.pointCurve(365 days, 0.03e18));
+        _buyCreditLimit(alice, block.timestamp + 150 days, _pointOfferAtIndex(4, 0.03e18));
 
         // vault loses liquidity
         deal(address(usdc), address(vaultSolady), 99e6);
 
         uint256 amount = 100e6;
-        uint256 tenor = 365 days;
+        uint256 tenor = 150 days;
+        uint256 maturity = block.timestamp + tenor;
 
         vm.expectRevert(abi.encodeWithSelector(IERC20Errors.ERC20InsufficientBalance.selector, alice, 99e6, 100e6));
         vm.prank(bob);
@@ -146,7 +145,7 @@ contract VaultsTest is BaseTest {
                 lender: alice,
                 creditPositionId: RESERVED_ID,
                 amount: amount,
-                tenor: tenor,
+                maturity: maturity,
                 deadline: block.timestamp,
                 maxAPR: type(uint256).max,
                 exactAmountIn: false,
@@ -169,10 +168,11 @@ contract VaultsTest is BaseTest {
 
         _deposit(alice, usdc, 200e6);
         _deposit(bob, weth, 100e18);
-        _buyCreditLimit(alice, block.timestamp + 365 days, YieldCurveHelper.pointCurve(365 days, 0.03e18));
+        _buyCreditLimit(alice, block.timestamp + 150 days, _pointOfferAtIndex(4, 0.03e18));
 
         uint256 amount = 100e6;
-        uint256 tenor = 365 days;
+        uint256 tenor = 150 days;
+        uint256 maturity = block.timestamp + tenor;
 
         vm.expectRevert(abi.encodeWithSelector(MaliciousERC4626WithdrawNotAllowed.WithdrawNotAllowed.selector));
         vm.prank(bob);
@@ -181,7 +181,7 @@ contract VaultsTest is BaseTest {
                 lender: alice,
                 creditPositionId: RESERVED_ID,
                 amount: amount,
-                tenor: tenor,
+                maturity: maturity,
                 deadline: block.timestamp,
                 maxAPR: type(uint256).max,
                 exactAmountIn: false,
@@ -218,16 +218,16 @@ contract VaultsTest is BaseTest {
         assertEq(vaultFeeOnTransfer.balanceOf(address(owner)), 20e6);
 
         _deposit(bob, weth, 100e18);
-        _buyCreditLimit(alice, block.timestamp + 365 days, YieldCurveHelper.pointCurve(365 days, 0.03e18));
+        _buyCreditLimit(alice, block.timestamp + 150 days, _pointOfferAtIndex(4, 0.03e18));
 
         uint256 amount = 100e6;
-        uint256 tenor = 365 days;
+        uint256 tenor = 150 days;
 
         uint256 feeOnTransfer = amount / 10;
 
         Vars memory _before = _state();
 
-        _sellCreditMarket(bob, alice, RESERVED_ID, amount, tenor, false);
+        _sellCreditMarket(bob, alice, RESERVED_ID, amount, _maturity(tenor), false);
 
         Vars memory _after = _state();
 
@@ -316,10 +316,11 @@ contract VaultsTest is BaseTest {
         assertEq(_after.alice.borrowTokenBalance, _before.alice.borrowTokenBalance + 200e6);
 
         _deposit(bob, weth, 100e18);
-        _sellCreditLimit(bob, block.timestamp + 365 days, YieldCurveHelper.pointCurve(365 days, 0.03e18));
+        _sellCreditLimit(bob, block.timestamp + 150 days, _pointOfferAtIndex(4, 0.03e18));
 
         uint256 amount = 100e6;
-        uint256 tenor = 365 days;
+        uint256 tenor = 150 days;
+        uint256 maturity = block.timestamp + tenor;
 
         _before = _state();
 
@@ -335,7 +336,7 @@ contract VaultsTest is BaseTest {
                 borrower: bob,
                 creditPositionId: RESERVED_ID,
                 amount: amount,
-                tenor: tenor,
+                maturity: maturity,
                 deadline: block.timestamp,
                 minAPR: 0,
                 exactAmountIn: true,
@@ -380,7 +381,7 @@ contract VaultsTest is BaseTest {
         assertEq(borrowTokenVault.totalSupply(), 1800e6);
 
         _deposit(bob, weth, 100e18);
-        _buyCreditLimit(alice, block.timestamp + 365 days, YieldCurveHelper.pointCurve(365 days, 0.03e18));
+        _buyCreditLimit(alice, block.timestamp + 150 days, _pointOfferAtIndex(4, 0.03e18));
         vm.expectRevert(
             abi.encodeWithSelector(IAdapter.InsufficientAssets.selector, address(vaultLimits), 100e6, 200e6)
         );
@@ -390,7 +391,7 @@ contract VaultsTest is BaseTest {
                 lender: alice,
                 creditPositionId: RESERVED_ID,
                 amount: 200e6,
-                tenor: 365 days,
+                maturity: block.timestamp + 150 days,
                 deadline: block.timestamp,
                 maxAPR: type(uint256).max,
                 exactAmountIn: false,
@@ -452,7 +453,7 @@ contract VaultsTest is BaseTest {
         cash = bound(cash, 1, 100e6);
         index = bound(index, 1e27, 1.3e27);
         apr = bound(apr, 0.01e18, 0.1e18);
-        tenor = bound(tenor, 1 days, 365 days);
+        tenor = _riskTenorAt(tenor);
         percent = bound(percent, 1e18, 2e18);
 
         _deposit(alice, usdc, cash);
@@ -482,14 +483,15 @@ contract VaultsTest is BaseTest {
 
         _setLiquidityIndex(index * 1.1e18 / PERCENT);
 
-        _buyCreditLimit(alice, block.timestamp + tenor, YieldCurveHelper.pointCurve(tenor, int256(apr)));
+        _buyCreditLimit(alice, block.timestamp + tenor, FixedMaturityLimitOrderHelper.pointOffer(tenor, apr));
+        uint256 maturity = block.timestamp + tenor;
         vm.prank(bob);
         try size.sellCreditMarket(
             SellCreditMarketParams({
                 lender: alice,
                 creditPositionId: RESERVED_ID,
                 amount: cash,
-                tenor: tenor,
+                maturity: maturity,
                 deadline: block.timestamp,
                 maxAPR: type(uint256).max,
                 exactAmountIn: false,
@@ -500,7 +502,7 @@ contract VaultsTest is BaseTest {
             uint256 creditPositionId = size.getCreditPositionIdsByDebtPositionId(0)[0];
 
             _buyCreditLimit(
-                candy, block.timestamp + tenor, YieldCurveHelper.pointCurve(tenor, int256(apr * percent / PERCENT))
+                candy, block.timestamp + tenor, FixedMaturityLimitOrderHelper.pointOffer(tenor, apr * percent / PERCENT)
             );
 
             _setLiquidityIndex(index * 1.1e18 / PERCENT);
@@ -511,7 +513,7 @@ contract VaultsTest is BaseTest {
                     lender: candy,
                     creditPositionId: creditPositionId,
                     amount: cash * percent / PERCENT,
-                    tenor: tenor,
+                    maturity: maturity,
                     deadline: block.timestamp,
                     maxAPR: type(uint256).max,
                     exactAmountIn: true,
@@ -738,7 +740,7 @@ contract VaultsTest is BaseTest {
 
     function test_Vaults_multicall_deposit_buyCreditMarket_can_revert_due_to_balanceOf_round_down() public {
         _deposit(bob, weth, 100e18);
-        _sellCreditLimit(bob, block.timestamp + 365 days, YieldCurveHelper.pointCurve(365 days, 0.03e18));
+        _sellCreditLimit(bob, block.timestamp + 150 days, _pointOfferAtIndex(4, 0.03e18));
 
         address v = address(vaultFeeOnEntryExit);
 
@@ -748,7 +750,8 @@ contract VaultsTest is BaseTest {
         _mint(address(usdc), v, 1);
 
         uint256 amount = 17957679;
-        uint256 tenor = 365 days;
+        uint256 tenor = 150 days;
+        uint256 maturity = block.timestamp + tenor;
 
         _mint(address(usdc), alice, amount);
         _approve(alice, address(usdc), address(size), amount);
@@ -761,7 +764,7 @@ contract VaultsTest is BaseTest {
                 borrower: bob,
                 creditPositionId: RESERVED_ID,
                 amount: amount,
-                tenor: tenor,
+                maturity: maturity,
                 deadline: block.timestamp,
                 minAPR: 0,
                 exactAmountIn: true,

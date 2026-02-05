@@ -113,9 +113,18 @@ abstract contract Deploy {
     PriceFeedMock internal priceFeed2;
     IERC20Metadata internal collateral2;
 
+    uint256 internal constant INITIAL_BLOCK_TIME = 1830297600; // 2028-01-01T00:00:00.000Z
     uint256 private constant TIMELOCK = 24 hours;
 
+    function _defaultRiskMaturities() internal view returns (uint256[] memory maturities) {
+        maturities = new uint256[](6);
+        for (uint256 i = 0; i < maturities.length; i++) {
+            maturities[i] = block.timestamp + (i + 1) * 30 days;
+        }
+    }
+
     function setupLocal(address owner, address feeRecipient) internal {
+        hevm.warp(INITIAL_BLOCK_TIME);
         priceFeed = new PriceFeedMock(owner);
         weth = new WETH();
         usdc = new USDC(owner);
@@ -173,9 +182,10 @@ abstract contract Deploy {
             crLiquidation: 1.3e18,
             minimumCreditBorrowToken: 5e6,
             minTenor: 1 hours,
-            maxTenor: 5 * 365 days
+            maxTenor: 5 * 365 days,
+            maturities: _defaultRiskMaturities()
         });
-        o = InitializeOracleParams({priceFeed: address(priceFeed), variablePoolBorrowRateStaleRateInterval: 0});
+        o = InitializeOracleParams({priceFeed: address(priceFeed)});
         d = InitializeDataParams({
             weth: address(weth),
             underlyingCollateralToken: address(weth),
@@ -207,6 +217,7 @@ abstract contract Deploy {
         bool collateralTokenIsWETH,
         bool borrowTokenIsWETH
     ) internal {
+        hevm.warp(INITIAL_BLOCK_TIME);
         priceFeed = new PriceFeedMock(owner);
         uint256 price = Math.mulDivDown(collateralTokenPriceUSD, 10 ** priceFeed.decimals(), borrowTokenPriceUSD);
 
@@ -276,9 +287,10 @@ abstract contract Deploy {
                 10 * 10 ** borrowToken.decimals(), 10 ** priceFeed.decimals(), borrowTokenPriceUSD
             ),
             minTenor: 1 hours,
-            maxTenor: 5 * 365 days
+            maxTenor: 5 * 365 days,
+            maturities: _defaultRiskMaturities()
         });
-        o = InitializeOracleParams({priceFeed: address(priceFeed), variablePoolBorrowRateStaleRateInterval: 0});
+        o = InitializeOracleParams({priceFeed: address(priceFeed)});
         d = InitializeDataParams({
             weth: address(weth),
             underlyingCollateralToken: address(collateralToken),

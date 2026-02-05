@@ -4,7 +4,7 @@ pragma solidity 0.8.23;
 import {RESERVED_ID} from "@src/market/libraries/LoanLibrary.sol";
 import {SetUserConfigurationParams} from "@src/market/libraries/actions/SetUserConfiguration.sol";
 import {BaseTest} from "@test/BaseTest.sol";
-import {YieldCurveHelper} from "@test/helpers/libraries/YieldCurveHelper.sol";
+import {FixedMaturityLimitOrderHelper} from "@test/helpers/libraries/FixedMaturityLimitOrderHelper.sol";
 
 import {Errors} from "@src/market/libraries/Errors.sol";
 
@@ -15,8 +15,8 @@ contract SetUserConfigurationValidationTest is BaseTest {
 
         _deposit(alice, usdc, 150e6);
         _deposit(bob, weth, 200e18);
-        _buyCreditLimit(alice, block.timestamp + 365 days, YieldCurveHelper.pointCurve(365 days, 0));
-        uint256 debtPositionId = _sellCreditMarket(bob, alice, RESERVED_ID, 100e6, 365 days, false);
+        _buyCreditLimit(alice, block.timestamp + 150 days, _pointOfferAtIndex(4, 0));
+        uint256 debtPositionId = _sellCreditMarket(bob, alice, RESERVED_ID, 100e6, _maturity(150 days), false);
         uint256 creditPositionId = size.getCreditPositionIdsByDebtPositionId(debtPositionId)[0];
 
         uint256[] memory creditPositionIds = new uint256[](1);

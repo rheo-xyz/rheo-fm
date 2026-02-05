@@ -9,7 +9,7 @@ import {CompensateOnBehalfOfParams, CompensateParams} from "@src/market/librarie
 
 import {Action, Authorization} from "@src/factory/libraries/Authorization.sol";
 import {BaseTest, Vars} from "@test/BaseTest.sol";
-import {YieldCurveHelper} from "@test/helpers/libraries/YieldCurveHelper.sol";
+import {FixedMaturityLimitOrderHelper} from "@test/helpers/libraries/FixedMaturityLimitOrderHelper.sol";
 
 contract AuthorizationCompensateTest is BaseTest {
     function test_AuthorizationCompensate_compensateOnBehalfOf() public {
@@ -23,14 +23,14 @@ contract AuthorizationCompensateTest is BaseTest {
         _deposit(candy, usdc, 100e6);
         _deposit(james, weth, 100e18);
         _deposit(james, usdc, 100e6);
-        _buyCreditLimit(alice, block.timestamp + 365 days, YieldCurveHelper.pointCurve(365 days, 1e18));
-        _buyCreditLimit(bob, block.timestamp + 365 days, YieldCurveHelper.pointCurve(365 days, 1e18));
-        _buyCreditLimit(candy, block.timestamp + 365 days, YieldCurveHelper.pointCurve(365 days, 1e18));
-        _buyCreditLimit(james, block.timestamp + 365 days, YieldCurveHelper.pointCurve(365 days, 1e18));
-        uint256 debtPositionId = _sellCreditMarket(bob, alice, RESERVED_ID, 20e6, 365 days, false);
+        _buyCreditLimit(alice, block.timestamp + 150 days, _pointOfferAtIndex(4, 1e18));
+        _buyCreditLimit(bob, block.timestamp + 150 days, _pointOfferAtIndex(4, 1e18));
+        _buyCreditLimit(candy, block.timestamp + 150 days, _pointOfferAtIndex(4, 1e18));
+        _buyCreditLimit(james, block.timestamp + 150 days, _pointOfferAtIndex(4, 1e18));
+        uint256 debtPositionId = _sellCreditMarket(bob, alice, RESERVED_ID, 20e6, _maturity(150 days), false);
         uint256 futureValue = size.getDebtPosition(debtPositionId).futureValue;
         uint256 creditPositionId = size.getCreditPositionIdsByDebtPositionId(debtPositionId)[0];
-        uint256 debtPositionId2 = _sellCreditMarket(alice, james, RESERVED_ID, 20e6, 365 days, false);
+        uint256 debtPositionId2 = _sellCreditMarket(alice, james, RESERVED_ID, 20e6, _maturity(150 days), false);
         uint256 creditPositionId3 = size.getCreditPositionIdsByDebtPositionId(debtPositionId2)[0];
 
         uint256 repaidLoanDebtBefore = size.getDebtPosition(debtPositionId2).futureValue;
@@ -64,11 +64,11 @@ contract AuthorizationCompensateTest is BaseTest {
         _deposit(candy, usdc, 100e6);
         _deposit(james, weth, 100e18);
         _deposit(james, usdc, 100e6);
-        _buyCreditLimit(alice, block.timestamp + 365 days, YieldCurveHelper.pointCurve(365 days, 1e18));
-        _buyCreditLimit(bob, block.timestamp + 365 days, YieldCurveHelper.pointCurve(365 days, 1e18));
-        _buyCreditLimit(candy, block.timestamp + 365 days, YieldCurveHelper.pointCurve(365 days, 1e18));
-        _buyCreditLimit(james, block.timestamp + 365 days, YieldCurveHelper.pointCurve(365 days, 1e18));
-        uint256 debtPositionId = _sellCreditMarket(bob, alice, RESERVED_ID, 20e6, 365 days, false);
+        _buyCreditLimit(alice, block.timestamp + 150 days, _pointOfferAtIndex(4, 1e18));
+        _buyCreditLimit(bob, block.timestamp + 150 days, _pointOfferAtIndex(4, 1e18));
+        _buyCreditLimit(candy, block.timestamp + 150 days, _pointOfferAtIndex(4, 1e18));
+        _buyCreditLimit(james, block.timestamp + 150 days, _pointOfferAtIndex(4, 1e18));
+        uint256 debtPositionId = _sellCreditMarket(bob, alice, RESERVED_ID, 20e6, _maturity(150 days), false);
         uint256 creditPositionId = size.getCreditPositionIdsByDebtPositionId(debtPositionId)[0];
 
         vm.expectRevert(abi.encodeWithSelector(Errors.UNAUTHORIZED_ACTION.selector, alice, bob, Action.COMPENSATE));

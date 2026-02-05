@@ -5,7 +5,7 @@ import {BaseTest} from "@test/BaseTest.sol";
 
 import {LoanStatus, RESERVED_ID} from "@src/market/libraries/LoanLibrary.sol";
 import {SelfLiquidateParams} from "@src/market/libraries/actions/SelfLiquidate.sol";
-import {YieldCurveHelper} from "@test/helpers/libraries/YieldCurveHelper.sol";
+import {FixedMaturityLimitOrderHelper} from "@test/helpers/libraries/FixedMaturityLimitOrderHelper.sol";
 
 import {Errors} from "@src/market/libraries/Errors.sol";
 
@@ -17,11 +17,11 @@ contract SelfLiquidateValidationTest is BaseTest {
         _deposit(alice, usdc, 100e6);
         _deposit(bob, weth, 2 * 150e18);
         _deposit(candy, usdc, 100e6);
-        _buyCreditLimit(alice, block.timestamp + 12 days, YieldCurveHelper.pointCurve(12 days, 0));
-        _buyCreditLimit(candy, block.timestamp + 12 days, YieldCurveHelper.pointCurve(12 days, 0));
-        uint256 debtPositionId = _sellCreditMarket(bob, alice, RESERVED_ID, 100e6, 12 days, false);
+        _buyCreditLimit(alice, block.timestamp + 30 days, _pointOfferAtIndex(0, 0));
+        _buyCreditLimit(candy, block.timestamp + 30 days, _pointOfferAtIndex(0, 0));
+        uint256 debtPositionId = _sellCreditMarket(bob, alice, RESERVED_ID, 100e6, _maturity(30 days), false);
         uint256 creditPositionId = size.getCreditPositionIdsByDebtPositionId(debtPositionId)[0];
-        _sellCreditMarket(bob, candy, RESERVED_ID, 100e6, 12 days, false);
+        _sellCreditMarket(bob, candy, RESERVED_ID, 100e6, _maturity(30 days), false);
 
         vm.startPrank(alice);
         vm.expectRevert(

@@ -3,16 +3,16 @@ pragma solidity 0.8.23;
 
 import {Errors} from "@src/market/libraries/Errors.sol";
 import {BaseTest} from "@test/BaseTest.sol";
-import {YieldCurveHelper} from "@test/helpers/libraries/YieldCurveHelper.sol";
+import {FixedMaturityLimitOrderHelper} from "@test/helpers/libraries/FixedMaturityLimitOrderHelper.sol";
 
 contract SizeViewTest is BaseTest {
     function test_SizeView_getUserDefinedBorrowOfferAPR_validation() public {
         vm.expectRevert(abi.encodeWithSelector(Errors.INVALID_OFFER.selector, alice));
         size.getUserDefinedBorrowOfferAPR(alice, block.timestamp);
 
-        _sellCreditLimit(alice, block.timestamp + 365 days, YieldCurveHelper.marketCurve());
+        _sellCreditLimit(alice, block.timestamp + 150 days, FixedMaturityLimitOrderHelper.marketOffer());
 
-        vm.expectRevert(abi.encodeWithSelector(Errors.NULL_TENOR.selector));
+        vm.expectRevert(abi.encodeWithSelector(Errors.NULL_MATURITY.selector));
         size.getUserDefinedBorrowOfferAPR(alice, 0);
     }
 
@@ -20,9 +20,9 @@ contract SizeViewTest is BaseTest {
         vm.expectRevert(abi.encodeWithSelector(Errors.INVALID_OFFER.selector, alice));
         size.getUserDefinedLoanOfferAPR(alice, block.timestamp);
 
-        _buyCreditLimit(alice, block.timestamp + 365 days, YieldCurveHelper.pointCurve(365 days, 1e18));
+        _buyCreditLimit(alice, block.timestamp + 150 days, _pointOfferAtIndex(4, 1e18));
 
-        vm.expectRevert(abi.encodeWithSelector(Errors.NULL_TENOR.selector));
+        vm.expectRevert(abi.encodeWithSelector(Errors.NULL_MATURITY.selector));
         size.getUserDefinedLoanOfferAPR(alice, 0);
     }
 
@@ -32,7 +32,7 @@ contract SizeViewTest is BaseTest {
     }
 
     function test_SizeView_getSwapFee_validation() public {
-        vm.expectRevert(abi.encodeWithSelector(Errors.NULL_TENOR.selector));
+        vm.expectRevert(abi.encodeWithSelector(Errors.NULL_MATURITY.selector));
         size.getSwapFee(100e6, 0);
     }
 

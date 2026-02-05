@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {LimitOrder, OfferLibrary} from "@src/market/libraries/OfferLibrary.sol";
-import {YieldCurve} from "@src/market/libraries/YieldCurveLibrary.sol";
+import {FixedMaturityLimitOrder, OfferLibrary} from "@src/market/libraries/OfferLibrary.sol";
 
 import {State} from "@src/market/SizeStorage.sol";
 
@@ -11,10 +10,10 @@ import {Errors} from "@src/market/libraries/Errors.sol";
 import {Events} from "@src/market/libraries/Events.sol";
 
 struct BuyCreditLimitParams {
-    // The maximum due date of the loan offer
-    uint256 maxDueDate;
-    // The yield curve of the loan offer
-    YieldCurve curveRelativeTime;
+    // The fixed maturities of the loan offer
+    uint256[] maturities;
+    // The APRs for each maturity
+    uint256[] aprs;
 }
 
 struct BuyCreditLimitOnBehalfOfParams {
@@ -29,7 +28,7 @@ struct BuyCreditLimitOnBehalfOfParams {
 /// @author Size (https://size.credit/)
 /// @notice Contains the logic for buying credit (lending) as a limit order
 library BuyCreditLimit {
-    using OfferLibrary for LimitOrder;
+    using OfferLibrary for FixedMaturityLimitOrder;
 
     /// @notice Validates the input parameters for buying credit as a limit order
     /// @param state The state
@@ -41,8 +40,8 @@ library BuyCreditLimit {
         BuyCreditLimitParams memory params = externalParams.params;
         address onBehalfOf = externalParams.onBehalfOf;
 
-        LimitOrder memory loanOffer =
-            LimitOrder({maxDueDate: params.maxDueDate, curveRelativeTime: params.curveRelativeTime});
+        FixedMaturityLimitOrder memory loanOffer =
+            FixedMaturityLimitOrder({maturities: params.maturities, aprs: params.aprs});
 
         // validate msg.sender
         if (!state.data.sizeFactory.isAuthorized(msg.sender, onBehalfOf, Action.BUY_CREDIT_LIMIT)) {
@@ -52,7 +51,9 @@ library BuyCreditLimit {
         // a null offer mean clearing their limit order
         if (!loanOffer.isNull()) {
             // validate loanOffer
-            loanOffer.validateLimitOrder(state.riskConfig.minTenor, state.riskConfig.maxTenor);
+            loanOffer.validateLimitOrder(
+                state.riskConfig.maturities, state.riskConfig.minTenor, state.riskConfig.maxTenor
+            );
         }
     }
 
@@ -66,16 +67,9 @@ library BuyCreditLimit {
         BuyCreditLimitParams memory params = externalParams.params;
         address onBehalfOf = externalParams.onBehalfOf;
 
-        emit Events.BuyCreditLimit(
-            msg.sender,
-            onBehalfOf,
-            params.maxDueDate,
-            params.curveRelativeTime.tenors,
-            params.curveRelativeTime.aprs,
-            params.curveRelativeTime.marketRateMultipliers
-        );
+        emit Events.BuyCreditLimit(msg.sender, onBehalfOf, params.maturities, params.aprs);
 
         state.data.users[onBehalfOf].loanOffer =
-            LimitOrder({maxDueDate: params.maxDueDate, curveRelativeTime: params.curveRelativeTime});
+            FixedMaturityLimitOrder({maturities: params.maturities, aprs: params.aprs});
     }
 }

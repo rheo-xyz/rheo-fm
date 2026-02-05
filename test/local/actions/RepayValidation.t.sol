@@ -7,7 +7,7 @@ import {IERC20Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.so
 import {RESERVED_ID} from "@src/market/libraries/LoanLibrary.sol";
 import {RepayParams} from "@src/market/libraries/actions/Repay.sol";
 import {WithdrawParams} from "@src/market/libraries/actions/Withdraw.sol";
-import {YieldCurveHelper} from "@test/helpers/libraries/YieldCurveHelper.sol";
+import {FixedMaturityLimitOrderHelper} from "@test/helpers/libraries/FixedMaturityLimitOrderHelper.sol";
 
 import {Errors} from "@src/market/libraries/Errors.sol";
 
@@ -22,15 +22,15 @@ contract RepayValidationTest is BaseTest {
         _deposit(bob, usdc, 100e6);
         _deposit(candy, weth, 100e18);
         _deposit(candy, usdc, 100e6);
-        _buyCreditLimit(alice, block.timestamp + 12 days, YieldCurveHelper.pointCurve(12 days, 0.05e18));
+        _buyCreditLimit(alice, block.timestamp + 30 days, _pointOfferAtIndex(0, 0.05e18));
         uint256 amount = 20e6;
-        uint256 debtPositionId = _sellCreditMarket(bob, alice, RESERVED_ID, amount, 12 days, false);
+        uint256 debtPositionId = _sellCreditMarket(bob, alice, RESERVED_ID, amount, _maturity(30 days), false);
         uint256 futureValue = size.getDebtPosition(debtPositionId).futureValue;
         address borrower = bob;
-        _buyCreditLimit(candy, block.timestamp + 12 days, YieldCurveHelper.pointCurve(12 days, 0.03e18));
+        _buyCreditLimit(candy, block.timestamp + 30 days, _pointOfferAtIndex(0, 0.03e18));
 
         uint256 creditId = size.getCreditPositionIdsByDebtPositionId(debtPositionId)[0];
-        _sellCreditMarket(alice, candy, creditId, 10e6, 12 days);
+        _sellCreditMarket(alice, candy, creditId, 10e6, _maturity(30 days));
 
         vm.startPrank(bob);
         size.withdraw(WithdrawParams({token: address(usdc), amount: 100e6, to: bob}));

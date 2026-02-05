@@ -19,9 +19,7 @@ import {ISizeFactoryOffchainGetters} from "@src/factory/interfaces/ISizeFactoryO
 import {ISizeFactoryV1_7} from "@src/factory/interfaces/ISizeFactoryV1_7.sol";
 import {ISizeFactoryV1_8} from "@src/factory/interfaces/ISizeFactoryV1_8.sol";
 
-bytes32 constant KEEPER_ROLE = keccak256("KEEPER_ROLE");
 bytes32 constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
-bytes32 constant BORROW_RATE_UPDATER_ROLE = keccak256("BORROW_RATE_UPDATER_ROLE");
 bytes32 constant DEFAULT_ADMIN_ROLE = 0x00;
 
 /// @title ISizeFactory

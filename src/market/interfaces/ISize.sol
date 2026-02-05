@@ -12,7 +12,6 @@ import {LiquidateParams} from "@src/market/libraries/actions/Liquidate.sol";
 import {DepositParams} from "@src/market/libraries/actions/Deposit.sol";
 import {WithdrawParams} from "@src/market/libraries/actions/Withdraw.sol";
 
-import {LiquidateWithReplacementParams} from "@src/market/libraries/actions/LiquidateWithReplacement.sol";
 import {RepayParams} from "@src/market/libraries/actions/Repay.sol";
 import {SelfLiquidateParams} from "@src/market/libraries/actions/SelfLiquidate.sol";
 
@@ -68,26 +67,21 @@ interface ISize is ISizeView, ISizeAdmin, IMulticall, ISizeV1_7, ISizeV1_8 {
 
     /// @notice Places a new loan offer in the orderbook
     /// @param params BuyCreditLimitParams struct containing the following fields:
-    ///     - uint256 maxDueDate: The maximum due date of the loan (e.g., 1712188800 for April 4th, 2024)
-    ///     - YieldCurve curveRelativeTime: The yield curve for the loan offer, a struct containing the following fields:
-    ///         - uint256[] tenors: The relative timestamps of the yield curve (for example, [30 days, 60 days, 90 days])
-    ///         - int256[] aprs: The aprs of the yield curve (for example, [0.05e18, 0.07e18, 0.08e18] to represent 5% APR, 7% APR, and 8% APR, linear interest, respectively)
-    ///         - uint256[] marketRateMultipliers: The market rate multipliers of the yield curve (for example, [1e18, 1.2e18, 1.3e18] to represent 100%, 120%, and 130% of the market borrow rate, respectively)
+    ///     - uint256[] maturities: The fixed maturities of the offer (unix timestamps)
+    ///     - uint256[] aprs: The APRs for each maturity (e.g., 0.05e18 for 5% APR)
     function buyCreditLimit(BuyCreditLimitParams calldata params) external payable;
 
     /// @notice Places a new borrow offer in the orderbook
     /// @param params SellCreditLimitParams struct containing the following fields:
-    ///     - YieldCurve curveRelativeTime: The yield curve for the borrow offer, a struct containing the following fields:
-    ///         - uint256[] tenors: The relative timestamps of the yield curve (for example, [30 days, 60 days, 90 days])
-    ///         - int256[] aprs: The aprs of the yield curve (for example, [0.05e18, 0.07e18, 0.08e18] to represent 5% APR, 7% APR, and 8% APR, linear interest, respectively)
-    ///         - uint256[] marketRateMultipliers: The market rate multipliers of the yield curve (for example, [0.99e18, 1e18, 1.1e18] to represent 99%, 100%, and 110% of the market borrow rate, respectively)
+    ///     - uint256[] maturities: The fixed maturities of the offer (unix timestamps)
+    ///     - uint256[] aprs: The APRs for each maturity (e.g., 0.05e18 for 5% APR)
     function sellCreditLimit(SellCreditLimitParams calldata params) external payable;
 
     /// @notice Obtains credit via lending or buying existing credit
     /// @param params BuyCreditMarketParams struct containing the following fields:
     ///     - address borrower: The address of the borrower (optional, for lending)
     ///     - uint256 creditPositionId: The id of the credit position to buy (optional, for buying credit)
-    ///     - uint256 tenor: The tenor of the loan
+    ///     - uint256 maturity: The maturity of the loan
     ///     - uint256 amount: The amount of tokens to lend or credit to buy
     ///     - bool exactAmountIn: Indicates if the amount is the value to be transferred or used to calculate the transfer amount
     ///     - uint256 deadline: The maximum timestamp for the transaction to be executed
@@ -102,12 +96,12 @@ interface ISize is ISizeView, ISizeAdmin, IMulticall, ISizeV1_7, ISizeV1_8 {
     ///     - address lender: The address of the lender
     ///     - uint256 creditPositionId: The id of a credit position to be sold
     ///     - uint256 amount: The amount of tokens to borrow (in decimals, e.g. 1_000e6 for 1000 aUSDC)
-    ///     - uint256 tenor: The tenor of the loan
+    ///     - uint256 maturity: The maturity of the loan
     ///     - uint256 deadline: The maximum timestamp for the transaction to be executed
     ///     - uint256 maxAPR: The maximum APR the caller is willing to accept
     ///     - bool exactAmountIn: this flag indicates if the amount argument represents either credit (true) or cash (false)
-    ///     - uint256 collectionId: The collection id. If collectionId is RESERVED_ID, selects the user-defined yield curve
-    ///     - address rateProvider: The rate provider. If collectionId is RESERVED_ID, selects the user-defined yield curve
+    ///     - uint256 collectionId: The collection id. If collectionId is RESERVED_ID, selects the user-defined offer
+    ///     - address rateProvider: The rate provider. If collectionId is RESERVED_ID, selects the user-defined offer
     function sellCreditMarket(SellCreditMarketParams calldata params) external payable;
 
     /// @notice Repay a debt position by transferring the amount due of borrow tokens to the protocol, which are deposited to the Variable Pool for the lenders to claim
@@ -144,23 +138,6 @@ interface ISize is ISizeView, ISizeAdmin, IMulticall, ISizeV1_7, ISizeV1_8 {
     ///     - uint256 creditPositionId: The id of the credit position to self-liquidate
     function selfLiquidate(SelfLiquidateParams calldata params) external payable;
 
-    /// @notice Liquidate a debt position with a replacement borrower
-    /// @dev This function works exactly like `liquidate`, with an added logic of replacing the borrower on the storage
-    ///         When liquidating with replacement, nothing changes from the lenders' perspective, but a spread is created between the previous borrower rate and the new borrower rate.
-    ///         As a result of the spread of these borrow aprs, the protocol is able to profit from the liquidation. Since the choice of the borrower impacts on the protocol's profit, this method is permissioned
-    /// @param params LiquidateWithReplacementParams struct containing the following fields:
-    ///     - uint256 debtPositionId: The id of the debt position to liquidate
-    ///     - uint256 minimumCollateralProfit: The minimum collateral profit that the liquidator is willing to accept from the borrower (keepers might choose to pass a value below 100% of the cash they bring and take the risk of liquidating unprofitably)
-    ///     - address borrower: The address of the replacement borrower
-    ///     - uint256 deadline: The maximum timestamp for the transaction to be executed
-    ///     - uint256 minAPR: The minimum APR the caller is willing to accept
-    /// @return liquidatorProfitCollateralToken The amount of collateral tokens liquidator received from the liquidation
-    /// @return liquidatorProfitBorrowToken The amount of borrow tokens liquidator received from the liquidation
-    function liquidateWithReplacement(LiquidateWithReplacementParams calldata params)
-        external
-        payable
-        returns (uint256 liquidatorProfitCollateralToken, uint256 liquidatorProfitBorrowToken);
-
     /// @notice Compensate a borrower's debt with his credit in another loan
     ///         The compensation can not exceed both 1) the credit the lender of `creditPositionWithDebtToRepayId` to the borrower and 2) the credit the lender of `creditPositionToCompensateId`
     // @dev The caller may pass type(uint256).max as the creditPositionId in order to represent "mint a new DebtPosition/CreditPosition pair"
@@ -195,16 +172,16 @@ interface ISize is ISizeView, ISizeAdmin, IMulticall, ISizeV1_7, ISizeV1_8 {
     /// @notice Set the copy limit order configs for a user
     /// @param params SetCopyLimitOrderConfigsParams struct containing the following fields:
     ///     - CopyLimitOrderConfig copyLoanOfferConfig: The loan offer copy parameters
-    ///       - uint256 minTenor: The minimum tenor of the loan offer to copy (0 means use copy yield curve tenor lower bound)
-    ///       - uint256 maxTenor: The maximum tenor of the loan offer to copy (type(uint256).max means use copy yield curve tenor upper bound)
-    ///       - uint256 minAPR: The minimum APR of the loan offer to copy (0 means use copy yield curve APR lower bound)
-    ///       - uint256 maxAPR: The maximum APR of the loan offer to copy (type(uint256).max means use copy yield curve APR upper bound)
+    ///       - uint256 minTenor: The minimum tenor of the loan offer to copy (0 means no lower bound)
+    ///       - uint256 maxTenor: The maximum tenor of the loan offer to copy (type(uint256).max means no upper bound)
+    ///       - uint256 minAPR: The minimum APR of the loan offer to copy (0 means no lower bound)
+    ///       - uint256 maxAPR: The maximum APR of the loan offer to copy (type(uint256).max means no upper bound)
     ///       - int256 offsetAPR: The offset APR relative to the copied loan offer
     ///     - CopyLimitOrderConfig copyBorrowOfferConfig: The borrow offer copy parameters
-    ///       - uint256 minTenor: The minimum tenor of the borrow offer to copy (0 means use copy yield curve tenor lower bound)
-    ///       - uint256 maxTenor: The maximum tenor of the borrow offer to copy (type(uint256).max means use copy yield curve tenor upper bound)
-    ///       - uint256 minAPR: The minimum APR of the borrow offer to copy (0 means use copy yield curve APR lower bound)
-    ///       - uint256 maxAPR: The maximum APR of the borrow offer to copy (type(uint256).max means use copy yield curve APR upper bound)
+    ///       - uint256 minTenor: The minimum tenor of the borrow offer to copy (0 means no lower bound)
+    ///       - uint256 maxTenor: The maximum tenor of the borrow offer to copy (type(uint256).max means no upper bound)
+    ///       - uint256 minAPR: The minimum APR of the borrow offer to copy (0 means no lower bound)
+    ///       - uint256 maxAPR: The maximum APR of the borrow offer to copy (type(uint256).max means no upper bound)
     ///       - int256 offsetAPR: The offset APR relative to the copied borrow offer
     /// @dev Does not erase the user's loan offer and borrow offer
     ///      To specify "no copy", pass a null CopyLimitOrderConfig except for offsetAPR, since a completely null CopyLimitOrderConfig

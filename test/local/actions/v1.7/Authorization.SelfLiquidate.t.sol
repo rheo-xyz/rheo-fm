@@ -9,7 +9,7 @@ import {SelfLiquidateOnBehalfOfParams, SelfLiquidateParams} from "@src/market/li
 
 import {Action, Authorization} from "@src/factory/libraries/Authorization.sol";
 import {BaseTest, Vars} from "@test/BaseTest.sol";
-import {YieldCurveHelper} from "@test/helpers/libraries/YieldCurveHelper.sol";
+import {FixedMaturityLimitOrderHelper} from "@test/helpers/libraries/FixedMaturityLimitOrderHelper.sol";
 
 contract AuthorizationSelfLiquidateTest is BaseTest {
     function test_AuthorizationSelfLiquidate_selfLiquidateOnBehalfOf() public {
@@ -23,8 +23,8 @@ contract AuthorizationSelfLiquidateTest is BaseTest {
 
         assertEq(size.collateralRatio(bob), type(uint256).max);
 
-        _buyCreditLimit(alice, block.timestamp + 365 days, YieldCurveHelper.pointCurve(365 days, 0));
-        uint256 debtPositionId = _sellCreditMarket(bob, alice, RESERVED_ID, 100e6, 365 days, false);
+        _buyCreditLimit(alice, block.timestamp + 150 days, _pointOfferAtIndex(4, 0));
+        uint256 debtPositionId = _sellCreditMarket(bob, alice, RESERVED_ID, 100e6, _maturity(150 days), false);
         uint256 creditPositionId = size.getCreditPositionIdsByDebtPositionId(debtPositionId)[0];
 
         assertEq(size.getDebtPositionAssignedCollateral(debtPositionId), 150e18);
@@ -67,8 +67,8 @@ contract AuthorizationSelfLiquidateTest is BaseTest {
         _deposit(bob, weth, 150e18);
         _deposit(liquidator, usdc, 10_000e6);
 
-        _buyCreditLimit(alice, block.timestamp + 365 days, YieldCurveHelper.pointCurve(365 days, 0));
-        uint256 debtPositionId = _sellCreditMarket(bob, alice, RESERVED_ID, 100e6, 365 days, false);
+        _buyCreditLimit(alice, block.timestamp + 150 days, _pointOfferAtIndex(4, 0));
+        uint256 debtPositionId = _sellCreditMarket(bob, alice, RESERVED_ID, 100e6, _maturity(150 days), false);
         uint256 creditPositionId = size.getCreditPositionIdsByDebtPositionId(debtPositionId)[0];
 
         vm.expectRevert(abi.encodeWithSelector(Errors.UNAUTHORIZED_ACTION.selector, alice, bob, Action.SELF_LIQUIDATE));

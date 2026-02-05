@@ -43,7 +43,7 @@ import {SetVaultOnBehalfOfParams, SetVaultParams} from "@src/market/libraries/ac
 import {WithdrawOnBehalfOfParams, WithdrawParams} from "@src/market/libraries/actions/Withdraw.sol";
 
 import {BaseTest} from "@test/BaseTest.sol";
-import {YieldCurveHelper} from "@test/helpers/libraries/YieldCurveHelper.sol";
+import {FixedMaturityLimitOrderHelper} from "@test/helpers/libraries/FixedMaturityLimitOrderHelper.sol";
 import {PriceFeedMock} from "@test/mocks/PriceFeedMock.sol";
 
 import {SizeMock} from "@test/mocks/SizeMock.sol";
@@ -65,15 +65,16 @@ contract CallMarketTest is BaseTest {
     function test_CallMarket_can_borrow_from_multiple_markets() public {
         _setPrice(1e18);
         _deposit(alice, usdc, 500e6);
-        _buyCreditLimit(alice, block.timestamp + 365 days, YieldCurveHelper.pointCurve(365 days, 0.03e18));
+        _buyCreditLimit(alice, block.timestamp + 150 days, _pointOfferAtIndex(4, 0.03e18));
         size = size2;
-        _buyCreditLimit(alice, block.timestamp + 365 days, YieldCurveHelper.pointCurve(365 days, 0.04e18));
+        _buyCreditLimit(alice, block.timestamp + 150 days, _pointOfferAtIndex(4, 0.04e18));
         size = size1;
 
         uint256 usdcBalanceBefore = usdc.balanceOf(bob);
 
         uint256 usdcAmount = 100e6;
-        uint256 tenor = 365 days;
+        uint256 tenor = 150 days;
+        uint256 maturity = block.timestamp + tenor;
 
         uint256 wethAmount = 300e18;
         uint256 collateral2Amount = 400e18;
@@ -119,7 +120,7 @@ contract CallMarketTest is BaseTest {
                                 lender: alice,
                                 creditPositionId: RESERVED_ID,
                                 amount: usdcAmount,
-                                tenor: tenor,
+                                maturity: maturity,
                                 deadline: block.timestamp,
                                 maxAPR: type(uint256).max,
                                 exactAmountIn: false,
@@ -160,7 +161,7 @@ contract CallMarketTest is BaseTest {
                                 lender: alice,
                                 creditPositionId: RESERVED_ID,
                                 amount: usdcAmount,
-                                tenor: tenor,
+                                maturity: maturity,
                                 deadline: block.timestamp,
                                 maxAPR: type(uint256).max,
                                 exactAmountIn: false,
@@ -210,9 +211,9 @@ contract CallMarketTest is BaseTest {
     function test_CallMarket_can_copy_limit_orders_from_multiple_markets() public {
         _setPrice(1e18);
         _deposit(alice, usdc, 500e6);
-        _buyCreditLimit(alice, block.timestamp + 365 days, YieldCurveHelper.pointCurve(365 days, 0.03e18));
+        _buyCreditLimit(alice, block.timestamp + 150 days, _pointOfferAtIndex(4, 0.03e18));
         size = size2;
-        _buyCreditLimit(alice, block.timestamp + 365 days, YieldCurveHelper.pointCurve(365 days, 0.04e18));
+        _buyCreditLimit(alice, block.timestamp + 150 days, _pointOfferAtIndex(4, 0.04e18));
         size = size1;
 
         uint256 collectionId = _createCollection(james);
@@ -272,8 +273,9 @@ contract CallMarketTest is BaseTest {
         vm.startPrank(bob);
         sizeFactory.multicall(datas);
 
-        assertEq(size1.getLoanOfferAPR(bob, collectionId, alice, 365 days), 0.03e18);
-        assertEq(size2.getLoanOfferAPR(bob, collectionId, alice, 365 days), 0.04e18);
+        uint256 maturity = block.timestamp + 150 days;
+        assertEq(size1.getLoanOfferAPR(bob, collectionId, alice, maturity), 0.03e18);
+        assertEq(size2.getLoanOfferAPR(bob, collectionId, alice, maturity), 0.04e18);
     }
 
     function test_CallMarket_user_can_execute_ideal_flow() public {
@@ -281,9 +283,9 @@ contract CallMarketTest is BaseTest {
         _deposit(alice, usdc, 500e6);
 
         size = size1;
-        _buyCreditLimit(alice, block.timestamp + 365 days, YieldCurveHelper.pointCurve(365 days, 0.03e18));
+        _buyCreditLimit(alice, block.timestamp + 150 days, _pointOfferAtIndex(4, 0.03e18));
         size = size2;
-        _buyCreditLimit(alice, block.timestamp + 365 days, YieldCurveHelper.pointCurve(365 days, 0.04e18));
+        _buyCreditLimit(alice, block.timestamp + 150 days, _pointOfferAtIndex(4, 0.04e18));
 
         uint256 collectionId = _createCollection(james);
         _addMarketToCollection(james, collectionId, size1);
@@ -349,7 +351,8 @@ contract CallMarketTest is BaseTest {
         sizeFactory.multicall(datas);
 
         assertEq(_state().candy.borrowTokenBalance, depositAmount);
-        assertEq(size1.getLoanOfferAPR(candy, collectionId, alice, 365 days), 0.03e18);
-        assertEq(size2.getLoanOfferAPR(candy, collectionId, alice, 365 days), 0.04e18);
+        uint256 maturity = block.timestamp + 150 days;
+        assertEq(size1.getLoanOfferAPR(candy, collectionId, alice, maturity), 0.03e18);
+        assertEq(size2.getLoanOfferAPR(candy, collectionId, alice, maturity), 0.04e18);
     }
 }

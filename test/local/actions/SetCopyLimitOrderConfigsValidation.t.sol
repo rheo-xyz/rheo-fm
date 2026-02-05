@@ -3,12 +3,10 @@ pragma solidity 0.8.23;
 
 import {Errors} from "@src/market/libraries/Errors.sol";
 import {CopyLimitOrderConfig} from "@src/market/libraries/OfferLibrary.sol";
-import {YieldCurve} from "@src/market/libraries/YieldCurveLibrary.sol";
-
 import {OfferLibrary} from "@src/market/libraries/OfferLibrary.sol";
 import {SetCopyLimitOrderConfigsParams} from "@src/market/libraries/actions/SetCopyLimitOrderConfigs.sol";
 import {BaseTest} from "@test/BaseTest.sol";
-import {YieldCurveHelper} from "@test/helpers/libraries/YieldCurveHelper.sol";
+import {FixedMaturityLimitOrderHelper} from "@test/helpers/libraries/FixedMaturityLimitOrderHelper.sol";
 
 contract SetCopyLimitOrderConfigsValidationTest is BaseTest {
     CopyLimitOrderConfig private nullCopy;
@@ -21,18 +19,18 @@ contract SetCopyLimitOrderConfigsValidationTest is BaseTest {
     });
 
     function test_SetCopyLimitOrderConfigs_validation() public {
-        vm.expectRevert(abi.encodeWithSelector(Errors.INVALID_TENOR_RANGE.selector, 3 days, 1 days));
+        vm.expectRevert(abi.encodeWithSelector(Errors.INVALID_TENOR_RANGE.selector, 90 days, 30 days));
         _setCopyLimitOrderConfigs(
             alice,
-            CopyLimitOrderConfig({minTenor: 3 days, maxTenor: 1 days, minAPR: 0, maxAPR: 0, offsetAPR: 0}),
+            CopyLimitOrderConfig({minTenor: 90 days, maxTenor: 30 days, minAPR: 0, maxAPR: 0, offsetAPR: 0}),
             nullCopy
         );
 
-        vm.expectRevert(abi.encodeWithSelector(Errors.INVALID_TENOR_RANGE.selector, 5 days, 2 days));
+        vm.expectRevert(abi.encodeWithSelector(Errors.INVALID_TENOR_RANGE.selector, 120 days, 60 days));
         _setCopyLimitOrderConfigs(
             alice,
             nullCopy,
-            CopyLimitOrderConfig({minTenor: 5 days, maxTenor: 2 days, minAPR: 0, maxAPR: 0, offsetAPR: 0})
+            CopyLimitOrderConfig({minTenor: 120 days, maxTenor: 60 days, minAPR: 0, maxAPR: 0, offsetAPR: 0})
         );
 
         vm.expectRevert(abi.encodeWithSelector(Errors.INVALID_APR_RANGE.selector, 0.1e18, 0.05e18));
@@ -64,20 +62,20 @@ contract SetCopyLimitOrderConfigsValidationTest is BaseTest {
         vm.expectRevert(
             abi.encodeWithSelector(
                 Errors.INVALID_OFFER_CONFIGS.selector,
-                15 days,
-                45 days,
+                90 days,
+                150 days,
                 0.06e18,
                 0.08e18,
-                10 days,
                 30 days,
+                120 days,
                 0.03e18,
                 0.05e18
             )
         );
         _setCopyLimitOrderConfigs(
             alice,
-            CopyLimitOrderConfig({minTenor: 10 days, maxTenor: 30 days, minAPR: 0.03e18, maxAPR: 0.05e18, offsetAPR: 0}),
-            CopyLimitOrderConfig({minTenor: 15 days, maxTenor: 45 days, minAPR: 0.06e18, maxAPR: 0.08e18, offsetAPR: 0})
+            CopyLimitOrderConfig({minTenor: 30 days, maxTenor: 120 days, minAPR: 0.03e18, maxAPR: 0.05e18, offsetAPR: 0}),
+            CopyLimitOrderConfig({minTenor: 90 days, maxTenor: 150 days, minAPR: 0.06e18, maxAPR: 0.08e18, offsetAPR: 0})
         );
     }
 }

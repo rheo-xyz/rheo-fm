@@ -70,12 +70,39 @@ contract InitializeValidationTest is Test, BaseTest {
         proxy = new ERC1967Proxy(address(implementation), abi.encodeCall(Size.initialize, (owner, f, r, o, d)));
         r.minTenor = 1 hours;
 
-        r.minTenor = 5 days;
-        r.maxTenor = 4 days;
-        vm.expectRevert(abi.encodeWithSelector(Errors.INVALID_MAXIMUM_TENOR.selector, 4 days));
+        r.maxTenor = 0;
+        vm.expectRevert(abi.encodeWithSelector(Errors.NULL_AMOUNT.selector));
+        proxy = new ERC1967Proxy(address(implementation), abi.encodeCall(Size.initialize, (owner, f, r, o, d)));
+        r.maxTenor = 150 days;
+
+        r.minTenor = r.maxTenor + 1;
+        vm.expectRevert(abi.encodeWithSelector(Errors.INVALID_TENOR_RANGE.selector, r.minTenor, r.maxTenor));
         proxy = new ERC1967Proxy(address(implementation), abi.encodeCall(Size.initialize, (owner, f, r, o, d)));
         r.minTenor = 1 hours;
-        r.maxTenor = 365 days;
+
+        r.maturities = new uint256[](0);
+        proxy = new ERC1967Proxy(address(implementation), abi.encodeCall(Size.initialize, (owner, f, r, o, d)));
+        Size emptyMaturitiesSize = Size(address(proxy));
+        assertEq(emptyMaturitiesSize.riskConfig().maturities.length, 0);
+
+        uint256[] memory unorderedMaturities = new uint256[](2);
+        unorderedMaturities[0] = block.timestamp + r.minTenor + 2;
+        unorderedMaturities[1] = block.timestamp + r.minTenor + 1;
+        r.maturities = unorderedMaturities;
+        vm.expectRevert(abi.encodeWithSelector(Errors.MATURITIES_NOT_STRICTLY_INCREASING.selector));
+        proxy = new ERC1967Proxy(address(implementation), abi.encodeCall(Size.initialize, (owner, f, r, o, d)));
+
+        uint256[] memory pastMaturities = new uint256[](1);
+        pastMaturities[0] = block.timestamp - 1;
+        r.maturities = pastMaturities;
+        proxy = new ERC1967Proxy(address(implementation), abi.encodeCall(Size.initialize, (owner, f, r, o, d)));
+        uint256[] memory outOfRangeMaturities = new uint256[](1);
+        outOfRangeMaturities[0] = block.timestamp + r.maxTenor + 1;
+        r.maturities = outOfRangeMaturities;
+        proxy = new ERC1967Proxy(address(implementation), abi.encodeCall(Size.initialize, (owner, f, r, o, d)));
+        uint256[] memory validMaturities = new uint256[](1);
+        validMaturities[0] = block.timestamp + r.minTenor;
+        r.maturities = validMaturities;
 
         o.priceFeed = address(0);
         vm.expectRevert(abi.encodeWithSelector(Errors.NULL_ADDRESS.selector));

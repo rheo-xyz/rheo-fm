@@ -9,9 +9,8 @@ import {Errors} from "@src/market/libraries/Errors.sol";
 import {Events} from "@src/market/libraries/Events.sol";
 import {CreditPosition, DebtPosition, LoanLibrary, RESERVED_ID} from "@src/market/libraries/LoanLibrary.sol";
 import {Math, PERCENT} from "@src/market/libraries/Math.sol";
-import {LimitOrder, OfferLibrary} from "@src/market/libraries/OfferLibrary.sol";
+import {FixedMaturityLimitOrder, OfferLibrary} from "@src/market/libraries/OfferLibrary.sol";
 import {RiskLibrary} from "@src/market/libraries/RiskLibrary.sol";
-import {VariablePoolBorrowRateParams} from "@src/market/libraries/YieldCurveLibrary.sol";
 
 struct BuyCreditMarketParams {
     // The borrower
@@ -22,9 +21,9 @@ struct BuyCreditMarketParams {
     uint256 creditPositionId;
     // The amount of credit to buy
     uint256 amount;
-    // The tenor of the loan
-    // If creditPositionId is not RESERVED_ID, this value is ignored and the tenor of the existing loan is used
-    uint256 tenor;
+    // The maturity of the loan
+    // If creditPositionId is not RESERVED_ID, this value is ignored and the maturity of the existing loan is used
+    uint256 maturity;
     // The deadline for the transaction
     uint256 deadline;
     // The minimum APR for the loan
@@ -32,10 +31,10 @@ struct BuyCreditMarketParams {
     // Whether amount means cash or credit
     bool exactAmountIn;
     // The collection Id (introduced in v1.8)
-    // If collectionId is RESERVED_ID, selects the user-defined yield curve
+    // If collectionId is RESERVED_ID, selects the user-defined offer
     uint256 collectionId;
     // The rate provider (introduced in v1.8)
-    // If collectionId is RESERVED_ID, selects the user-defined yield curve
+    // If collectionId is RESERVED_ID, selects the user-defined offer
     address rateProvider;
 }
 
@@ -53,7 +52,7 @@ struct BuyCreditMarketOnBehalfOfParams {
 /// @author Size (https://size.credit/)
 /// @notice Contains the logic for buying credit (lending) as a market order
 library BuyCreditMarket {
-    using OfferLibrary for LimitOrder;
+    using OfferLibrary for FixedMaturityLimitOrder;
     using OfferLibrary for State;
     using AccountingLibrary for State;
     using LoanLibrary for State;
@@ -68,7 +67,7 @@ library BuyCreditMarket {
         uint256 cashAmountIn;
         uint256 swapFee;
         uint256 fragmentationFee;
-        uint256 tenor;
+        uint256 maturity;
     }
 
     /// @notice Validates the input parameters for buying credit as a market order
@@ -83,7 +82,7 @@ library BuyCreditMarket {
         address recipient = externalParams.recipient;
 
         address borrower;
-        uint256 tenor;
+        uint256 maturity;
 
         // validate msg.sender
         if (!state.data.sizeFactory.isAuthorized(msg.sender, onBehalfOf, Action.BUY_CREDIT_MARKET)) {
@@ -98,12 +97,7 @@ library BuyCreditMarket {
         // validate creditPositionId
         if (params.creditPositionId == RESERVED_ID) {
             borrower = params.borrower;
-            tenor = params.tenor;
-
-            // validate tenor
-            if (tenor < state.riskConfig.minTenor || tenor > state.riskConfig.maxTenor) {
-                revert Errors.TENOR_OUT_OF_RANGE(tenor, state.riskConfig.minTenor, state.riskConfig.maxTenor);
-            }
+            maturity = params.maturity;
         } else {
             CreditPosition storage creditPosition = state.getCreditPosition(params.creditPositionId);
             DebtPosition storage debtPosition = state.getDebtPositionByCreditPositionId(params.creditPositionId);
@@ -120,7 +114,7 @@ library BuyCreditMarket {
             }
 
             borrower = creditPosition.lender;
-            tenor = debtPosition.dueDate - block.timestamp; // positive since the credit position is transferrable, so the loan must be ACTIVE
+            maturity = debtPosition.dueDate;
         }
 
         // validate borrower
@@ -133,8 +127,8 @@ library BuyCreditMarket {
             revert Errors.NULL_AMOUNT();
         }
 
-        // validate tenor
-        // N/A
+        // validate maturity
+        state.validateMaturity(maturity);
 
         // validate deadline
         if (params.deadline < block.timestamp) {
@@ -142,7 +136,7 @@ library BuyCreditMarket {
         }
 
         // validate minAPR
-        uint256 borrowAPR = state.getBorrowOfferAPR(borrower, params.collectionId, params.rateProvider, tenor);
+        uint256 borrowAPR = state.getBorrowOfferAPR(borrower, params.collectionId, params.rateProvider, maturity);
         if (borrowAPR < params.minAPR) {
             revert Errors.APR_LOWER_THAN_MIN_APR(borrowAPR, params.minAPR);
         }
@@ -150,9 +144,9 @@ library BuyCreditMarket {
         // validate exactAmountIn
         // N/A
 
-        // validate inverted curves
-        if (!state.isBorrowAPRLowerThanLoanOfferAPRs(borrower, borrowAPR, tenor)) {
-            revert Errors.INVERTED_CURVES(borrower, tenor);
+        // validate inverted offers
+        if (!state.isBorrowAPRLowerThanLoanOfferAPRs(borrower, borrowAPR, maturity)) {
+            revert Errors.INVERTED_OFFERS(borrower, maturity);
         }
 
         // validate collectionId
@@ -171,18 +165,19 @@ library BuyCreditMarket {
     {
         if (params.creditPositionId == RESERVED_ID) {
             swapData.borrower = params.borrower;
-            swapData.tenor = params.tenor;
+            swapData.maturity = params.maturity;
         } else {
             DebtPosition storage debtPosition = state.getDebtPositionByCreditPositionId(params.creditPositionId);
             swapData.creditPosition = state.getCreditPosition(params.creditPositionId);
 
             swapData.borrower = swapData.creditPosition.lender;
-            swapData.tenor = debtPosition.dueDate - block.timestamp;
+            swapData.maturity = debtPosition.dueDate;
         }
 
         uint256 ratePerTenor = state.getBorrowOfferRatePerTenor(
-            swapData.borrower, params.collectionId, params.rateProvider, swapData.tenor
+            swapData.borrower, params.collectionId, params.rateProvider, swapData.maturity
         );
+        uint256 tenor = swapData.maturity - block.timestamp;
 
         if (params.exactAmountIn) {
             swapData.cashAmountIn = params.amount;
@@ -195,7 +190,7 @@ library BuyCreditMarket {
                     ? Math.mulDivDown(swapData.cashAmountIn, PERCENT + ratePerTenor, PERCENT)
                     : swapData.creditPosition.credit,
                 ratePerTenor: ratePerTenor,
-                tenor: swapData.tenor
+                tenor: tenor
             });
         } else {
             swapData.creditAmountOut = params.amount;
@@ -205,7 +200,7 @@ library BuyCreditMarket {
                     ? swapData.creditAmountOut
                     : swapData.creditPosition.credit,
                 ratePerTenor: ratePerTenor,
-                tenor: swapData.tenor
+                tenor: tenor
             });
         }
     }
@@ -227,7 +222,7 @@ library BuyCreditMarket {
             recipient,
             params.creditPositionId,
             params.amount,
-            params.tenor,
+            params.maturity,
             params.deadline,
             params.minAPR,
             params.exactAmountIn,
@@ -243,7 +238,7 @@ library BuyCreditMarket {
                 lender: recipient,
                 borrower: swapData.borrower,
                 futureValue: swapData.creditAmountOut,
-                dueDate: block.timestamp + swapData.tenor
+                dueDate: swapData.maturity
             });
         } else {
             state.createCreditPosition({
@@ -273,7 +268,7 @@ library BuyCreditMarket {
             swapData.cashAmountIn - swapData.swapFee - swapData.fragmentationFee,
             swapData.swapFee,
             swapData.fragmentationFee,
-            swapData.tenor
+            swapData.maturity
         );
     }
 }

@@ -15,16 +15,16 @@ contract SellCreditMarketSimulationScript is Script, Logger {
     function run() external {
         Size size = Size(payable(vm.envAddress("SIZE_ADDRESS")));
 
-        uint256 tenor = 30 days;
+        uint256 maturity = size.riskConfig().maturities[1];
         address lender = address(vm.envAddress("LENDER"));
         address borrower = address(vm.envAddress("BORROWER"));
         uint256 amount = 100e6;
-        uint256 apr = size.getUserDefinedLoanOfferAPR(lender, tenor);
+        uint256 apr = size.getUserDefinedLoanOfferAPR(lender, maturity);
 
         SellCreditMarketParams memory params = SellCreditMarketParams({
             lender: lender,
             creditPositionId: RESERVED_ID,
-            tenor: tenor,
+            maturity: maturity,
             amount: amount,
             deadline: block.timestamp,
             maxAPR: apr,

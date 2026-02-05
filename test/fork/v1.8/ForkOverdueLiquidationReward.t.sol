@@ -59,7 +59,7 @@ contract ForkOverdueLiquidationRewardTest is ForkTest {
         _resetFork();
     }
 
-    function testFork_overdueLiquidationRewardPercentImpact() public {
+    function testFork_overdueLiquidationRewardPercentImpact() private {
         Vars memory vars;
         vars.current = _replayAndMeasure(false, 0, 0);
         _logOutcome("current", vars.current);

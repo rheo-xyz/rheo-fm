@@ -4,7 +4,6 @@ pragma solidity 0.8.23;
 import {Size} from "@src/market/Size.sol";
 import {Logger} from "@test/Logger.sol";
 
-import {Errors} from "@src/market/libraries/Errors.sol";
 import {RESERVED_ID} from "@src/market/libraries/LoanLibrary.sol";
 import {BuyCreditMarketParams} from "@src/market/libraries/actions/BuyCreditMarket.sol";
 import {Script} from "forge-std/Script.sol";
@@ -16,7 +15,7 @@ contract BuyCreditMarketScript is Script, Logger {
         address sizeContractAddress = vm.envAddress("SIZE_CONTRACT_ADDRESS");
         Size size = Size(payable(sizeContractAddress));
 
-        uint256 tenor = 30 days;
+        uint256 maturity = size.riskConfig().maturities[1];
 
         address lender = vm.envAddress("LENDER");
         address borrower = vm.envAddress("BORROWER");
@@ -26,12 +25,12 @@ contract BuyCreditMarketScript is Script, Logger {
 
         uint256 amount = 6e6;
 
-        uint256 apr = size.getUserDefinedBorrowOfferAPR(borrower, tenor);
+        uint256 apr = size.getUserDefinedBorrowOfferAPR(borrower, maturity);
 
         BuyCreditMarketParams memory params = BuyCreditMarketParams({
             borrower: borrower,
             creditPositionId: RESERVED_ID,
-            tenor: tenor,
+            maturity: maturity,
             amount: amount,
             deadline: block.timestamp,
             minAPR: apr,

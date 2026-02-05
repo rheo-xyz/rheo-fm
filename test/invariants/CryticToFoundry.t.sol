@@ -36,7 +36,7 @@ contract CryticToFoundry is BaseTest, TargetFunctions, SetupLocal, FoundryAssert
 
     function _setUp2(uint256 _time, uint256 _block, address _user) internal {
         sender = _user;
-        vm.warp(_time);
+        vm.warp(block.timestamp + _time);
         vm.roll(_block);
     }
 
@@ -439,7 +439,6 @@ contract CryticToFoundry is BaseTest, TargetFunctions, SetupLocal, FoundryAssert
             57218209390102485188511442210970186798232272390219048367509076441804535919386
         );
         _setUp(address(0x0000000000000000000000000000000000020000), 118896 seconds, 17247);
-        liquidateWithReplacement(13, 80000000000000000, address(0xffffffff));
     }
 
     function test_CryticToFoundry_27() public {
@@ -561,14 +560,6 @@ contract CryticToFoundry is BaseTest, TargetFunctions, SetupLocal, FoundryAssert
             true
         );
         _setUp2(258685, 2691557, address(0x30000));
-        liquidateWithReplacement(
-            36118400957964409079476276000813651756586808874195130332881610687090433108,
-            904041440440807036214896628020941972261085157007089697648582835499492545,
-            address(0x47868C00)
-        );
-        _before.sig = liquidateWithReplacement.selector;
-        _after.sig = liquidateWithReplacement.selector;
-        property_LOAN();
     }
 
     function test_CryticToFoundry_33() public {

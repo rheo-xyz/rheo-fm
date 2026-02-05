@@ -12,7 +12,6 @@ import {MarketShutdownParams} from "@src/market/libraries/actions/MarketShutdown
 import {WithdrawParams} from "@src/market/libraries/actions/Withdraw.sol";
 
 import {BaseTest} from "@test/BaseTest.sol";
-import {YieldCurveHelper} from "@test/helpers/libraries/YieldCurveHelper.sol";
 
 contract MarketShutdownTest is BaseTest {
     function setUp() public override {
@@ -27,16 +26,16 @@ contract MarketShutdownTest is BaseTest {
         _deposit(james, weth, 200e18);
         _deposit(candy, usdc, 200e6);
 
-        _buyCreditLimit(alice, block.timestamp + 365 days, YieldCurveHelper.pointCurve(365 days, 0.03e18));
-        _buyCreditLimit(candy, block.timestamp + 365 days, YieldCurveHelper.pointCurve(365 days, 0.04e18));
+        _buyCreditLimit(alice, block.timestamp + 150 days, _pointOfferAtIndex(4, 0.03e18));
+        _buyCreditLimit(candy, block.timestamp + 150 days, _pointOfferAtIndex(4, 0.04e18));
 
-        uint256 debtPositionId1 = _sellCreditMarket(bob, alice, RESERVED_ID, 100e6, 365 days, false);
+        uint256 debtPositionId1 = _sellCreditMarket(bob, alice, RESERVED_ID, 100e6, _maturity(150 days), false);
         uint256 creditPositionId1 = size.getCreditPositionIdsByDebtPositionId(debtPositionId1)[0];
-        _sellCreditMarket(alice, candy, creditPositionId1, 40e6, 365 days);
+        _sellCreditMarket(alice, candy, creditPositionId1, 40e6, _maturity(150 days));
         uint256[] memory creditPositionIdsDebt1 = size.getCreditPositionIdsByDebtPositionId(debtPositionId1);
         assertEq(creditPositionIdsDebt1.length, 2);
 
-        uint256 debtPositionId2 = _sellCreditMarket(james, alice, RESERVED_ID, 80e6, 365 days, false);
+        uint256 debtPositionId2 = _sellCreditMarket(james, alice, RESERVED_ID, 80e6, _maturity(150 days), false);
 
         uint256 adminWethBefore = weth.balanceOf(address(this));
         uint256 bobWethBefore = weth.balanceOf(bob);
@@ -105,10 +104,10 @@ contract MarketShutdownTest is BaseTest {
         _deposit(bob, weth, 200e18);
         _deposit(james, weth, 200e18);
 
-        _buyCreditLimit(alice, block.timestamp + 365 days, YieldCurveHelper.pointCurve(365 days, 0.03e18));
+        _buyCreditLimit(alice, block.timestamp + 150 days, _pointOfferAtIndex(4, 0.03e18));
 
-        uint256 debtPositionId1 = _sellCreditMarket(bob, alice, RESERVED_ID, 100e6, 365 days, false);
-        uint256 debtPositionId2 = _sellCreditMarket(james, alice, RESERVED_ID, 80e6, 365 days, false);
+        uint256 debtPositionId1 = _sellCreditMarket(bob, alice, RESERVED_ID, 100e6, _maturity(150 days), false);
+        uint256 debtPositionId2 = _sellCreditMarket(james, alice, RESERVED_ID, 80e6, _maturity(150 days), false);
 
         uint256[] memory creditPositionIds1 = size.getCreditPositionIdsByDebtPositionId(debtPositionId1);
         uint256[] memory creditPositionIds2 = size.getCreditPositionIdsByDebtPositionId(debtPositionId2);

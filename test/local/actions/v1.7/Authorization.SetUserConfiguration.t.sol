@@ -14,7 +14,7 @@ import {
 
 import {Action, Authorization} from "@src/factory/libraries/Authorization.sol";
 import {BaseTest} from "@test/BaseTest.sol";
-import {YieldCurveHelper} from "@test/helpers/libraries/YieldCurveHelper.sol";
+import {FixedMaturityLimitOrderHelper} from "@test/helpers/libraries/FixedMaturityLimitOrderHelper.sol";
 
 contract AuthorizationSetUserConfigurationTest is BaseTest {
     function test_AuthorizationSetUserConfiguration_setUserConfigurationOnBehalfOf() public {
@@ -28,18 +28,20 @@ contract AuthorizationSetUserConfigurationTest is BaseTest {
         _deposit(james, weth, 1600e18);
         _deposit(james, usdc, 1000e6);
         _deposit(candy, usdc, 1200e6);
-        _buyCreditLimit(alice, block.timestamp + 12 * 30 days, YieldCurveHelper.pointCurve(6 * 30 days, 0.05e18));
-        _buyCreditLimit(candy, block.timestamp + 12 * 30 days, YieldCurveHelper.pointCurve(7 * 30 days, 0));
-        _sellCreditLimit(alice, block.timestamp + 365 days, YieldCurveHelper.pointCurve(6 * 30 days, 0.04e18));
+        _buyCreditLimit(alice, block.timestamp + 150 days, _pointOfferAtIndex(3, 0.05e18));
+        _buyCreditLimit(candy, block.timestamp + 150 days, _pointOfferAtIndex(4, 0));
+        _sellCreditLimit(alice, block.timestamp + 150 days, _pointOfferAtIndex(3, 0.04e18));
 
-        uint256 tenor = 6 * 30 days;
-        uint256 debtPositionId1 = _sellCreditMarket(bob, alice, RESERVED_ID, 975.94e6, tenor, false);
+        uint256 tenor = 120 days;
+        uint256 debtPositionId1 = _sellCreditMarket(bob, alice, RESERVED_ID, 975.94e6, _maturity(tenor), false);
         uint256 creditPositionId1_1 = size.getCreditPositionIdsByDebtPositionId(debtPositionId1)[0];
         uint256 futureValue = size.getDebtPosition(debtPositionId1).futureValue;
 
         CreditPosition memory creditPosition = size.getCreditPosition(creditPositionId1_1);
         assertEq(creditPosition.lender, alice);
 
+        uint256[] memory creditPositionIds = new uint256[](1);
+        creditPositionIds[0] = creditPositionId1_1;
         vm.prank(candy);
         size.setUserConfigurationOnBehalfOf(
             SetUserConfigurationOnBehalfOfParams({
@@ -47,14 +49,15 @@ contract AuthorizationSetUserConfigurationTest is BaseTest {
                     openingLimitBorrowCR: 0,
                     allCreditPositionsForSaleDisabled: true,
                     creditPositionIdsForSale: false,
-                    creditPositionIds: new uint256[](0)
+                    creditPositionIds: creditPositionIds
                 }),
                 onBehalfOf: alice
             })
         );
 
+        uint256 maturity = _maturity(tenor);
         vm.expectRevert(abi.encodeWithSelector(Errors.CREDIT_NOT_FOR_SALE.selector, creditPositionId1_1));
-        _buyCreditMarket(james, alice, creditPositionId1_1, futureValue, tenor, false);
+        _buyCreditMarket(james, alice, creditPositionId1_1, futureValue, maturity, false);
     }
 
     function test_AuthorizationSetUserConfiguration_validation() public {

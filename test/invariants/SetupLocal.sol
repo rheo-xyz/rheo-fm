@@ -3,7 +3,6 @@ pragma solidity 0.8.23;
 
 import {BaseSetup} from "@chimera/BaseSetup.sol";
 import "@crytic/properties/contracts/util/Hevm.sol";
-import {KEEPER_ROLE} from "@src/factory/SizeFactory.sol";
 
 import {NonTransferrableRebasingTokenVault} from "@src/market/token/NonTransferrableRebasingTokenVault.sol";
 import {Helper} from "@test/invariants/Helper.sol";
@@ -13,7 +12,6 @@ import {DEFAULT_VAULT, ERC4626_ADAPTER_ID} from "@src/market/token/NonTransferra
 abstract contract SetupLocal is Helper, BaseSetup {
     function setup() internal virtual override {
         setupLocal(address(this), address(this));
-        size.grantRole(KEEPER_ROLE, USER2);
 
         address[] memory users = new address[](3);
         users[0] = USER1;
