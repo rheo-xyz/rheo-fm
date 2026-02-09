@@ -12,8 +12,8 @@ import {IPriceFeed} from "@rheo-fm/src/oracle/IPriceFeed.sol";
 import {PriceFeed, PriceFeedParams} from "@rheo-fm/src/oracle/v1.5.1/PriceFeed.sol";
 import {ForkTest} from "@rheo-fm/test/fork/ForkTest.sol";
 
-import {Contract, NetworkConfiguration, Networks} from "@rheo-fm/script/Networks.sol";
-import {RheoFactory} from "@rheo-fm/src/factory/RheoFactory.sol";
+import {Contract, Networks} from "@rheo-fm/script/Networks.sol";
+import {IRheoFactory} from "@rheo-fm/src/factory/interfaces/IRheoFactory.sol";
 
 import {IUniswapV3Pool} from "@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol";
 import {console} from "forge-std/console.sol";
@@ -36,8 +36,8 @@ contract ForkChainlinkGoesDownUniswapIsUsedAsFallbackTest is ForkTest, Networks 
         super.setUp();
         vm.createSelectFork("base_archive");
         sizeCbBtcUsdcOwner = contracts[block.chainid][Contract.RHEO_GOVERNANCE];
-        sizeCbBtcUsdc = _findMarketByNetworkConfiguration(
-            RheoFactory(contracts[block.chainid][Contract.RHEO_FACTORY]), "base-production-cbbtc-usdc"
+        sizeCbBtcUsdc = findMarketByNetworkConfiguration(
+            IRheoFactory(contracts[block.chainid][Contract.RHEO_FACTORY]), "base-production-cbbtc-usdc"
         );
 
         vm.rollFork(blockNumberChainlinkAggregatorRoundId397);
@@ -127,23 +127,5 @@ contract ForkChainlinkGoesDownUniswapIsUsedAsFallbackTest is ForkTest, Networks 
         uint256 chainlinkPrice = v1_5_1PriceFeed.getPrice();
         assertGt(chainlinkPrice, 0);
         assertTrue(uniswapPrice != chainlinkPrice);
-    }
-
-    function _findMarketByNetworkConfiguration(RheoFactory factory, string memory networkConfiguration)
-        internal
-        view
-        returns (IRheo)
-    {
-        NetworkConfiguration memory cfg = params(networkConfiguration);
-        IRheo[] memory markets = factory.getMarkets();
-        for (uint256 i = 0; i < markets.length; i++) {
-            if (
-                address(markets[i].data().underlyingCollateralToken) == cfg.underlyingCollateralToken
-                    && address(markets[i].data().underlyingBorrowToken) == cfg.underlyingBorrowToken
-            ) {
-                return markets[i];
-            }
-        }
-        revert("Market not found");
     }
 }

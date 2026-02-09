@@ -43,6 +43,7 @@ enum Contract {
 
 abstract contract Networks {
     error InvalidNetworkConfiguration(string networkConfiguration);
+    error MarketNotFound(string networkConfiguration);
 
     uint256 public constant ETHEREUM_MAINNET = 1;
     uint256 public constant BASE_MAINNET = 8453;
@@ -257,6 +258,26 @@ abstract contract Networks {
         } else {
             revert InvalidNetworkConfiguration(networkConfiguration);
         }
+    }
+
+    function findMarketByNetworkConfiguration(IRheoFactory factory, string memory networkConfiguration)
+        internal
+        view
+        returns (IRheo)
+    {
+        NetworkConfiguration memory cfg = params(networkConfiguration);
+
+        IRheo[] memory markets = factory.getMarkets();
+        for (uint256 i = 0; i < markets.length; i++) {
+            if (
+                address(markets[i].data().underlyingCollateralToken) == cfg.underlyingCollateralToken
+                    && address(markets[i].data().underlyingBorrowToken) == cfg.underlyingBorrowToken
+            ) {
+                return markets[i];
+            }
+        }
+
+        revert MarketNotFound(networkConfiguration);
     }
 
     function priceFeedVirtualUsdcBaseMainnet()
