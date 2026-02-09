@@ -2,14 +2,14 @@
 pragma solidity 0.8.23;
 
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
-import {Errors} from "@src/market/libraries/Errors.sol";
-import {Math, PERCENT, YEAR} from "@src/market/libraries/Math.sol";
-import {BaseTest} from "@test/BaseTest.sol";
-import {PriceFeedMock} from "@test/mocks/PriceFeedMock.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
+import {Math, PERCENT, YEAR} from "@rheo-fm/src/market/libraries/Math.sol";
+import {BaseTest} from "@rheo-fm/test/BaseTest.sol";
+import {PriceFeedMock} from "@rheo-fm/test/mocks/PriceFeedMock.sol";
 
-import {UpdateConfigParams} from "@src/market/libraries/actions/UpdateConfig.sol";
+import {UpdateConfigParams} from "@rheo-fm/src/market/libraries/actions/UpdateConfig.sol";
 
-import {Size} from "@src/market/Size.sol";
+import {Rheo} from "@rheo-fm/src/market/Rheo.sol";
 
 contract UpdateConfigTest is BaseTest {
     function test_UpdateConfig_updateConfig_reverts_if_not_owner() public {

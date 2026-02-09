@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import "@src/market/Size.sol";
+import "@rheo-fm/src/market/Rheo.sol";
 import "forge-std/Script.sol";
 
 contract DepositWETHScript is Script {
     function run() external {
         console.log("Deposit WETH...");
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-        address sizeContractAddress = vm.envAddress("SIZE_CONTRACT_ADDRESS");
+        address rheoContractAddress = vm.envAddress("RHEO_CONTRACT_ADDRESS");
         address wethAddress = vm.envAddress("WETH_ADDRESS");
 
         address lender = vm.envAddress("LENDER");
@@ -19,12 +19,12 @@ contract DepositWETHScript is Script {
         console.log("lender", lender);
         console.log("borrower", borrower);
 
-        Size size = Size(payable(sizeContractAddress));
+        Rheo rheo = Rheo(payable(rheoContractAddress));
 
         DepositParams memory params = DepositParams({token: wethAddress, amount: amount, to: borrower});
 
         vm.startBroadcast(deployerPrivateKey);
-        size.deposit(params);
+        rheo.deposit(params);
         vm.stopBroadcast();
     }
 }

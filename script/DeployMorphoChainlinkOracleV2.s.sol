@@ -3,14 +3,14 @@ pragma solidity 0.8.23;
 
 import {console} from "forge-std/Script.sol";
 
-import {BaseScript, Deployment, Parameter} from "@script/BaseScript.sol";
-import {Deploy} from "@script/Deploy.sol";
-import {Contract, NetworkConfiguration, Networks} from "@script/Networks.sol";
+import {BaseScript} from "@rheo-fm/script/BaseScript.sol";
+import {Deploy} from "@rheo-fm/script/Deploy.sol";
+import {Contract, NetworkConfiguration, Networks} from "@rheo-fm/script/Networks.sol";
 
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
-import {IMorphoChainlinkOracleV2} from "@src/oracle/adapters/morpho/IMorphoChainlinkOracleV2.sol";
-import {IMorphoChainlinkOracleV2Factory} from "@src/oracle/adapters/morpho/IMorphoChainlinkOracleV2Factory.sol";
+import {IMorphoChainlinkOracleV2} from "@rheo-fm/src/oracle/adapters/morpho/IMorphoChainlinkOracleV2.sol";
+import {IMorphoChainlinkOracleV2Factory} from "@rheo-fm/src/oracle/adapters/morpho/IMorphoChainlinkOracleV2Factory.sol";
 
 contract DeployMorphoChainlinkOracleV2Script is BaseScript, Networks, Deploy {
     function setUp() public {}

@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {BaseTest} from "@test/BaseTest.sol";
-import {Vars} from "@test/BaseTest.sol";
-import {FixedMaturityLimitOrderHelper} from "@test/helpers/libraries/FixedMaturityLimitOrderHelper.sol";
+import {BaseTest} from "@rheo-fm/test/BaseTest.sol";
+import {Vars} from "@rheo-fm/test/BaseTest.sol";
+import {FixedMaturityLimitOrderHelper} from "@rheo-fm/test/helpers/libraries/FixedMaturityLimitOrderHelper.sol";
 
-import {CreditPosition, DebtPosition, LoanStatus, RESERVED_ID} from "@src/market/libraries/LoanLibrary.sol";
+import {CreditPosition, DebtPosition, LoanStatus, RESERVED_ID} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
 
 contract ClaimTest is BaseTest {
     function test_Claim_claim_gets_loan_FV_back() public {
@@ -187,7 +187,7 @@ contract ClaimTest is BaseTest {
         Vars memory _s1 = _state();
 
         assertEq(_s1.alice.borrowTokenBalance, 100e6, "Alice borrowed 100e6");
-        assertEq(_s1.size.borrowTokenBalance, 0, "Size has 0");
+        assertEq(_s1.size.borrowTokenBalance, 0, "Rheo has 0");
 
         _setLiquidityIndex(2e27);
         _repay(alice, debtPositionId, alice);
@@ -198,7 +198,7 @@ contract ClaimTest is BaseTest {
         assertEq(
             _s2.size.borrowTokenBalance,
             100e6,
-            "Alice repaid amount is now on Size for claiming for DebtPosition/CreditPosition"
+            "Alice repaid amount is now on Rheo for claiming for DebtPosition/CreditPosition"
         );
 
         _setLiquidityIndex(8e27);
@@ -210,7 +210,7 @@ contract ClaimTest is BaseTest {
         assertEq(
             _s3.size.borrowTokenBalance,
             360e6,
-            "Size had 100e6 for claiming, it 4x to 400e6, and Candy claimed 40e6, now there's 360e6 left for claiming"
+            "Rheo had 100e6 for claiming, it 4x to 400e6, and Candy claimed 40e6, now there's 360e6 left for claiming"
         );
 
         _setLiquidityIndex(16e27);
@@ -224,7 +224,7 @@ contract ClaimTest is BaseTest {
             "Bob lent 100e6 and was repaid and it 8x, and it borrowed 10e6 and it 8x, so it is now 880e6"
         );
         assertEq(_s4.candy.borrowTokenBalance, 80e6, "Candy borrowed 40e6 2x, so it is now 80e6");
-        assertEq(_s4.size.borrowTokenBalance, 0, "Size has 0 because everything was claimed");
+        assertEq(_s4.size.borrowTokenBalance, 0, "Rheo has 0 because everything was claimed");
     }
 
     function test_Claim_isClaimable() public {

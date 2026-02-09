@@ -1,14 +1,15 @@
 # rheo-fm [![Coverage Status](https://coveralls.io/repos/github/rheo-xyz/rheo-fm/badge.svg?branch=main)](https://coveralls.io/github/rheo-xyz/rheo-fm?branch=main) [![CI](https://github.com/rheo-xyz/rheo-fm/actions/workflows/ci.yml/badge.svg)](https://github.com/rheo-xyz/rheo-fm/actions/workflows/ci.yml) [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/rheo-xyz/rheo-fm)
 
-<a href="https://github.com/rheo-xyz/rheo-solidity/raw/main/logo.PNG"><img src="https://github.com/rheo-xyz/rheo-solidity/raw/main/logo.PNG" width="300" alt="Logo"/></a>
+<a href="https://github.com/rheo-xyz/rheo-fm/raw/main/logo.PNG"><img src="https://github.com/rheo-xyz/rheo-fm/raw/main/logo.PNG" width="300" alt="Logo"/></a>
 
-Rheo (prev. Size Credit) is a credit marketplace with unified liquidity across maturities.
+Rheo is a credit marketplace with unified liquidity across maturities.
 This repo implements fixed-maturity (FM) markets; see [SPECS.md](./SPECS.md).
 
-Networks:
+Deployments:
 
-- [Ethereum mainnet](./deployments/mainnet-size-factory.json)
-- [Base](./deployments/base-production-size-factory.json)
+- This repository does not include deployment artifacts yet (this is a fork intended to be deployed from scratch).
+- Canonical Rheo deployments live in `rheo-solidity`.
+- Chain-specific addresses used by scripts/tests live in `script/Networks.sol`.
 
 ## Audits
 
@@ -39,14 +40,14 @@ For bug reports, please refer to our [Bug Bounty Program](https://cantina.xyz/bo
 
 #### Architecture
 
-The architecture of Size v2 was inspired by [dYdX v2](https://github.com/dydxprotocol/solo), with the following design goals:
+The architecture of Rheo v2 was inspired by [dYdX v2](https://github.com/dydxprotocol/solo), with the following design goals:
 
 - Upgradeability
 - Modularity
 - Overcome [EIP-170](https://eips.ethereum.org/EIPS/eip-170)'s contract code size limit of 24kb
 - Maintaining the protocol invariants after each user interaction (["FREI-PI" pattern](https://www.nascent.xyz/idea/youre-writing-require-statements-wrong))
 
-For that purpose, the contract is deployed behind an UUPS-Upgradeable proxy, and contains a single entrypoint, `Size.sol`. External libraries are used, and a single `State storage` variable is passed to them via `delegatecall`s. All user-facing functions have the same pattern:
+For that purpose, the contract is deployed behind an UUPS-Upgradeable proxy, and contains a single entrypoint, `Rheo.sol`. External libraries are used, and a single `State storage` variable is passed to them via `delegatecall`s. All user-facing functions have the same pattern:
 
 ```solidity
 state.validateFunction(params);
@@ -86,13 +87,13 @@ A contract that provides the price of ETH in terms of USDC in 18 decimals. For e
 
 #### Factory
 
-After v1.5, markets can be deployed through a `SizeFactory` contract. This contract is a central point of the Size ecosystem, as it enables `NonTransferrableScaledTokenV1_5` contracts (such as `saUSDC`) to mint/burn deposit tokens to users who deposit/withdraw, essentially enabling shared liquidity across different markets. For example, a user may deposit USDC to the WETH/USDC market but use the same liquidity to lend on the cbBTC/USDC market.
+After v1.5, markets can be deployed through a `RheoFactory` contract. This contract is a central point of the Rheo ecosystem, as it enables `NonTransferrableScaledTokenV1_5` contracts (such as `saUSDC`) to mint/burn deposit tokens to users who deposit/withdraw, essentially enabling shared liquidity across different markets. For example, a user may deposit USDC to the WETH/USDC market but use the same liquidity to lend on the cbBTC/USDC market.
 
-After v1.7, the `SizeFactory` also holds the access control for all Size markets. A fallback mechanism is still used on individual markets, where roles are first checked on each deployment, and then on the factory contract. This means the administrator must take appropriate care to revoke roles both on the factory and on individual markets in case of a privilege de-escalation scenario. The benefit of this approach is that existing markets will continue to work as usual even if all accounts have not been granted roles on the SizeFactory contract. Note: This change allows the factory access control to act on behalf of a role (e.g., pause a market) but does not grant it the ability to manage roles (grant/revoke). Role management in `AccessControl`'s for market is strictly governed by the market-scoped `DEFAULT_ADMIN_ROLE`, which is not overridden by the factory access control, which means, if the admin revokes his role with `renounceRole`, it may not be able to revoke other roles later.
+After v1.7, the `RheoFactory` also holds the access control for all Rheo markets. A fallback mechanism is still used on individual markets, where roles are first checked on each deployment, and then on the factory contract. This means the administrator must take appropriate care to revoke roles both on the factory and on individual markets in case of a privilege de-escalation scenario. The benefit of this approach is that existing markets will continue to work as usual even if all accounts have not been granted roles on the RheoFactory contract. Note: This change allows the factory access control to act on behalf of a role (e.g., pause a market) but does not grant it the ability to manage roles (grant/revoke). Role management in `AccessControl`'s for market is strictly governed by the market-scoped `DEFAULT_ADMIN_ROLE`, which is not overridden by the factory access control, which means, if the admin revokes his role with `renounceRole`, it may not be able to revoke other roles later.
 
 #### Copy trading
 
-In Size v1.6.1, a `copyLimitOrders` function was introduced so that users could copy other users' limit orders. The feature behaved as follows:
+In Rheo v1.6.1, a `copyLimitOrders` function was introduced so that users could copy other users' limit orders. The feature behaved as follows:
 
 - Users could copy borrow/loan offers from other users
 - Users could copy both or a single offer from a single address
@@ -114,7 +115,7 @@ After v1.8, the `CollectionsManager` core contract was introduced, which superse
 
 #### Authorization
 
-Users can authorize other operator accounts to perform specific actions or any action on their behalf on any market (per chain) through a new `setAuthorization` method called on the `SizeFactory` introduced in v1.7. This enables users to delegate all Size functionalities to third parties, enabling more complex strategies and automations.
+Users can authorize other operator accounts to perform specific actions or any action on their behalf on any market (per chain) through a new `setAuthorization` method called on the `RheoFactory` introduced in v1.7. This enables users to delegate all Rheo functionalities to third parties, enabling more complex strategies and automations.
 
 Some use cases of delegation are:
 
@@ -156,7 +157,7 @@ Since there can be an unlimited number of whitelisted vaults, the amount of unde
 
 #### Collections, curators and rate providers
 
-Since Size v1.8, collections of markets, curators and rate providers are core entities of the ecosystem. This superseedes the previous `copyLimitOrders` feature from v1.6.1, but with more functionality:
+Since Rheo v1.8, collections of markets, curators and rate providers are core entities of the ecosystem. This superseedes the previous `copyLimitOrders` feature from v1.6.1, but with more functionality:
 
 - A *collection* is a set of markets grouped under a curator.
 - A *Curator* defines *rate providers* (RPs) for each market, which publish fixed-maturity offers and compete in pricing credit.
@@ -181,8 +182,8 @@ Since Size v1.8, collections of markets, curators and rate providers are core en
   - All users who previously used the `copyLimitOrder` feature are now subscribed to a new collection that mirrors the rate provider they had copied.
   - Their existing limit orders are cleared, since these may now be used by the taker side of a market order.
 - To indicate "no copy," users should pass a `CopyLimitOrderConfig` with all fields set to null except `offsetAPR`.
-- For the sake of clarity, `getLoanOfferAPR` and `getBorrowOfferAPR` on the `SizeView` contract were renamed to `getUserDefinedLoanOfferAPR` and `getUserDefinedBorrowOfferAPR` to be explicit about whether the offer is from a rate provider or from the user themselves.
-- Some infrequently utilized `SizeView` functions were removed to make room for the additional `WithCollection` functions and not break the max contract size limit.
+- For the sake of clarity, `getLoanOfferAPR` and `getBorrowOfferAPR` on the `RheoView` contract were renamed to `getUserDefinedLoanOfferAPR` and `getUserDefinedBorrowOfferAPR` to be explicit about whether the offer is from a rate provider or from the user themselves.
+- Some infrequently utilized `RheoView` functions were removed to make room for the additional `WithCollection` functions and not break the max contract size limit.
 
 ## Test
 
@@ -238,7 +239,7 @@ for i in {0..5}; do halmos --loop $i; done
 - In case the protocol is paused, the price of the collateral may change during the unpause event. This may cause unforseen liquidations, among other issues
 - It is not possible to pause individual functions. Nevertheless, the functions of trusted roles are enabled even if the protocol is paused
 - Users blacklisted by underlying tokens (e.g. USDC) may be unable to withdraw
-- If the user vault (by default Aave v3) fails to deposit or withdraw for any reason, such as supply caps or low liquidity, Size's `deposit` and `withdraw` may be prevented.
+- If the user vault (by default Aave v3) fails to deposit or withdraw for any reason, such as supply caps or low liquidity, Rheo's `deposit` and `withdraw` may be prevented.
 - Centralization risk related to integrations (USDC, Aave v3, Chainlink) are out of scope
 - The fragmentation fee meant to subsidize `claim` operations by protocol-owned keeper bots during credit splits are not charged during loan origination
 - The debt token cap can be inexpensively met with self-borrows, even if there is no benefit to the attacker. Reducing the debt cap does not affect currently open positions.

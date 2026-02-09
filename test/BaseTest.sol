@@ -4,59 +4,59 @@ pragma solidity 0.8.23;
 import {Test} from "forge-std/Test.sol";
 
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
-import {ISize} from "@src/market/interfaces/ISize.sol";
-import {AssertsHelper} from "@test/helpers/AssertsHelper.sol";
+import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
+import {AssertsHelper} from "@rheo-fm/test/helpers/AssertsHelper.sol";
 
-import {NonTransferrableRebasingTokenVault} from "@src/market/token/NonTransferrableRebasingTokenVault.sol";
-import {UNISWAP_V3_FACTORY_BYTECODE} from "@test/mocks/UniswapV3FactoryBytecode.sol";
+import {NonTransferrableRebasingTokenVault} from "@rheo-fm/src/market/token/NonTransferrableRebasingTokenVault.sol";
+import {UNISWAP_V3_FACTORY_BYTECODE} from "@rheo-fm/test/mocks/UniswapV3FactoryBytecode.sol";
 import {IUniswapV3Factory} from "@uniswap/v3-core/contracts/interfaces/IUniswapV3Factory.sol";
 
 import {IERC4626} from "@openzeppelin/contracts/interfaces/IERC4626.sol";
 
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
-import {Size} from "@src/market/Size.sol";
-import {FixedMaturityLimitOrder} from "@src/market/libraries/OfferLibrary.sol";
-import {FixedMaturityLimitOrderHelper} from "@test/helpers/libraries/FixedMaturityLimitOrderHelper.sol";
+import {Rheo} from "@rheo-fm/src/market/Rheo.sol";
+import {FixedMaturityLimitOrder} from "@rheo-fm/src/market/libraries/OfferLibrary.sol";
+import {FixedMaturityLimitOrderHelper} from "@rheo-fm/test/helpers/libraries/FixedMaturityLimitOrderHelper.sol";
 
-import {DepositParams} from "@src/market/libraries/actions/Deposit.sol";
-import {WithdrawParams} from "@src/market/libraries/actions/Withdraw.sol";
+import {DepositParams} from "@rheo-fm/src/market/libraries/actions/Deposit.sol";
+import {WithdrawParams} from "@rheo-fm/src/market/libraries/actions/Withdraw.sol";
 
-import {SellCreditLimitParams} from "@src/market/libraries/actions/SellCreditLimit.sol";
+import {SellCreditLimitParams} from "@rheo-fm/src/market/libraries/actions/SellCreditLimit.sol";
 import {
     SellCreditMarketOnBehalfOfParams,
     SellCreditMarketParams
-} from "@src/market/libraries/actions/SellCreditMarket.sol";
+} from "@rheo-fm/src/market/libraries/actions/SellCreditMarket.sol";
 
-import {DEBT_POSITION_ID_START, RESERVED_ID} from "@src/market/libraries/LoanLibrary.sol";
+import {DEBT_POSITION_ID_START, RESERVED_ID} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
 
-import {BuyCreditLimitParams} from "@src/market/libraries/actions/BuyCreditLimit.sol";
-import {ClaimParams} from "@src/market/libraries/actions/Claim.sol";
-import {LiquidateParams} from "@src/market/libraries/actions/Liquidate.sol";
+import {BuyCreditLimitParams} from "@rheo-fm/src/market/libraries/actions/BuyCreditLimit.sol";
+import {ClaimParams} from "@rheo-fm/src/market/libraries/actions/Claim.sol";
+import {LiquidateParams} from "@rheo-fm/src/market/libraries/actions/Liquidate.sol";
 
-import {CompensateParams} from "@src/market/libraries/actions/Compensate.sol";
+import {CompensateParams} from "@rheo-fm/src/market/libraries/actions/Compensate.sol";
 
-import {PartialRepayParams} from "@src/market/libraries/actions/PartialRepay.sol";
-import {RepayParams} from "@src/market/libraries/actions/Repay.sol";
-import {SelfLiquidateParams} from "@src/market/libraries/actions/SelfLiquidate.sol";
+import {PartialRepayParams} from "@rheo-fm/src/market/libraries/actions/PartialRepay.sol";
+import {RepayParams} from "@rheo-fm/src/market/libraries/actions/Repay.sol";
+import {SelfLiquidateParams} from "@rheo-fm/src/market/libraries/actions/SelfLiquidate.sol";
 
-import {BuyCreditMarketParams} from "@src/market/libraries/actions/BuyCreditMarket.sol";
-import {SetUserConfigurationParams} from "@src/market/libraries/actions/SetUserConfiguration.sol";
-import {SetVaultParams} from "@src/market/libraries/actions/SetVault.sol";
+import {BuyCreditMarketParams} from "@rheo-fm/src/market/libraries/actions/BuyCreditMarket.sol";
+import {SetUserConfigurationParams} from "@rheo-fm/src/market/libraries/actions/SetUserConfiguration.sol";
+import {SetVaultParams} from "@rheo-fm/src/market/libraries/actions/SetVault.sol";
 
-import {UserView} from "@src/market/SizeView.sol";
-import {CopyLimitOrderConfig} from "@src/market/libraries/OfferLibrary.sol";
-import {SetCopyLimitOrderConfigsParams} from "@src/market/libraries/actions/SetCopyLimitOrderConfigs.sol";
+import {UserView} from "@rheo-fm/src/market/RheoView.sol";
+import {CopyLimitOrderConfig} from "@rheo-fm/src/market/libraries/OfferLibrary.sol";
+import {SetCopyLimitOrderConfigsParams} from "@rheo-fm/src/market/libraries/actions/SetCopyLimitOrderConfigs.sol";
 
-import {DataView} from "@src/market/SizeViewData.sol";
-import {ISizeView} from "@src/market/interfaces/ISizeView.sol";
-import {UpdateConfigParams} from "@src/market/libraries/actions/UpdateConfig.sol";
+import {DataView} from "@rheo-fm/src/market/RheoViewData.sol";
+import {IRheoView} from "@rheo-fm/src/market/interfaces/IRheoView.sol";
+import {UpdateConfigParams} from "@rheo-fm/src/market/libraries/actions/UpdateConfig.sol";
 
-import {PoolMock} from "@test/mocks/PoolMock.sol";
-import {PriceFeedMock} from "@test/mocks/PriceFeedMock.sol";
+import {PoolMock} from "@rheo-fm/test/mocks/PoolMock.sol";
+import {PriceFeedMock} from "@rheo-fm/test/mocks/PriceFeedMock.sol";
 
-import {ActionsBitmap} from "@src/factory/libraries/Authorization.sol";
+import {ActionsBitmap} from "@rheo-fm/src/factory/libraries/Authorization.sol";
 
-import {Deploy} from "@script/Deploy.sol";
+import {Deploy} from "@rheo-fm/script/Deploy.sol";
 
 struct Vars {
     UserView alice;
@@ -185,9 +185,9 @@ contract BaseTest is Test, Deploy, AssertsHelper {
         vm.label(liquidator, "liquidator");
         vm.label(feeRecipient, "feeRecipient");
 
-        vm.label(address(proxy), "Size-proxy");
-        vm.label(address(implementation), "Size-implementation");
-        vm.label(address(size), "Size");
+        vm.label(address(proxy), "Rheo-proxy");
+        vm.label(address(implementation), "Rheo-implementation");
+        vm.label(address(size), "Rheo");
         vm.label(address(priceFeed), "PriceFeed");
         vm.label(address(usdc), "USDC");
         vm.label(address(weth), "WETH");
@@ -197,7 +197,7 @@ contract BaseTest is Test, Deploy, AssertsHelper {
         vm.label(address(size.data().borrowTokenVault), "szvUSDC");
         vm.label(address(size.data().debtToken), "szDebtUSDC");
 
-        vm.label(address(sizeFactory), "SizeFactory");
+        vm.label(address(sizeFactory), "RheoFactory");
 
         vm.label(address(vaultSolady), "ERC4626Solady");
         vm.label(address(vaultOpenZeppelin), "ERC4626OpenZeppelin");
@@ -218,13 +218,13 @@ contract BaseTest is Test, Deploy, AssertsHelper {
         vm.label(address(this), "Test");
     }
 
-    function _findMarket(string memory collateralSymbol, string memory borrowSymbol) internal view returns (ISize) {
-        ISize[] memory markets = sizeFactory.getMarkets();
+    function _findMarket(string memory collateralSymbol, string memory borrowSymbol) internal view returns (IRheo) {
+        IRheo[] memory markets = sizeFactory.getMarkets();
         bytes32 collateralHash = keccak256(bytes(collateralSymbol));
         bytes32 borrowHash = keccak256(bytes(borrowSymbol));
 
         for (uint256 i = 0; i < markets.length; i++) {
-            DataView memory dataView = ISizeView(address(markets[i])).data();
+            DataView memory dataView = IRheoView(address(markets[i])).data();
             if (
                 keccak256(bytes(dataView.underlyingCollateralToken.symbol())) == collateralHash
                     && keccak256(bytes(dataView.underlyingBorrowToken.symbol())) == borrowHash
@@ -660,14 +660,14 @@ contract BaseTest is Test, Deploy, AssertsHelper {
         collectionId = collectionsManager.createCollection();
     }
 
-    function _addMarketToCollection(address user, uint256 collectionId, ISize market) internal {
-        ISize[] memory markets = new ISize[](1);
+    function _addMarketToCollection(address user, uint256 collectionId, IRheo market) internal {
+        IRheo[] memory markets = new IRheo[](1);
         markets[0] = market;
         vm.prank(user);
         collectionsManager.addMarketsToCollection(collectionId, markets);
     }
 
-    function _addRateProviderToCollectionMarket(address user, uint256 collectionId, ISize market, address rateProvider)
+    function _addRateProviderToCollectionMarket(address user, uint256 collectionId, IRheo market, address rateProvider)
         internal
     {
         address[] memory rateProviders = new address[](1);
@@ -679,7 +679,7 @@ contract BaseTest is Test, Deploy, AssertsHelper {
     function _removeRateProviderFromCollectionMarket(
         address user,
         uint256 collectionId,
-        ISize market,
+        IRheo market,
         address rateProvider
     ) internal {
         address[] memory rateProviders = new address[](1);

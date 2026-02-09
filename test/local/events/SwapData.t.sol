@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {BaseTest} from "@test/BaseTest.sol";
+import {BaseTest} from "@rheo-fm/test/BaseTest.sol";
 
-import {Events} from "@src/market/libraries/Events.sol";
-import {CREDIT_POSITION_ID_START, RESERVED_ID} from "@src/market/libraries/LoanLibrary.sol";
+import {Events} from "@rheo-fm/src/market/libraries/Events.sol";
+import {CREDIT_POSITION_ID_START, RESERVED_ID} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
 
-import {Math, PERCENT} from "@src/market/libraries/Math.sol";
-import {BuyCreditMarket, BuyCreditMarketParams} from "@src/market/libraries/actions/BuyCreditMarket.sol";
+import {Math, PERCENT} from "@rheo-fm/src/market/libraries/Math.sol";
+import {BuyCreditMarket, BuyCreditMarketParams} from "@rheo-fm/src/market/libraries/actions/BuyCreditMarket.sol";
 
 contract SwapDataTest is BaseTest {
     function test_SwapData_borrowerAPR_lenderAPR() public {

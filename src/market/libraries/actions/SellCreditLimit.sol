@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {State} from "@src/market/SizeStorage.sol";
+import {State} from "@rheo-fm/src/market/RheoStorage.sol";
 
-import {Action} from "@src/factory/libraries/Authorization.sol";
-import {Errors} from "@src/market/libraries/Errors.sol";
-import {Events} from "@src/market/libraries/Events.sol";
-import {FixedMaturityLimitOrder, OfferLibrary} from "@src/market/libraries/OfferLibrary.sol";
+import {Action} from "@rheo-fm/src/factory/libraries/Authorization.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
+import {Events} from "@rheo-fm/src/market/libraries/Events.sol";
+import {FixedMaturityLimitOrder, OfferLibrary} from "@rheo-fm/src/market/libraries/OfferLibrary.sol";
 
 struct SellCreditLimitParams {
     // The fixed maturities of the borrow offer
@@ -23,8 +23,8 @@ struct SellCreditLimitOnBehalfOfParams {
 }
 
 /// @title SellCreditLimit
-/// @custom:security-contact security@size.credit
-/// @author Size (https://size.credit/)
+/// @custom:security-contact security@rheo.xyz
+/// @author Rheo (https://rheo.xyz/)
 /// @notice Contains the logic for selling credit (borrowing) as a limit order
 library SellCreditLimit {
     using OfferLibrary for FixedMaturityLimitOrder;

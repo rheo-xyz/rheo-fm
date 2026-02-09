@@ -7,12 +7,12 @@ import {IERC20Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.so
 import {ERC4626 as ERC4626OpenZeppelin} from "@openzeppelin/contracts/token/ERC20/extensions/ERC4626.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 
-import {Deploy} from "@script/Deploy.sol";
-import {IAdapter} from "@src/market/token/adapters/IAdapter.sol";
+import {Deploy} from "@rheo-fm/script/Deploy.sol";
+import {IAdapter} from "@rheo-fm/src/market/token/adapters/IAdapter.sol";
 import {console} from "forge-std/console.sol";
 
-import {Errors} from "@src/market/libraries/Errors.sol";
-import {Properties} from "@test/invariants/Properties.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
+import {Properties} from "@rheo-fm/test/invariants/Properties.sol";
 
 import {ERC4626 as ERC4626OpenZeppelin} from "@openzeppelin/contracts/token/ERC20/extensions/ERC4626.sol";
 import {ERC4626 as ERC4626Solady} from "@solady/src/tokens/ERC4626.sol";

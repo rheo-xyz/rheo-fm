@@ -5,14 +5,14 @@ import {WadRayMath} from "@aave/protocol/libraries/math/WadRayMath.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IERC4626} from "@openzeppelin/contracts/interfaces/IERC4626.sol";
 import {IERC20Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
-import {Math} from "@src/market/libraries/Math.sol";
+import {Math} from "@rheo-fm/src/market/libraries/Math.sol";
 
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-import {Errors} from "@src/market/libraries/Errors.sol";
-import {NonTransferrableRebasingTokenVault} from "@src/market/token/NonTransferrableRebasingTokenVault.sol";
-import {IAdapter} from "@src/market/token/adapters/IAdapter.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
+import {NonTransferrableRebasingTokenVault} from "@rheo-fm/src/market/token/NonTransferrableRebasingTokenVault.sol";
+import {IAdapter} from "@rheo-fm/src/market/token/adapters/IAdapter.sol";
 
 contract ERC4626Adapter is Ownable, IAdapter {
     using SafeERC20 for IERC20Metadata;

@@ -6,22 +6,23 @@ import {ERC721EnumerableUpgradeable} from
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import {CopyLimitOrderConfig, OfferLibrary} from "@src/market/libraries/OfferLibrary.sol";
+import {CopyLimitOrderConfig, OfferLibrary} from "@rheo-fm/src/market/libraries/OfferLibrary.sol";
 
-import {CollectionsManagerBase} from "@src/collections/CollectionsManagerBase.sol";
+import {CollectionsManagerBase} from "@rheo-fm/src/collections/CollectionsManagerBase.sol";
 
-import {ICollectionsManagerCuratorActions} from "@src/collections/interfaces/ICollectionsManagerCuratorActions.sol";
+import {ICollectionsManagerCuratorActions} from
+    "@rheo-fm/src/collections/interfaces/ICollectionsManagerCuratorActions.sol";
 
-import {ISizeFactory} from "@src/factory/interfaces/ISizeFactory.sol";
-import {ISize} from "@src/market/interfaces/ISize.sol";
+import {IRheoFactory} from "@rheo-fm/src/factory/interfaces/IRheoFactory.sol";
+import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
 
-import {Errors} from "@src/market/libraries/Errors.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
 
 bytes32 constant DEFAULT_ADMIN_ROLE = 0x00;
 
 /// @title CollectionsManagerCuratorActions
-/// @custom:security-contact security@size.credit
-/// @author Size (https://size.credit/)
+/// @custom:security-contact security@rheo.xyz
+/// @author Rheo (https://rheo.xyz/)
 /// @notice See the documentation in {ICollectionsManagerCuratorActions}.
 abstract contract CollectionsManagerCuratorActions is
     ICollectionsManagerCuratorActions,
@@ -50,7 +51,7 @@ abstract contract CollectionsManagerCuratorActions is
     }
 
     /// @inheritdoc ICollectionsManagerCuratorActions
-    function addMarketsToCollection(uint256 collectionId, ISize[] memory markets)
+    function addMarketsToCollection(uint256 collectionId, IRheo[] memory markets)
         external
         onlyCollectionCuratorAuthorized(collectionId)
     {
@@ -70,7 +71,7 @@ abstract contract CollectionsManagerCuratorActions is
     }
 
     /// @inheritdoc ICollectionsManagerCuratorActions
-    function removeMarketsFromCollection(uint256 collectionId, ISize[] memory markets)
+    function removeMarketsFromCollection(uint256 collectionId, IRheo[] memory markets)
         external
         onlyCollectionCuratorAuthorized(collectionId)
     {
@@ -83,7 +84,7 @@ abstract contract CollectionsManagerCuratorActions is
     }
 
     /// @inheritdoc ICollectionsManagerCuratorActions
-    function addRateProvidersToCollectionMarket(uint256 collectionId, ISize market, address[] memory rateProviders)
+    function addRateProvidersToCollectionMarket(uint256 collectionId, IRheo market, address[] memory rateProviders)
         external
         onlyCollectionCuratorAuthorized(collectionId)
     {
@@ -100,7 +101,7 @@ abstract contract CollectionsManagerCuratorActions is
     }
 
     /// @inheritdoc ICollectionsManagerCuratorActions
-    function removeRateProvidersFromCollectionMarket(uint256 collectionId, ISize market, address[] memory rateProviders)
+    function removeRateProvidersFromCollectionMarket(uint256 collectionId, IRheo market, address[] memory rateProviders)
         public
         onlyCollectionCuratorAuthorized(collectionId)
     {

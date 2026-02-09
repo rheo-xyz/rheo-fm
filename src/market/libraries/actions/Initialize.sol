@@ -4,29 +4,29 @@ pragma solidity 0.8.23;
 import {IAToken} from "@aave/interfaces/IAToken.sol";
 import {IPool} from "@aave/interfaces/IPool.sol";
 
-import {ISizeFactory} from "@src/factory/interfaces/ISizeFactory.sol";
+import {IRheoFactory} from "@rheo-fm/src/factory/interfaces/IRheoFactory.sol";
 
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import {IWETH} from "@src/market/interfaces/IWETH.sol";
+import {IWETH} from "@rheo-fm/src/market/interfaces/IWETH.sol";
 
-import {Math, PERCENT, YEAR} from "@src/market/libraries/Math.sol";
+import {Math, PERCENT, YEAR} from "@rheo-fm/src/market/libraries/Math.sol";
 
-import {CREDIT_POSITION_ID_START, DEBT_POSITION_ID_START} from "@src/market/libraries/LoanLibrary.sol";
+import {CREDIT_POSITION_ID_START, DEBT_POSITION_ID_START} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
 
-import {IPriceFeed} from "@src/oracle/IPriceFeed.sol";
+import {IPriceFeed} from "@rheo-fm/src/oracle/IPriceFeed.sol";
 
-import {NonTransferrableRebasingTokenVault} from "@src/market/token/NonTransferrableRebasingTokenVault.sol";
-import {NonTransferrableToken} from "@src/market/token/NonTransferrableToken.sol";
+import {NonTransferrableRebasingTokenVault} from "@rheo-fm/src/market/token/NonTransferrableRebasingTokenVault.sol";
+import {NonTransferrableToken} from "@rheo-fm/src/market/token/NonTransferrableToken.sol";
 
-import {State} from "@src/market/SizeStorage.sol";
+import {State} from "@rheo-fm/src/market/RheoStorage.sol";
 
-import {Errors} from "@src/market/libraries/Errors.sol";
-import {Events} from "@src/market/libraries/Events.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
+import {Events} from "@rheo-fm/src/market/libraries/Events.sol";
 
-// See SizeStorage.sol for the definitions of the structs below
+// See RheoStorage.sol for the definitions of the structs below
 struct InitializeFeeConfigParams {
     uint256 swapFeeAPR;
     uint256 fragmentationFee;
@@ -59,8 +59,8 @@ struct InitializeDataParams {
 }
 
 /// @title Initialize
-/// @custom:security-contact security@size.credit
-/// @author Size (https://size.credit/)
+/// @custom:security-contact security@rheo.xyz
+/// @author Rheo (https://rheo.xyz/)
 /// @notice Contains the logic to initialize the protocol
 /// @dev The collateralToken (e.g. szETH) and debtToken (e.g. szDebt) are created in the `executeInitialize` function
 ///      The borrowTokenVault (e.g. svUSDC) must have been deployed before the initialization
@@ -272,17 +272,17 @@ library Initialize {
 
         state.data.collateralToken = new NonTransferrableToken(
             address(this),
-            string.concat("Size ", IERC20Metadata(state.data.underlyingCollateralToken).name()),
+            string.concat("Rheo ", IERC20Metadata(state.data.underlyingCollateralToken).name()),
             string.concat("sz", IERC20Metadata(state.data.underlyingCollateralToken).symbol()),
             IERC20Metadata(state.data.underlyingCollateralToken).decimals()
         );
         state.data.debtToken = new NonTransferrableToken(
             address(this),
-            string.concat("Size Debt ", IERC20Metadata(state.data.underlyingBorrowToken).name()),
+            string.concat("Rheo Debt ", IERC20Metadata(state.data.underlyingBorrowToken).name()),
             string.concat("szDebt", IERC20Metadata(state.data.underlyingBorrowToken).symbol()),
             IERC20Metadata(state.data.underlyingBorrowToken).decimals()
         );
-        state.data.sizeFactory = ISizeFactory(d.sizeFactory);
+        state.data.sizeFactory = IRheoFactory(d.sizeFactory);
         state.data.borrowTokenVault = NonTransferrableRebasingTokenVault(d.borrowTokenVault);
         state.data.debtTokenCap = type(uint256).max;
         state.data.overdueLiquidationRewardPercent = state.feeConfig.liquidationRewardPercent;

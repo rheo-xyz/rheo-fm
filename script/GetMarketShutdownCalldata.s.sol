@@ -2,71 +2,71 @@
 pragma solidity 0.8.23;
 
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import {BaseScript} from "@script/BaseScript.sol";
-import {Contract, Networks} from "@script/Networks.sol";
+import {BaseScript} from "@rheo-fm/script/BaseScript.sol";
+import {Contract, Networks} from "@rheo-fm/script/Networks.sol";
 
-import {DataView} from "@src/market/SizeViewData.sol";
-import {ISize} from "@src/market/interfaces/ISize.sol";
-import {ISizeAdmin} from "@src/market/interfaces/ISizeAdmin.sol";
-import {ISizeView} from "@src/market/interfaces/ISizeView.sol";
+import {DataView} from "@rheo-fm/src/market/RheoViewData.sol";
+import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
+import {IRheoAdmin} from "@rheo-fm/src/market/interfaces/IRheoAdmin.sol";
+import {IRheoView} from "@rheo-fm/src/market/interfaces/IRheoView.sol";
 import {
     CREDIT_POSITION_ID_START,
     CreditPosition,
     DEBT_POSITION_ID_START,
     DebtPosition
-} from "@src/market/libraries/LoanLibrary.sol";
-import {MarketShutdownParams} from "@src/market/libraries/actions/MarketShutdown.sol";
+} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
+import {MarketShutdownParams} from "@rheo-fm/src/market/libraries/actions/MarketShutdown.sol";
 
 contract GetMarketShutdownCalldataScript is BaseScript, Networks {
     using EnumerableSet for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.UintSet;
 
-    mapping(ISize market => EnumerableSet.AddressSet) private borrowersByMarket;
-    mapping(ISize market => EnumerableSet.AddressSet) private lendersByMarket;
-    mapping(ISize market => EnumerableSet.UintSet) private debtPositionIdsByMarket;
-    mapping(ISize market => EnumerableSet.UintSet) private creditPositionIdsByMarket;
-    mapping(ISize market => uint256) private sumFutureValueByMarket;
+    mapping(IRheo market => EnumerableSet.AddressSet) private borrowersByMarket;
+    mapping(IRheo market => EnumerableSet.AddressSet) private lendersByMarket;
+    mapping(IRheo market => EnumerableSet.UintSet) private debtPositionIdsByMarket;
+    mapping(IRheo market => EnumerableSet.UintSet) private creditPositionIdsByMarket;
+    mapping(IRheo market => uint256) private sumFutureValueByMarket;
 
     function run() public pure {}
 
-    function getMarketShutdownCalldata(ISize market) public returns (bytes memory calldata_) {
+    function getMarketShutdownCalldata(IRheo market) public returns (bytes memory calldata_) {
         MarketShutdownParams memory shutdownParams = _collectPositions(market, type(uint256).max, type(uint256).max);
-        calldata_ = abi.encodeCall(ISizeAdmin.marketShutdown, (shutdownParams));
+        calldata_ = abi.encodeCall(IRheoAdmin.marketShutdown, (shutdownParams));
     }
 
-    function getMarketShutdownCalldataWithMaxIds(ISize market, uint256 maxDebtIds, uint256 maxCreditIds)
+    function getMarketShutdownCalldataWithMaxIds(IRheo market, uint256 maxDebtIds, uint256 maxCreditIds)
         public
         returns (bytes memory calldata_)
     {
         MarketShutdownParams memory shutdownParams = _collectPositions(market, maxDebtIds, maxCreditIds);
-        calldata_ = abi.encodeCall(ISizeAdmin.marketShutdown, (shutdownParams));
+        calldata_ = abi.encodeCall(IRheoAdmin.marketShutdown, (shutdownParams));
     }
 
-    function getBorrowers(ISize market) external view returns (address[] memory) {
+    function getBorrowers(IRheo market) external view returns (address[] memory) {
         return borrowersByMarket[market].values();
     }
 
-    function getLenders(ISize market) external view returns (address[] memory) {
+    function getLenders(IRheo market) external view returns (address[] memory) {
         return lendersByMarket[market].values();
     }
 
-    function getDebtPositionIds(ISize market) external view returns (uint256[] memory) {
+    function getDebtPositionIds(IRheo market) external view returns (uint256[] memory) {
         return debtPositionIdsByMarket[market].values();
     }
 
-    function getCreditPositionIds(ISize market) external view returns (uint256[] memory) {
+    function getCreditPositionIds(IRheo market) external view returns (uint256[] memory) {
         return creditPositionIdsByMarket[market].values();
     }
 
-    function getSumFutureValue(ISize market) external view returns (uint256) {
+    function getSumFutureValue(IRheo market) external view returns (uint256) {
         return sumFutureValueByMarket[market];
     }
 
-    function _collectPositions(ISize market, uint256 maxDebtIds, uint256 maxCreditIds)
+    function _collectPositions(IRheo market, uint256 maxDebtIds, uint256 maxCreditIds)
         private
         returns (MarketShutdownParams memory params)
     {
-        ISizeView marketView = ISizeView(address(market));
+        IRheoView marketView = IRheoView(address(market));
         DataView memory dataView = marketView.data();
 
         EnumerableSet.AddressSet storage borrowers = borrowersByMarket[market];
@@ -115,7 +115,7 @@ contract GetMarketShutdownCalldataScript is BaseScript, Networks {
         }
 
         borrowers.add(marketView.feeConfig().feeRecipient);
-        borrowers.add(contracts[block.chainid][Contract.SIZE_GOVERNANCE]);
+        borrowers.add(contracts[block.chainid][Contract.RHEO_GOVERNANCE]);
 
         params = MarketShutdownParams({
             debtPositionIdsToForceLiquidate: debtPositionIds.values(),

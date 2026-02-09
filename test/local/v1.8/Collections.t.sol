@@ -1,42 +1,43 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {Errors} from "@src/market/libraries/Errors.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
 
-import {ICollectionsManagerView} from "@src/collections/interfaces/ICollectionsManagerView.sol";
-import {RESERVED_ID} from "@src/market/libraries/LoanLibrary.sol";
-import {CopyLimitOrderConfig, FixedMaturityLimitOrder} from "@src/market/libraries/OfferLibrary.sol";
+import {ICollectionsManagerView} from "@rheo-fm/src/collections/interfaces/ICollectionsManagerView.sol";
+import {RESERVED_ID} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
+import {CopyLimitOrderConfig, FixedMaturityLimitOrder} from "@rheo-fm/src/market/libraries/OfferLibrary.sol";
 
-import {UserCopyLimitOrderConfigs} from "@src/market/SizeStorage.sol";
+import {UserCopyLimitOrderConfigs} from "@rheo-fm/src/market/RheoStorage.sol";
 
 import {
-    BuyCreditMarketOnBehalfOfParams, BuyCreditMarketParams
-} from "@src/market/libraries/actions/BuyCreditMarket.sol";
+    BuyCreditMarketOnBehalfOfParams,
+    BuyCreditMarketParams
+} from "@rheo-fm/src/market/libraries/actions/BuyCreditMarket.sol";
 
 import {
     SellCreditMarketOnBehalfOfParams,
     SellCreditMarketParams
-} from "@src/market/libraries/actions/SellCreditMarket.sol";
-import {SetCopyLimitOrderConfigsParams} from "@src/market/libraries/actions/SetCopyLimitOrderConfigs.sol";
-import {BaseTest} from "@test/BaseTest.sol";
-import {FixedMaturityLimitOrderHelper} from "@test/helpers/libraries/FixedMaturityLimitOrderHelper.sol";
+} from "@rheo-fm/src/market/libraries/actions/SellCreditMarket.sol";
+import {SetCopyLimitOrderConfigsParams} from "@rheo-fm/src/market/libraries/actions/SetCopyLimitOrderConfigs.sol";
+import {BaseTest} from "@rheo-fm/test/BaseTest.sol";
+import {FixedMaturityLimitOrderHelper} from "@rheo-fm/test/helpers/libraries/FixedMaturityLimitOrderHelper.sol";
 
 import {
     InitializeDataParams,
     InitializeFeeConfigParams,
     InitializeOracleParams,
     InitializeRiskConfigParams
-} from "@src/market/libraries/actions/Initialize.sol";
+} from "@rheo-fm/src/market/libraries/actions/Initialize.sol";
 
 import {ERC20Mock} from "@openzeppelin/contracts/mocks/token/ERC20Mock.sol";
 
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
-import {CollectionsManagerBase} from "@src/collections/CollectionsManagerBase.sol";
-import {DataView} from "@src/market/SizeViewData.sol";
-import {ISize} from "@src/market/interfaces/ISize.sol";
-import {PriceFeedMock} from "@test/mocks/PriceFeedMock.sol";
-import {SizeMock} from "@test/mocks/SizeMock.sol";
+import {CollectionsManagerBase} from "@rheo-fm/src/collections/CollectionsManagerBase.sol";
+import {DataView} from "@rheo-fm/src/market/RheoViewData.sol";
+import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
+import {PriceFeedMock} from "@rheo-fm/test/mocks/PriceFeedMock.sol";
+import {RheoMock} from "@rheo-fm/test/mocks/RheoMock.sol";
 
 contract CollectionsTest is BaseTest {
     CopyLimitOrderConfig private nullCopy;
@@ -52,7 +53,7 @@ contract CollectionsTest is BaseTest {
 
     function setUp() public override {
         super.setUp();
-        _deploySizeMarket2();
+        _deployRheoMarket2();
     }
 
     function test_Collections_subscribeToCollection_check_APR() public {
@@ -1234,9 +1235,9 @@ contract CollectionsTest is BaseTest {
         uint256 collectionId = _createCollection(james);
 
         // Create a fake market address that is not registered in the factory
-        ISize invalidMarket = ISize(address(0x999999));
+        IRheo invalidMarket = IRheo(address(0x999999));
 
-        ISize[] memory markets = new ISize[](1);
+        IRheo[] memory markets = new IRheo[](1);
         markets[0] = invalidMarket;
 
         vm.prank(james);
@@ -1256,7 +1257,7 @@ contract CollectionsTest is BaseTest {
         // Verify the market is paused
         assertTrue(size.paused());
 
-        ISize[] memory markets = new ISize[](1);
+        IRheo[] memory markets = new IRheo[](1);
         markets[0] = size;
 
         vm.prank(james);
@@ -1267,20 +1268,20 @@ contract CollectionsTest is BaseTest {
         assertEq(collectionsManager.collectionContainsMarket(collectionId, size), false);
     }
 
-    // ============ onlySizeFactory revert tests ============
+    // ============ onlyRheoFactory revert tests ============
 
-    function test_Collections_subscribeUserToCollections_onlySizeFactory_revert() public {
+    function test_Collections_subscribeUserToCollections_onlyRheoFactory_revert() public {
         uint256 collectionId = _createCollection(james);
         uint256[] memory collectionIds = new uint256[](1);
         collectionIds[0] = collectionId;
 
         // Try to call subscribeUserToCollections directly on collectionsManager (not through sizeFactory)
-        vm.expectRevert(abi.encodeWithSelector(CollectionsManagerBase.OnlySizeFactory.selector, alice));
+        vm.expectRevert(abi.encodeWithSelector(CollectionsManagerBase.OnlyRheoFactory.selector, alice));
         vm.prank(alice);
         collectionsManager.subscribeUserToCollections(alice, collectionIds);
     }
 
-    function test_Collections_unsubscribeUserFromCollections_onlySizeFactory_revert() public {
+    function test_Collections_unsubscribeUserFromCollections_onlyRheoFactory_revert() public {
         uint256 collectionId = _createCollection(james);
 
         // First subscribe through the proper channel (sizeFactory)
@@ -1290,12 +1291,12 @@ contract CollectionsTest is BaseTest {
         collectionIds[0] = collectionId;
 
         // Try to call unsubscribeUserFromCollections directly on collectionsManager (not through sizeFactory)
-        vm.expectRevert(abi.encodeWithSelector(CollectionsManagerBase.OnlySizeFactory.selector, alice));
+        vm.expectRevert(abi.encodeWithSelector(CollectionsManagerBase.OnlyRheoFactory.selector, alice));
         vm.prank(alice);
         collectionsManager.unsubscribeUserFromCollections(alice, collectionIds);
     }
 
-    function test_Collections_setUserCollectionCopyLimitOrderConfigs_onlySizeFactory_revert() public {
+    function test_Collections_setUserCollectionCopyLimitOrderConfigs_onlyRheoFactory_revert() public {
         uint256 collectionId = _createCollection(james);
 
         // First subscribe through the proper channel (sizeFactory)
@@ -1310,7 +1311,7 @@ contract CollectionsTest is BaseTest {
         });
 
         // Try to call setUserCollectionCopyLimitOrderConfigs directly on collectionsManager (not through sizeFactory)
-        vm.expectRevert(abi.encodeWithSelector(CollectionsManagerBase.OnlySizeFactory.selector, alice));
+        vm.expectRevert(abi.encodeWithSelector(CollectionsManagerBase.OnlyRheoFactory.selector, alice));
         vm.prank(alice);
         collectionsManager.setUserCollectionCopyLimitOrderConfigs(alice, collectionId, config, config);
     }

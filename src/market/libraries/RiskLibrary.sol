@@ -2,16 +2,16 @@
 pragma solidity 0.8.23;
 
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import {State} from "@src/market/SizeStorage.sol";
+import {State} from "@rheo-fm/src/market/RheoStorage.sol";
 
-import {Errors} from "@src/market/libraries/Errors.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
 
-import {CreditPosition, DebtPosition, LoanLibrary, LoanStatus} from "@src/market/libraries/LoanLibrary.sol";
-import {Math, PERCENT} from "@src/market/libraries/Math.sol";
+import {CreditPosition, DebtPosition, LoanLibrary, LoanStatus} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
+import {Math, PERCENT} from "@rheo-fm/src/market/libraries/Math.sol";
 
 /// @title RiskLibrary
-/// @custom:security-contact security@size.credit
-/// @author Size (https://size.credit/)
+/// @custom:security-contact security@rheo.xyz
+/// @author Rheo (https://rheo.xyz/)
 library RiskLibrary {
     using EnumerableSet for EnumerableSet.UintSet;
     using LoanLibrary for State;

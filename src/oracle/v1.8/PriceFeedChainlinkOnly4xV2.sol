@@ -3,17 +3,17 @@ pragma solidity 0.8.23;
 
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
-import {Errors} from "@src/market/libraries/Errors.sol";
-import {Math} from "@src/market/libraries/Math.sol";
-import {IPriceFeed} from "@src/oracle/IPriceFeed.sol";
-import {PriceFeedChainlinkMul} from "@src/oracle/v1.8/PriceFeedChainlinkMul.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
+import {Math} from "@rheo-fm/src/market/libraries/Math.sol";
+import {IPriceFeed} from "@rheo-fm/src/oracle/IPriceFeed.sol";
+import {PriceFeedChainlinkMul} from "@rheo-fm/src/oracle/v1.8/PriceFeedChainlinkMul.sol";
 
 /// @title PriceFeedChainlinkOnly4xV2
-/// @custom:security-contact security@size.credit
-/// @author Size (https://size.credit/)
+/// @custom:security-contact security@rheo.xyz
+/// @author Rheo (https://rheo.xyz/)
 /// @notice A contract that provides the price of a `base` asset in terms of a `quote` asset, scaled to 18 decimals,
 ///         by calculating `(base * intermediate1) / (quote * intermediate2)`, using Chainlink only.
-/// @dev `decimals` must be 18 to comply with Size contracts
+/// @dev `decimals` must be 18 to comply with Rheo contracts
 ///      Only networks without a sequencer are supported.
 ///      The base/intermediate and quote/intermediate feed decimals should match to avoid skewed ratios.
 contract PriceFeedChainlinkOnly4xV2 is IPriceFeed {

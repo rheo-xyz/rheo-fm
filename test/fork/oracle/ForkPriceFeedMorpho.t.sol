@@ -3,12 +3,12 @@ pragma solidity 0.8.23;
 
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
-import {Networks} from "@script/Networks.sol";
-import {ForkTest} from "@test/fork/ForkTest.sol";
+import {Networks} from "@rheo-fm/script/Networks.sol";
+import {ForkTest} from "@rheo-fm/test/fork/ForkTest.sol";
 
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
-import {IOracle} from "@src/oracle/adapters/morpho/IOracle.sol";
-import {PriceFeedMorpho} from "@src/oracle/v1.6.2/PriceFeedMorpho.sol";
+import {IOracle} from "@rheo-fm/src/oracle/adapters/morpho/IOracle.sol";
+import {PriceFeedMorpho} from "@rheo-fm/src/oracle/v1.6.2/PriceFeedMorpho.sol";
 
 contract ForkPriceFeedMorphoTest is ForkTest, Networks {
     PriceFeedMorpho public priceFeedMorpho;

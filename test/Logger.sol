@@ -2,16 +2,16 @@
 pragma solidity 0.8.23;
 
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
-import {Size} from "@src/market/Size.sol";
-import {UserView} from "@src/market/SizeView.sol";
+import {Rheo} from "@rheo-fm/src/market/Rheo.sol";
+import {UserView} from "@rheo-fm/src/market/RheoView.sol";
 import {
     CREDIT_POSITION_ID_START,
     CreditPosition,
     DEBT_POSITION_ID_START,
     DebtPosition,
     LoanLibrary
-} from "@src/market/libraries/LoanLibrary.sol";
-import {FixedMaturityLimitOrder, OfferLibrary} from "@src/market/libraries/OfferLibrary.sol";
+} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
+import {FixedMaturityLimitOrder, OfferLibrary} from "@rheo-fm/src/market/libraries/OfferLibrary.sol";
 
 import {console2 as console} from "forge-std/console2.sol";
 
@@ -51,7 +51,7 @@ abstract contract Logger {
         console.log("debtPositionId", creditPosition.debtPositionId);
     }
 
-    function _log(Size size) internal view {
+    function _log(Rheo size) internal view {
         uint256 debtPositionsCount = size.data().nextDebtPositionId - DEBT_POSITION_ID_START;
         uint256 creditPositionsCount = size.data().nextCreditPositionId - CREDIT_POSITION_ID_START;
         uint256 totalDebt;

@@ -5,8 +5,9 @@ import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Ini
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import {Test} from "forge-std/Test.sol";
 
-import {ReentrancyGuardUpgradeableWithViewModifier} from "@src/helpers/ReentrancyGuardUpgradeableWithViewModifier.sol";
-import {AssertsHelper} from "@test/helpers/AssertsHelper.sol";
+import {ReentrancyGuardUpgradeableWithViewModifier} from
+    "@rheo-fm/src/helpers/ReentrancyGuardUpgradeableWithViewModifier.sol";
+import {AssertsHelper} from "@rheo-fm/test/helpers/AssertsHelper.sol";
 
 // Test contract that extends ReentrancyGuardUpgradeableWithViewModifier
 contract ReentrancyContract is ReentrancyGuardUpgradeableWithViewModifier {

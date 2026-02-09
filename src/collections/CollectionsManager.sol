@@ -8,19 +8,19 @@ import {ERC721EnumerableUpgradeable} from
 import {MulticallUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/MulticallUpgradeable.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
-import {CollectionsManagerBase} from "@src/collections/CollectionsManagerBase.sol";
-import {CollectionsManagerCuratorActions} from "@src/collections/actions/CollectionsManagerCuratorActions.sol";
-import {CollectionsManagerUserActions} from "@src/collections/actions/CollectionsManagerUserActions.sol";
-import {CollectionsManagerView} from "@src/collections/actions/CollectionsManagerView.sol";
+import {CollectionsManagerBase} from "@rheo-fm/src/collections/CollectionsManagerBase.sol";
+import {CollectionsManagerCuratorActions} from "@rheo-fm/src/collections/actions/CollectionsManagerCuratorActions.sol";
+import {CollectionsManagerUserActions} from "@rheo-fm/src/collections/actions/CollectionsManagerUserActions.sol";
+import {CollectionsManagerView} from "@rheo-fm/src/collections/actions/CollectionsManagerView.sol";
 
-import {ICollectionsManager} from "@src/collections/interfaces/ICollectionsManager.sol";
+import {ICollectionsManager} from "@rheo-fm/src/collections/interfaces/ICollectionsManager.sol";
 
-import {DEFAULT_ADMIN_ROLE, ISizeFactory} from "@src/factory/interfaces/ISizeFactory.sol";
-import {ISize} from "@src/market/interfaces/ISize.sol";
+import {DEFAULT_ADMIN_ROLE, IRheoFactory} from "@rheo-fm/src/factory/interfaces/IRheoFactory.sol";
+import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
 
 /// @title CollectionsManager
-/// @custom:security-contact security@size.credit
-/// @author Size (https://size.credit/)
+/// @custom:security-contact security@rheo.xyz
+/// @author Rheo (https://rheo.xyz/)
 /// @notice See the documentation in {ICollectionsManager}.
 contract CollectionsManager is
     ICollectionsManager,
@@ -37,8 +37,8 @@ contract CollectionsManager is
         _disableInitializers();
     }
 
-    function initialize(ISizeFactory _sizeFactory) external initializer {
-        __ERC721_init("Size Collections", "SIZE_COLLECTIONS");
+    function initialize(IRheoFactory _sizeFactory) external initializer {
+        __ERC721_init("Rheo Collections", "RHEO_COLLECTIONS");
         __ERC721Enumerable_init();
         __Multicall_init();
         __UUPSUpgradeable_init();
@@ -49,10 +49,10 @@ contract CollectionsManager is
     function _authorizeUpgrade(address newImplementation)
         internal
         override
-        onlySizeFactoryHasRole(DEFAULT_ADMIN_ROLE)
+        onlyRheoFactoryHasRole(DEFAULT_ADMIN_ROLE)
     {}
 
     function _baseURI() internal view virtual override returns (string memory) {
-        return string.concat("https://api.size.credit/collections/", Strings.toString(block.chainid), "/");
+        return string.concat("https://api.rheo.xyz/collections/fm/", Strings.toString(block.chainid), "/");
     }
 }

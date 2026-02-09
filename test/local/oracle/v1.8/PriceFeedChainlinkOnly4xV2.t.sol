@@ -6,10 +6,10 @@ import {Test} from "forge-std/Test.sol";
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 import {MockV3Aggregator} from "@chainlink/contracts/src/v0.8/tests/MockV3Aggregator.sol";
 
-import {Errors} from "@src/market/libraries/Errors.sol";
-import {Math} from "@src/market/libraries/Math.sol";
-import {PriceFeedChainlinkMul} from "@src/oracle/v1.8/PriceFeedChainlinkMul.sol";
-import {PriceFeedChainlinkOnly4xV2} from "@src/oracle/v1.8/PriceFeedChainlinkOnly4xV2.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
+import {Math} from "@rheo-fm/src/market/libraries/Math.sol";
+import {PriceFeedChainlinkMul} from "@rheo-fm/src/oracle/v1.8/PriceFeedChainlinkMul.sol";
+import {PriceFeedChainlinkOnly4xV2} from "@rheo-fm/src/oracle/v1.8/PriceFeedChainlinkOnly4xV2.sol";
 
 contract PriceFeedChainlinkOnly4xV2Test is Test {
     uint8 private constant DECIMALS = 8;

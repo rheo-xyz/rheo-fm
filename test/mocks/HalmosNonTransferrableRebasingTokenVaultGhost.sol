@@ -3,7 +3,7 @@ pragma solidity ^0.8.13;
 
 import {vm} from "@chimera/Hevm.sol";
 import {PropertiesConstants} from "@crytic/properties/contracts/util/PropertiesConstants.sol";
-import {NonTransferrableRebasingTokenVaultGhost} from "@test/mocks/NonTransferrableRebasingTokenVaultGhost.sol";
+import {NonTransferrableRebasingTokenVaultGhost} from "@rheo-fm/test/mocks/NonTransferrableRebasingTokenVaultGhost.sol";
 
 contract HalmosNonTransferrableRebasingTokenVaultGhost is
     NonTransferrableRebasingTokenVaultGhost,

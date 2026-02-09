@@ -3,20 +3,20 @@ pragma solidity 0.8.23;
 
 import {IERC721Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
 
-import {CollectionsManagerBase} from "@src/collections/CollectionsManagerBase.sol";
-import {CollectionsManagerCuratorActions} from "@src/collections/actions/CollectionsManagerCuratorActions.sol";
-import {ISize} from "@src/market/interfaces/ISize.sol";
+import {CollectionsManagerBase} from "@rheo-fm/src/collections/CollectionsManagerBase.sol";
+import {CollectionsManagerCuratorActions} from "@rheo-fm/src/collections/actions/CollectionsManagerCuratorActions.sol";
+import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
 
-import {Errors} from "@src/market/libraries/Errors.sol";
-import {CopyLimitOrderConfig} from "@src/market/libraries/OfferLibrary.sol";
-import {BaseTest} from "@test/BaseTest.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
+import {CopyLimitOrderConfig} from "@rheo-fm/src/market/libraries/OfferLibrary.sol";
+import {BaseTest} from "@rheo-fm/test/BaseTest.sol";
 
 contract CollectionsManagerCuratorActionsTest is BaseTest {
     function test_CollectionsManagerCuratorActions_createCollection() public {
         uint256 collectionId = _createCollection(alice);
         assertEq(collectionsManager.isValidCollectionId(collectionId), true);
         assertEq(collectionsManager.ownerOf(collectionId), alice);
-        assertEq(collectionsManager.tokenURI(collectionId), "https://api.size.credit/collections/31337/0");
+        assertEq(collectionsManager.tokenURI(collectionId), "https://api.rheo.xyz/collections/fm/31337/0");
     }
 
     function test_CollectionsManagerCuratorActions_transfer_collection() public {
@@ -31,7 +31,7 @@ contract CollectionsManagerCuratorActionsTest is BaseTest {
     function test_CollectionsManagerCuratorActions_addMarketsToCollection_not_curator() public {
         uint256 collectionId = _createCollection(alice);
 
-        ISize[] memory markets = new ISize[](1);
+        IRheo[] memory markets = new IRheo[](1);
         markets[0] = size;
 
         vm.prank(bob);
@@ -44,7 +44,7 @@ contract CollectionsManagerCuratorActionsTest is BaseTest {
     function test_CollectionsManagerCuratorActions_addMarketsToCollection_approved() public {
         uint256 collectionId = _createCollection(alice);
 
-        ISize[] memory markets = new ISize[](1);
+        IRheo[] memory markets = new IRheo[](1);
         markets[0] = size;
 
         vm.prank(alice);
@@ -61,7 +61,7 @@ contract CollectionsManagerCuratorActionsTest is BaseTest {
     function test_CollectionsManagerCuratorActions_addMarketsToCollection_curator() public {
         uint256 collectionId = _createCollection(alice);
 
-        ISize[] memory markets = new ISize[](1);
+        IRheo[] memory markets = new IRheo[](1);
         markets[0] = size;
         vm.prank(alice);
         collectionsManager.addMarketsToCollection(collectionId, markets);
@@ -72,7 +72,7 @@ contract CollectionsManagerCuratorActionsTest is BaseTest {
     function test_CollectionsManagerCuratorActions_removeMarketsFromCollection() public {
         uint256 collectionId = _createCollection(alice);
 
-        ISize[] memory markets = new ISize[](1);
+        IRheo[] memory markets = new IRheo[](1);
         markets[0] = size;
         vm.prank(alice);
         collectionsManager.addMarketsToCollection(collectionId, markets);
@@ -96,7 +96,7 @@ contract CollectionsManagerCuratorActionsTest is BaseTest {
             maxAPR: type(uint256).max,
             offsetAPR: 0
         });
-        ISize[] memory markets = new ISize[](1);
+        IRheo[] memory markets = new IRheo[](1);
         markets[0] = size;
 
         address[] memory rateProviders = new address[](2);
@@ -140,7 +140,7 @@ contract CollectionsManagerCuratorActionsTest is BaseTest {
         uint256 collectionId = 0;
 
         datas[0] = abi.encodeCall(CollectionsManagerCuratorActions.createCollection, ());
-        ISize[] memory markets = new ISize[](1);
+        IRheo[] memory markets = new IRheo[](1);
         markets[0] = size;
         datas[1] = abi.encodeCall(CollectionsManagerCuratorActions.addMarketsToCollection, (collectionId, markets));
 

@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {IPriceFeedV1_5} from "@deprecated/oracle/IPriceFeedV1_5.sol";
+import {IPriceFeedV1_5} from "@rheo-fm/deprecated/oracle/IPriceFeedV1_5.sol";
 
-import {ChainlinkPriceFeed} from "@src/oracle/adapters/ChainlinkPriceFeed.sol";
-import {ChainlinkSequencerUptimeFeed} from "@src/oracle/adapters/ChainlinkSequencerUptimeFeed.sol";
-import {UniswapV3PriceFeed} from "@src/oracle/adapters/UniswapV3PriceFeed.sol";
+import {ChainlinkPriceFeed} from "@rheo-fm/src/oracle/adapters/ChainlinkPriceFeed.sol";
+import {ChainlinkSequencerUptimeFeed} from "@rheo-fm/src/oracle/adapters/ChainlinkSequencerUptimeFeed.sol";
+import {UniswapV3PriceFeed} from "@rheo-fm/src/oracle/adapters/UniswapV3PriceFeed.sol";
 
 /// @title IPriceFeedV1_5_1
-/// @custom:security-contact security@size.credit
-/// @author Size (https://size.credit/)
+/// @custom:security-contact security@rheo.xyz
+/// @author Rheo (https://rheo.xyz/)
 interface IPriceFeedV1_5_1 is IPriceFeedV1_5 {
     /// @notice Returns the Chainlink sequencer uptime feed
     function chainlinkSequencerUptimeFeed() external view returns (ChainlinkSequencerUptimeFeed);

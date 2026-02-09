@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {WithdrawParams} from "@src/market/libraries/actions/Withdraw.sol";
-import {BaseTest} from "@test/BaseTest.sol";
+import {WithdrawParams} from "@rheo-fm/src/market/libraries/actions/Withdraw.sol";
+import {BaseTest} from "@rheo-fm/test/BaseTest.sol";
 
-import {Errors} from "@src/market/libraries/Errors.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
 
 contract WithdrawValidationTest is BaseTest {
     function test_Withdraw_validation() public {

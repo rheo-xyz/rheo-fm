@@ -5,9 +5,9 @@ import {IPool} from "@aave/interfaces/IPool.sol";
 
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
-import {ISizeFactory} from "@src/factory/interfaces/ISizeFactory.sol";
+import {IRheoFactory} from "@rheo-fm/src/factory/interfaces/IRheoFactory.sol";
 
-import {NonTransferrableRebasingTokenVault} from "@src/market/token/NonTransferrableRebasingTokenVault.sol";
+import {NonTransferrableRebasingTokenVault} from "@rheo-fm/src/market/token/NonTransferrableRebasingTokenVault.sol";
 
 library NonTransferrableRebasingTokenVaultLibrary {
     function createNonTransferrableRebasingTokenVault(
@@ -23,11 +23,11 @@ library NonTransferrableRebasingTokenVaultLibrary {
                     abi.encodeCall(
                         NonTransferrableRebasingTokenVault.initialize,
                         (
-                            ISizeFactory(address(this)),
+                            IRheoFactory(address(this)),
                             variablePool,
                             underlyingBorrowToken,
                             owner,
-                            string.concat("Size ", underlyingBorrowToken.name(), " Vault"),
+                            string.concat("Rheo ", underlyingBorrowToken.name(), " Vault"),
                             string.concat("sv", underlyingBorrowToken.symbol()),
                             underlyingBorrowToken.decimals()
                         )

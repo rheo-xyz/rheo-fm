@@ -5,26 +5,26 @@ import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/Ag
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
-import {PriceFeedChainlinkOnly4x} from "@deprecated/oracle/v1.8/PriceFeedChainlinkOnly4x.sol";
+import {PriceFeedChainlinkOnly4x} from "@rheo-fm/deprecated/oracle/v1.8/PriceFeedChainlinkOnly4x.sol";
 
-import {MainnetAddresses} from "@script/MainnetAddresses.s.sol";
-import {Contract, Networks} from "@script/Networks.sol";
-import {SizeFactory} from "@src/factory/SizeFactory.sol";
-import {ISize} from "@src/market/interfaces/ISize.sol";
+import {MainnetAddresses} from "@rheo-fm/script/MainnetAddresses.s.sol";
+import {Contract, Networks} from "@rheo-fm/script/Networks.sol";
+import {RheoFactory} from "@rheo-fm/src/factory/RheoFactory.sol";
+import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
 
-import {Math} from "@src/market/libraries/Math.sol";
+import {Math} from "@rheo-fm/src/market/libraries/Math.sol";
 
-import {InitializeOracleParams} from "@src/market/libraries/actions/Initialize.sol";
+import {InitializeOracleParams} from "@rheo-fm/src/market/libraries/actions/Initialize.sol";
 
-import {UpdateConfigParams} from "@src/market/libraries/actions/UpdateConfig.sol";
-import {IPriceFeed} from "@src/oracle/IPriceFeed.sol";
+import {UpdateConfigParams} from "@rheo-fm/src/market/libraries/actions/UpdateConfig.sol";
+import {IPriceFeed} from "@rheo-fm/src/oracle/IPriceFeed.sol";
 
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {ProposeSafeTxUpdatePriceFeedChainlinkOnly4xV2Script} from
-    "@script/ProposeSafeTxUpdatePriceFeedChainlinkOnly4xV2.s.sol";
-import {PriceFeedChainlinkMul} from "@src/oracle/v1.8/PriceFeedChainlinkMul.sol";
-import {PriceFeedChainlinkOnly4xV2} from "@src/oracle/v1.8/PriceFeedChainlinkOnly4xV2.sol";
-import {ForkTest} from "@test/fork/ForkTest.sol";
+    "@rheo-fm/script/ProposeSafeTxUpdatePriceFeedChainlinkOnly4xV2.s.sol";
+import {PriceFeedChainlinkMul} from "@rheo-fm/src/oracle/v1.8/PriceFeedChainlinkMul.sol";
+import {PriceFeedChainlinkOnly4xV2} from "@rheo-fm/src/oracle/v1.8/PriceFeedChainlinkOnly4xV2.sol";
+import {ForkTest} from "@rheo-fm/test/fork/ForkTest.sol";
 
 import {console} from "forge-std/console.sol";
 
@@ -38,7 +38,7 @@ contract ForkPriceFeedChainlinkOnly4xBugReportTest is ForkTest, MainnetAddresses
     function setUp() public override(ForkTest) {
         vm.createSelectFork("mainnet", 24_343_753);
 
-        sizeFactory = SizeFactory(Networks.contracts[block.chainid][Contract.SIZE_FACTORY]);
+        sizeFactory = RheoFactory(Networks.contracts[block.chainid][Contract.RHEO_FACTORY]);
     }
 
     function testFork_PriceFeedChainlinkOnly4xBugReport_misprices_when_quote_is_non_pegged() public {
@@ -86,7 +86,7 @@ contract ForkPriceFeedChainlinkOnly4xBugReportTest is ForkTest, MainnetAddresses
     }
 
     function testFork_PriceFeedChainlinkOnly4xBugReport_WBTC_USDC_priceFeed_is_product_but_V2_fixes() public {
-        ISize market = _findMarketBySymbols(sizeFactory, "WBTC", "USDC");
+        IRheo market = _findMarketBySymbols(sizeFactory, "WBTC", "USDC");
         InitializeOracleParams memory oracleParams = market.oracle();
 
         PriceFeedChainlinkOnly4x currentFeed = PriceFeedChainlinkOnly4x(oracleParams.priceFeed);
@@ -125,14 +125,14 @@ contract ForkPriceFeedChainlinkOnly4xBugReportTest is ForkTest, MainnetAddresses
         uint256[] memory newPrices = new uint256[](targets.length);
 
         for (uint256 i = 0; i < targets.length; i++) {
-            IPriceFeed oldFeed = IPriceFeed(ISize(targets[i]).oracle().priceFeed);
+            IPriceFeed oldFeed = IPriceFeed(IRheo(targets[i]).oracle().priceFeed);
             oldPrices[i] = oldFeed.getPrice();
         }
 
         _updatePriceFeeds(targets, datas);
 
         for (uint256 i = 0; i < targets.length; i++) {
-            IPriceFeed newFeed = IPriceFeed(ISize(targets[i]).oracle().priceFeed);
+            IPriceFeed newFeed = IPriceFeed(IRheo(targets[i]).oracle().priceFeed);
             newPrices[i] = newFeed.getPrice();
 
             assertApproxEqRel(
@@ -143,17 +143,17 @@ contract ForkPriceFeedChainlinkOnly4xBugReportTest is ForkTest, MainnetAddresses
 
     function _updatePriceFeeds(address[] memory targets, bytes[] memory datas) internal {
         for (uint256 i = 0; i < targets.length; i++) {
-            vm.prank(contracts[block.chainid][Contract.SIZE_GOVERNANCE]);
+            vm.prank(contracts[block.chainid][Contract.RHEO_GOVERNANCE]);
             Address.functionCall(targets[i], datas[i]);
         }
     }
 
-    function _findMarketBySymbols(SizeFactory sizeFactory, string memory collateralSymbol, string memory borrowSymbol)
+    function _findMarketBySymbols(RheoFactory sizeFactory, string memory collateralSymbol, string memory borrowSymbol)
         internal
         view
-        returns (ISize)
+        returns (IRheo)
     {
-        ISize[] memory markets = sizeFactory.getMarkets();
+        IRheo[] memory markets = sizeFactory.getMarkets();
         for (uint256 i = 0; i < markets.length; i++) {
             IERC20Metadata collateralToken = markets[i].data().underlyingCollateralToken;
             IERC20Metadata borrowToken = markets[i].data().underlyingBorrowToken;

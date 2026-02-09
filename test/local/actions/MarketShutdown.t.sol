@@ -4,19 +4,19 @@ pragma solidity 0.8.23;
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
 import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
 
-import {Errors} from "@src/market/libraries/Errors.sol";
-import {LoanStatus, RESERVED_ID} from "@src/market/libraries/LoanLibrary.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
+import {LoanStatus, RESERVED_ID} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
 
-import {LiquidateParams} from "@src/market/libraries/actions/Liquidate.sol";
-import {MarketShutdownParams} from "@src/market/libraries/actions/MarketShutdown.sol";
-import {WithdrawParams} from "@src/market/libraries/actions/Withdraw.sol";
+import {LiquidateParams} from "@rheo-fm/src/market/libraries/actions/Liquidate.sol";
+import {MarketShutdownParams} from "@rheo-fm/src/market/libraries/actions/MarketShutdown.sol";
+import {WithdrawParams} from "@rheo-fm/src/market/libraries/actions/Withdraw.sol";
 
-import {BaseTest} from "@test/BaseTest.sol";
+import {BaseTest} from "@rheo-fm/test/BaseTest.sol";
 
 contract MarketShutdownTest is BaseTest {
     function setUp() public override {
         super.setUp();
-        _deploySizeMarket2();
+        _deployRheoMarket2();
     }
 
     function test_MarketShutdown_shutdown_with_active_loans() public {

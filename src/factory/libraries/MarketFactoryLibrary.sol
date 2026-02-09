@@ -2,15 +2,15 @@
 pragma solidity 0.8.23;
 
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
-import {Size} from "@src/market/Size.sol";
-import {ISize} from "@src/market/interfaces/ISize.sol";
+import {Rheo} from "@rheo-fm/src/market/Rheo.sol";
+import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
 
 import {
     InitializeDataParams,
     InitializeFeeConfigParams,
     InitializeOracleParams,
     InitializeRiskConfigParams
-} from "@src/market/libraries/actions/Initialize.sol";
+} from "@rheo-fm/src/market/libraries/actions/Initialize.sol";
 
 library MarketFactoryLibrary {
     function createMarket(
@@ -20,8 +20,8 @@ library MarketFactoryLibrary {
         InitializeRiskConfigParams calldata r,
         InitializeOracleParams calldata o,
         InitializeDataParams calldata d
-    ) external returns (ISize market) {
-        ERC1967Proxy proxy = new ERC1967Proxy(implementation, abi.encodeCall(Size.initialize, (owner, f, r, o, d)));
-        market = ISize(payable(proxy));
+    ) external returns (IRheo market) {
+        ERC1967Proxy proxy = new ERC1967Proxy(implementation, abi.encodeCall(Rheo.initialize, (owner, f, r, o, d)));
+        market = IRheo(payable(proxy));
     }
 }

@@ -6,29 +6,29 @@ import {Test} from "forge-std/Test.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
-import {SizeMock} from "@test/mocks/SizeMock.sol";
+import {RheoMock} from "@rheo-fm/test/mocks/RheoMock.sol";
 
-import {Size} from "@src/market/Size.sol";
-import {BaseTest} from "@test/BaseTest.sol";
+import {Rheo} from "@rheo-fm/src/market/Rheo.sol";
+import {BaseTest} from "@rheo-fm/test/BaseTest.sol";
 
 contract UpgradeTest is Test, BaseTest {
     function test_Upgrade_proxy_can_be_upgraded_with_uups_casting() public {
         address owner = address(this);
-        Size v1 = new Size();
-        ERC1967Proxy proxy = new ERC1967Proxy(address(v1), abi.encodeCall(Size.initialize, (owner, f, r, o, d)));
-        Size v2 = new SizeMock();
+        Rheo v1 = new Rheo();
+        ERC1967Proxy proxy = new ERC1967Proxy(address(v1), abi.encodeCall(Rheo.initialize, (owner, f, r, o, d)));
+        Rheo v2 = new RheoMock();
 
         UUPSUpgradeable(address(proxy)).upgradeToAndCall(address(v2), "");
-        assertEq(SizeMock(payable(proxy)).v(), 2);
+        assertEq(RheoMock(payable(proxy)).v(), 2);
     }
 
     function test_Upgrade_proxy_can_be_upgraded_directly() public {
         address owner = address(this);
-        Size v1 = new Size();
-        ERC1967Proxy proxy = new ERC1967Proxy(address(v1), abi.encodeCall(Size.initialize, (owner, f, r, o, d)));
-        Size v2 = new SizeMock();
+        Rheo v1 = new Rheo();
+        ERC1967Proxy proxy = new ERC1967Proxy(address(v1), abi.encodeCall(Rheo.initialize, (owner, f, r, o, d)));
+        Rheo v2 = new RheoMock();
 
-        Size(payable(proxy)).upgradeToAndCall(address(v2), "");
-        assertEq(SizeMock(payable(proxy)).v(), 2);
+        Rheo(payable(proxy)).upgradeToAndCall(address(v2), "");
+        assertEq(RheoMock(payable(proxy)).v(), 2);
     }
 }

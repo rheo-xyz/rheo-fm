@@ -3,14 +3,14 @@ pragma solidity 0.8.23;
 
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
-import {Math} from "@src/market/libraries/Math.sol";
+import {Math} from "@rheo-fm/src/market/libraries/Math.sol";
 
-import {Errors} from "@src/market/libraries/Errors.sol";
-import {IPriceFeed} from "@src/oracle/IPriceFeed.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
+import {IPriceFeed} from "@rheo-fm/src/oracle/IPriceFeed.sol";
 
 /// @title PriceFeedV1_5
-/// @custom:security-contact security@size.credit
-/// @author Size (https://size.credit/)
+/// @custom:security-contact security@rheo.xyz
+/// @author Rheo (https://rheo.xyz/)
 /// @notice A contract that provides the price of a `base` asset in terms of a `quote` asset, using an intermediate asset, scaled to 18 decimals (1)
 ///         If `base` and `quote` are equal, the aggregator provided is the price of the asset without any intermediate asset (2)
 /// @dev The price is calculated as `base / quote`

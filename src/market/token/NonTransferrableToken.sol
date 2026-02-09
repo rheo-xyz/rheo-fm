@@ -4,13 +4,13 @@ pragma solidity 0.8.23;
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
-import {Errors} from "@src/market/libraries/Errors.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
 
 /// @title NonTransferrableToken
-/// @custom:security-contact security@size.credit
-/// @author Size (https://size.credit/)
+/// @custom:security-contact security@rheo.xyz
+/// @author Rheo (https://rheo.xyz/)
 /// @notice An ERC-20 that is not transferrable from outside of the protocol
-/// @dev The contract owner (i.e. the Size contract) can still mint, burn, and transfer tokens
+/// @dev The contract owner (i.e. the Rheo contract) can still mint, burn, and transfer tokens
 contract NonTransferrableToken is Ownable, ERC20 {
     uint8 internal immutable _decimals;
 

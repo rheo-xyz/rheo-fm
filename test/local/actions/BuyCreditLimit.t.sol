@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {BaseTest} from "@test/BaseTest.sol";
+import {BaseTest} from "@rheo-fm/test/BaseTest.sol";
 
-import {Errors} from "@src/market/libraries/Errors.sol";
-import {RESERVED_ID} from "@src/market/libraries/LoanLibrary.sol";
-import {FixedMaturityLimitOrder, OfferLibrary} from "@src/market/libraries/OfferLibrary.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
+import {RESERVED_ID} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
+import {FixedMaturityLimitOrder, OfferLibrary} from "@rheo-fm/src/market/libraries/OfferLibrary.sol";
 
-import {Math, PERCENT} from "@src/market/libraries/Math.sol";
-import {BuyCreditLimitParams} from "@src/market/libraries/actions/BuyCreditLimit.sol";
+import {Math, PERCENT} from "@rheo-fm/src/market/libraries/Math.sol";
+import {BuyCreditLimitParams} from "@rheo-fm/src/market/libraries/actions/BuyCreditLimit.sol";
 
-import {SellCreditMarketParams} from "@src/market/libraries/actions/SellCreditMarket.sol";
+import {SellCreditMarketParams} from "@rheo-fm/src/market/libraries/actions/SellCreditMarket.sol";
 
 contract BuyCreditLimitTest is BaseTest {
     using OfferLibrary for FixedMaturityLimitOrder;

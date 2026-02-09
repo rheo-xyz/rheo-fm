@@ -3,8 +3,8 @@ pragma solidity 0.8.23;
 
 import {FoundryAsserts} from "@chimera/FoundryAsserts.sol";
 
-import {SetupLocal} from "@test/invariants/SetupLocal.sol";
-import {TargetFunctions} from "@test/invariants/TargetFunctions.sol";
+import {SetupLocal} from "@rheo-fm/test/invariants/SetupLocal.sol";
+import {TargetFunctions} from "@rheo-fm/test/invariants/TargetFunctions.sol";
 
 contract FoundryHandler is TargetFunctions, SetupLocal, FoundryAsserts {
     constructor() {

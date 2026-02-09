@@ -2,21 +2,21 @@
 pragma solidity 0.8.23;
 
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import {Errors} from "@src/market/libraries/Errors.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {ERC4626} from "@openzeppelin/contracts/token/ERC20/extensions/ERC4626.sol";
-import {ISize} from "@src/market/interfaces/ISize.sol";
-import {ISizeV1_7} from "@src/market/interfaces/v1.7/ISizeV1_7.sol";
-import {ISizeV1_8} from "@src/market/interfaces/v1.8/ISizeV1_8.sol";
+import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
+import {IRheoV1_7} from "@rheo-fm/src/market/interfaces/v1.7/IRheoV1_7.sol";
+import {IRheoV1_8} from "@rheo-fm/src/market/interfaces/v1.8/IRheoV1_8.sol";
 
-import {DepositOnBehalfOfParams, DepositParams} from "@src/market/libraries/actions/Deposit.sol";
-import {SetVaultOnBehalfOfParams, SetVaultParams} from "@src/market/libraries/actions/SetVault.sol";
-import {WithdrawOnBehalfOfParams, WithdrawParams} from "@src/market/libraries/actions/Withdraw.sol";
+import {DepositOnBehalfOfParams, DepositParams} from "@rheo-fm/src/market/libraries/actions/Deposit.sol";
+import {SetVaultOnBehalfOfParams, SetVaultParams} from "@rheo-fm/src/market/libraries/actions/SetVault.sol";
+import {WithdrawOnBehalfOfParams, WithdrawParams} from "@rheo-fm/src/market/libraries/actions/Withdraw.sol";
 
 contract MaliciousERC4626ReentrancyGeneric is ERC4626, Ownable {
-    ISize public size;
+    IRheo public size;
     bytes4 public operation;
     bool public forfeitOldShares;
     address public onBehalfOf;
@@ -28,7 +28,7 @@ contract MaliciousERC4626ReentrancyGeneric is ERC4626, Ownable {
         Ownable(msg.sender)
     {}
 
-    function setSize(ISize _size) external onlyOwner {
+    function setRheo(IRheo _size) external onlyOwner {
         size = _size;
     }
 
@@ -46,15 +46,15 @@ contract MaliciousERC4626ReentrancyGeneric is ERC4626, Ownable {
 
     function setOperation(bytes4 _operation) external onlyOwner {
         bytes4[] memory operations = new bytes4[](4);
-        operations[0] = ISizeV1_7.depositOnBehalfOf.selector;
-        operations[1] = ISizeV1_7.withdrawOnBehalfOf.selector;
-        operations[2] = ISizeV1_8.setVaultOnBehalfOf.selector;
+        operations[0] = IRheoV1_7.depositOnBehalfOf.selector;
+        operations[1] = IRheoV1_7.withdrawOnBehalfOf.selector;
+        operations[2] = IRheoV1_8.setVaultOnBehalfOf.selector;
         operations[3] = IERC20.approve.selector;
         operation = operations[uint256(uint32(_operation)) % operations.length];
     }
 
     function _reenter() internal {
-        if (operation == ISizeV1_7.depositOnBehalfOf.selector) {
+        if (operation == IRheoV1_7.depositOnBehalfOf.selector) {
             size.depositOnBehalfOf(
                 DepositOnBehalfOfParams({
                     params: DepositParams({
@@ -65,14 +65,14 @@ contract MaliciousERC4626ReentrancyGeneric is ERC4626, Ownable {
                     onBehalfOf: onBehalfOf
                 })
             );
-        } else if (operation == ISizeV1_7.withdrawOnBehalfOf.selector) {
+        } else if (operation == IRheoV1_7.withdrawOnBehalfOf.selector) {
             size.withdrawOnBehalfOf(
                 WithdrawOnBehalfOfParams({
                     params: WithdrawParams({token: asset(), amount: type(uint256).max, to: address(this)}),
                     onBehalfOf: onBehalfOf
                 })
             );
-        } else if (operation == ISizeV1_8.setVaultOnBehalfOf.selector) {
+        } else if (operation == IRheoV1_8.setVaultOnBehalfOf.selector) {
             size.setVaultOnBehalfOf(
                 SetVaultOnBehalfOfParams({
                     params: SetVaultParams({vault: address(this), forfeitOldShares: forfeitOldShares}),

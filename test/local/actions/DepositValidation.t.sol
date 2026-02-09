@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {DepositParams} from "@src/market/libraries/actions/Deposit.sol";
-import {BaseTest} from "@test/BaseTest.sol";
+import {DepositParams} from "@rheo-fm/src/market/libraries/actions/Deposit.sol";
+import {BaseTest} from "@rheo-fm/test/BaseTest.sol";
 
-import {Errors} from "@src/market/libraries/Errors.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
 
 contract DepositValidationTest is BaseTest {
     function test_Deposit_validation() public {

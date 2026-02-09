@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {Action} from "@src/factory/libraries/Authorization.sol";
-import {AccountingLibrary} from "@src/market/libraries/AccountingLibrary.sol";
-import {CreditPosition, DebtPosition, LoanLibrary} from "@src/market/libraries/LoanLibrary.sol";
-import {RiskLibrary} from "@src/market/libraries/RiskLibrary.sol";
+import {Action} from "@rheo-fm/src/factory/libraries/Authorization.sol";
+import {AccountingLibrary} from "@rheo-fm/src/market/libraries/AccountingLibrary.sol";
+import {CreditPosition, DebtPosition, LoanLibrary} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
+import {RiskLibrary} from "@rheo-fm/src/market/libraries/RiskLibrary.sol";
 
-import {State} from "@src/market/SizeStorage.sol";
+import {State} from "@rheo-fm/src/market/RheoStorage.sol";
 
-import {Errors} from "@src/market/libraries/Errors.sol";
-import {Events} from "@src/market/libraries/Events.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
+import {Events} from "@rheo-fm/src/market/libraries/Events.sol";
 
 struct SelfLiquidateParams {
     // The credit position ID
@@ -26,8 +26,8 @@ struct SelfLiquidateOnBehalfOfParams {
 }
 
 /// @title SelfLiquidate
-/// @custom:security-contact security@size.credit
-/// @author Size (https://size.credit/)
+/// @custom:security-contact security@rheo.xyz
+/// @author Rheo (https://rheo.xyz/)
 /// @notice Contains the logic for self-liquidating a credit position
 library SelfLiquidate {
     using LoanLibrary for DebtPosition;

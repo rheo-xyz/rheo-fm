@@ -12,23 +12,23 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
 
 import {IERC20Metadata} from "@openzeppelin/contracts/interfaces/IERC20Metadata.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {ISizeFactory} from "@src/factory/interfaces/ISizeFactory.sol";
+import {IRheoFactory} from "@rheo-fm/src/factory/interfaces/IRheoFactory.sol";
 
-import {Math} from "@src/market/libraries/Math.sol";
+import {Math} from "@rheo-fm/src/market/libraries/Math.sol";
 
-import {Errors} from "@src/market/libraries/Errors.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
 
 /// @title NonTransferrableScaledTokenV1_5
-/// @custom:security-contact security@size.credit
-/// @author Size (https://size.credit/)
+/// @custom:security-contact security@rheo.xyz
+/// @author Rheo (https://rheo.xyz/)
 /// @notice An ERC-20 that is not transferrable from outside of the protocol
-/// @dev The contract owner (i.e. the Size contract) can still mint, burn, and transfer tokens
+/// @dev The contract owner (i.e. the Rheo contract) can still mint, burn, and transfer tokens
 ///      Enables the owner to mint and burn scaled amounts.
 ///      For backward compatibility, emits the TransferUnscaled event representing the actual unscaled amount
 contract NonTransferrableScaledTokenV1_5 is IERC20Metadata, IERC20Errors, Ownable2StepUpgradeable, UUPSUpgradeable {
     using SafeERC20 for IERC20Metadata;
 
-    ISizeFactory public sizeFactory;
+    IRheoFactory public sizeFactory;
     IPool public variablePool;
     IERC20Metadata public underlyingToken;
 
@@ -48,7 +48,7 @@ contract NonTransferrableScaledTokenV1_5 is IERC20Metadata, IERC20Errors, Ownabl
     }
 
     function initialize(
-        ISizeFactory sizeFactory_,
+        IRheoFactory sizeFactory_,
         IPool variablePool_,
         IERC20Metadata underlyingToken_,
         address owner_,

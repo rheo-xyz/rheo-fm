@@ -2,8 +2,8 @@
 pragma solidity ^0.8.13;
 
 import {EnumerableMap} from "@openzeppelin/contracts/utils/structs/EnumerableMap.sol";
-import {NonTransferrableRebasingTokenVault} from "@src/market/token/NonTransferrableRebasingTokenVault.sol";
-import {PropertiesSpecifications} from "@test/invariants/PropertiesSpecifications.sol";
+import {NonTransferrableRebasingTokenVault} from "@rheo-fm/src/market/token/NonTransferrableRebasingTokenVault.sol";
+import {PropertiesSpecifications} from "@rheo-fm/test/invariants/PropertiesSpecifications.sol";
 
 contract NonTransferrableRebasingTokenVaultGhost is NonTransferrableRebasingTokenVault, PropertiesSpecifications {
     using EnumerableMap for EnumerableMap.AddressToBytes32Map;

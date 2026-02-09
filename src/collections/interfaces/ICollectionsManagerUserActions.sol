@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {CopyLimitOrderConfig} from "@src/market/libraries/OfferLibrary.sol";
+import {CopyLimitOrderConfig} from "@rheo-fm/src/market/libraries/OfferLibrary.sol";
 
 /// @title ICollectionsManagerUserActions
-/// @custom:security-contact security@size.credit
-/// @author Size (https://size.credit/)
+/// @custom:security-contact security@rheo.xyz
+/// @author Rheo (https://rheo.xyz/)
 interface ICollectionsManagerUserActions {
     /*//////////////////////////////////////////////////////////////
                             EVENTS
@@ -27,14 +27,14 @@ interface ICollectionsManagerUserActions {
     /// @notice Subscribe a user to collections
     /// @param user The user to subscribe
     /// @param collectionIds The collection IDs to subscribe the user to
-    /// @dev Only callable by the SizeFactory
+    /// @dev Only callable by the RheoFactory
     /// @dev Calling this function resets the copy limit order configs to full copy.
     function subscribeUserToCollections(address user, uint256[] memory collectionIds) external;
 
     /// @notice Unsubscribe a user from collections
     /// @param user The user to unsubscribe
     /// @param collectionIds The collection IDs to unsubscribe the user from
-    /// @dev Only callable by the SizeFactory
+    /// @dev Only callable by the RheoFactory
     function unsubscribeUserFromCollections(address user, uint256[] memory collectionIds) external;
 
     /// @notice Set the copy limit order configs for a user and collection
@@ -42,7 +42,7 @@ interface ICollectionsManagerUserActions {
     /// @param collectionId The collection ID to set the copy limit order configs for
     /// @param copyLoanOfferConfig The copy limit order config for the loan offer
     /// @param copyBorrowOfferConfig The copy limit order config for the borrow offer
-    /// @dev Only callable by the SizeFactory
+    /// @dev Only callable by the RheoFactory
     /// @dev Added in v1.8.1
     function setUserCollectionCopyLimitOrderConfigs(
         address user,

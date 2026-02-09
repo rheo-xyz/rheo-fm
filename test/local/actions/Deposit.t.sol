@@ -2,9 +2,9 @@
 pragma solidity 0.8.23;
 
 import {IAToken} from "@aave/interfaces/IAToken.sol";
-import {UserView} from "@src/market/SizeView.sol";
-import {DepositParams} from "@src/market/libraries/actions/Deposit.sol";
-import {BaseTest} from "@test/BaseTest.sol";
+import {UserView} from "@rheo-fm/src/market/RheoView.sol";
+import {DepositParams} from "@rheo-fm/src/market/libraries/actions/Deposit.sol";
+import {BaseTest} from "@rheo-fm/test/BaseTest.sol";
 
 contract DepositTest is BaseTest {
     function test_Deposit_deposit_increases_user_balance() public {

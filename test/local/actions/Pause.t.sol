@@ -2,9 +2,9 @@
 pragma solidity 0.8.23;
 
 import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
-import {DepositParams} from "@src/market/libraries/actions/Deposit.sol";
-import {UpdateConfigParams} from "@src/market/libraries/actions/UpdateConfig.sol";
-import {BaseTest} from "@test/BaseTest.sol";
+import {DepositParams} from "@rheo-fm/src/market/libraries/actions/Deposit.sol";
+import {UpdateConfigParams} from "@rheo-fm/src/market/libraries/actions/UpdateConfig.sol";
+import {BaseTest} from "@rheo-fm/test/BaseTest.sol";
 
 contract PauseTest is BaseTest {
     function test_Pause_pause_cannot_deposit() public {

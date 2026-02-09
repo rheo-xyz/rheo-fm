@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {IMultiSendCallOnly} from "@script/interfaces/IMultiSendCallOnly.sol";
-import {ISafe} from "@script/interfaces/ISafe.sol";
-import {Proxy} from "@test/Proxy.sol";
+import {IMultiSendCallOnly} from "@rheo-fm/script/interfaces/IMultiSendCallOnly.sol";
+import {ISafe} from "@rheo-fm/script/interfaces/ISafe.sol";
+import {Proxy} from "@rheo-fm/test/Proxy.sol";
 import {Test} from "forge-std/Test.sol";
 
 contract SafeUtils is Test {

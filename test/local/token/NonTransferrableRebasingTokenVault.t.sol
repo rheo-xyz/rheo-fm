@@ -15,26 +15,26 @@ import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.s
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-import {SizeFactory} from "@src/factory/SizeFactory.sol";
-import {ISizeFactory} from "@src/factory/interfaces/ISizeFactory.sol";
-import {ISize} from "@src/market/interfaces/ISize.sol";
-import {Errors} from "@src/market/libraries/Errors.sol";
-import {NonTransferrableRebasingTokenVault} from "@src/market/token/NonTransferrableRebasingTokenVault.sol";
+import {RheoFactory} from "@rheo-fm/src/factory/RheoFactory.sol";
+import {IRheoFactory} from "@rheo-fm/src/factory/interfaces/IRheoFactory.sol";
+import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
+import {NonTransferrableRebasingTokenVault} from "@rheo-fm/src/market/token/NonTransferrableRebasingTokenVault.sol";
 import {
     AAVE_ADAPTER_ID,
     DEFAULT_VAULT,
     ERC4626_ADAPTER_ID
-} from "@src/market/token/NonTransferrableRebasingTokenVault.sol";
+} from "@rheo-fm/src/market/token/NonTransferrableRebasingTokenVault.sol";
 
-import {BaseTest} from "@test/BaseTest.sol";
-import {PoolMock} from "@test/mocks/PoolMock.sol";
-import {USDC} from "@test/mocks/USDC.sol";
+import {BaseTest} from "@rheo-fm/test/BaseTest.sol";
+import {PoolMock} from "@rheo-fm/test/mocks/PoolMock.sol";
+import {USDC} from "@rheo-fm/test/mocks/USDC.sol";
 
-import {AaveAdapter} from "@src/market/token/adapters/AaveAdapter.sol";
-import {ERC4626Adapter} from "@src/market/token/adapters/ERC4626Adapter.sol";
+import {AaveAdapter} from "@rheo-fm/src/market/token/adapters/AaveAdapter.sol";
+import {ERC4626Adapter} from "@rheo-fm/src/market/token/adapters/ERC4626Adapter.sol";
 
-import {IAdapter} from "@src/market/token/adapters/IAdapter.sol";
-import {NonTransferrableRebasingTokenVaultGhost} from "@test/mocks/NonTransferrableRebasingTokenVaultGhost.sol";
+import {IAdapter} from "@rheo-fm/src/market/token/adapters/IAdapter.sol";
+import {NonTransferrableRebasingTokenVaultGhost} from "@rheo-fm/test/mocks/NonTransferrableRebasingTokenVaultGhost.sol";
 
 contract NonTransferrableRebasingTokenVaultTest is BaseTest {
     NonTransferrableRebasingTokenVault public token;
@@ -65,7 +65,7 @@ contract NonTransferrableRebasingTokenVaultTest is BaseTest {
     }
 
     function test_NonTransferrableRebasingTokenVault_initialize() public view {
-        assertEq(token.name(), "Size USD Coin Vault");
+        assertEq(token.name(), "Rheo USD Coin Vault");
         assertEq(token.symbol(), "svUSDC");
         assertEq(token.decimals(), 6);
         assertEq(token.totalSupply(), 0);
@@ -84,7 +84,7 @@ contract NonTransferrableRebasingTokenVaultTest is BaseTest {
                     abi.encodeCall(
                         NonTransferrableRebasingTokenVault.initialize,
                         (
-                            ISizeFactory(address(0)),
+                            IRheoFactory(address(0)),
                             IPool(address(0)),
                             IERC20Metadata(address(0)),
                             owner,

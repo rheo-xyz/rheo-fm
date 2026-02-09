@@ -5,9 +5,9 @@ import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/acce
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
-import {ISizeFactory} from "@src/factory/interfaces/ISizeFactory.sol";
-import {ISize} from "@src/market/interfaces/ISize.sol";
-import {CopyLimitOrderConfig} from "@src/market/libraries/OfferLibrary.sol";
+import {IRheoFactory} from "@rheo-fm/src/factory/interfaces/IRheoFactory.sol";
+import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
+import {CopyLimitOrderConfig} from "@rheo-fm/src/market/libraries/OfferLibrary.sol";
 
 struct MarketInformation {
     bool initialized;
@@ -20,8 +20,8 @@ struct UserCollectionCopyLimitOrderConfigs {
 }
 
 /// @title CollectionManagerStorage
-/// @custom:security-contact security@size.credit
-/// @author Size (https://size.credit/)
+/// @custom:security-contact security@rheo.xyz
+/// @author Rheo (https://rheo.xyz/)
 /// @dev Introduced in v1.8
 abstract contract CollectionsManagerBase {
     /*//////////////////////////////////////////////////////////////
@@ -29,11 +29,11 @@ abstract contract CollectionsManagerBase {
     //////////////////////////////////////////////////////////////*/
 
     // size factory
-    ISizeFactory sizeFactory;
+    IRheoFactory sizeFactory;
     // collection Id counter
     uint256 collectionIdCounter;
     // mapping of collection Id to collection
-    mapping(uint256 collectionId => mapping(ISize market => MarketInformation marketInformation) collection) collections;
+    mapping(uint256 collectionId => mapping(IRheo market => MarketInformation marketInformation) collection) collections;
     // mapping of user to collection Ids set
     mapping(address user => EnumerableSet.UintSet collectionIds) userToCollectionIds;
     // mapping of user to collection Ids to CopyLimitOrderConfig
@@ -47,23 +47,23 @@ abstract contract CollectionsManagerBase {
     //////////////////////////////////////////////////////////////*/
 
     error InvalidCollectionId(uint256 collectionId);
-    error OnlySizeFactory(address user);
+    error OnlyRheoFactory(address user);
     error MarketNotInCollection(uint256 collectionId, address market);
 
     /*//////////////////////////////////////////////////////////////
                             MODIFIERS
     //////////////////////////////////////////////////////////////*/
 
-    modifier onlySizeFactoryHasRole(bytes32 role) {
+    modifier onlyRheoFactoryHasRole(bytes32 role) {
         if (!AccessControlUpgradeable(address(sizeFactory)).hasRole(role, msg.sender)) {
             revert IAccessControl.AccessControlUnauthorizedAccount(msg.sender, role);
         }
         _;
     }
 
-    modifier onlySizeFactory() {
+    modifier onlyRheoFactory() {
         if (msg.sender != address(sizeFactory)) {
-            revert OnlySizeFactory(msg.sender);
+            revert OnlyRheoFactory(msg.sender);
         }
         _;
     }

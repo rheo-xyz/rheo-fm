@@ -2,14 +2,17 @@
 pragma solidity 0.8.23;
 
 import {IAToken} from "@aave/interfaces/IAToken.sol";
-import {UserView} from "@src/market/SizeView.sol";
-import {Errors} from "@src/market/libraries/Errors.sol";
+import {UserView} from "@rheo-fm/src/market/RheoView.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
 
-import {Action, Authorization} from "@src/factory/libraries/Authorization.sol";
-import {FixedMaturityLimitOrder, OfferLibrary} from "@src/market/libraries/OfferLibrary.sol";
-import {BuyCreditLimitOnBehalfOfParams, BuyCreditLimitParams} from "@src/market/libraries/actions/BuyCreditLimit.sol";
+import {Action, Authorization} from "@rheo-fm/src/factory/libraries/Authorization.sol";
+import {FixedMaturityLimitOrder, OfferLibrary} from "@rheo-fm/src/market/libraries/OfferLibrary.sol";
+import {
+    BuyCreditLimitOnBehalfOfParams,
+    BuyCreditLimitParams
+} from "@rheo-fm/src/market/libraries/actions/BuyCreditLimit.sol";
 
-import {BaseTest} from "@test/BaseTest.sol";
+import {BaseTest} from "@rheo-fm/test/BaseTest.sol";
 
 contract AuthorizationBuyCreditLimitTest is BaseTest {
     using OfferLibrary for FixedMaturityLimitOrder;

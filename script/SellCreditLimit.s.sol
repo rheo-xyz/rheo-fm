@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {Size} from "@src/market/Size.sol";
+import {Rheo} from "@rheo-fm/src/market/Rheo.sol";
 
-import {InitializeRiskConfigParams} from "@src/market/libraries/actions/Initialize.sol";
-import {SellCreditLimitParams} from "@src/market/libraries/actions/SellCreditLimit.sol";
-import {Logger} from "@test/Logger.sol";
+import {InitializeRiskConfigParams} from "@rheo-fm/src/market/libraries/actions/Initialize.sol";
+import {SellCreditLimitParams} from "@rheo-fm/src/market/libraries/actions/SellCreditLimit.sol";
+import {Logger} from "@rheo-fm/test/Logger.sol";
 import {Script} from "forge-std/Script.sol";
 import {console2 as console} from "forge-std/console2.sol";
 
@@ -14,11 +14,11 @@ contract SellCreditLimitScript is Script, Logger {
         console.log("SellCreditLimit...");
 
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-        address sizeContractAddress = vm.envAddress("SIZE_CONTRACT_ADDRESS");
+        address rheoContractAddress = vm.envAddress("RHEO_CONTRACT_ADDRESS");
 
-        Size size = Size(payable(sizeContractAddress));
+        Rheo rheo = Rheo(payable(rheoContractAddress));
 
-        InitializeRiskConfigParams memory riskConfig = size.riskConfig();
+        InitializeRiskConfigParams memory riskConfig = rheo.riskConfig();
         if (riskConfig.maturities.length < 3) {
             revert("NOT_ENOUGH_MATURITIES");
         }
@@ -33,7 +33,7 @@ contract SellCreditLimitScript is Script, Logger {
         SellCreditLimitParams memory params = SellCreditLimitParams({maturities: maturities, aprs: aprs});
 
         vm.startBroadcast(deployerPrivateKey);
-        size.sellCreditLimit(params);
+        rheo.sellCreditLimit(params);
         vm.stopBroadcast();
     }
 }

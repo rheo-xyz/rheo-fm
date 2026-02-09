@@ -2,16 +2,16 @@
 pragma solidity 0.8.23;
 
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
-import {VaultsTargetFunctions} from "@test/local/v1.8/invariants/VaultsTargetFunctions.sol";
+import {VaultsTargetFunctions} from "@rheo-fm/test/local/v1.8/invariants/VaultsTargetFunctions.sol";
 
 import {Asserts} from "@chimera/Asserts.sol";
 import {FoundryAsserts} from "@chimera/FoundryAsserts.sol";
-import {SetupLocal} from "@test/invariants/SetupLocal.sol";
+import {SetupLocal} from "@rheo-fm/test/invariants/SetupLocal.sol";
 import {console} from "forge-std/console.sol";
 
-import {Logger} from "@test/Logger.sol";
+import {Logger} from "@rheo-fm/test/Logger.sol";
 
-import {BaseTest} from "@test/BaseTest.sol";
+import {BaseTest} from "@rheo-fm/test/BaseTest.sol";
 
 contract CryticVaultsTesterToFoundry is BaseTest, VaultsTargetFunctions, FoundryAsserts, Logger {
     function setUp() public override {
@@ -34,7 +34,7 @@ contract CryticVaultsTesterToFoundry is BaseTest, VaultsTargetFunctions, Foundry
     }
 
     function test_CryticVaultsTesterToFoundry_1() public {
-        maliciousVault_setSize(false);
+        maliciousVault_setRheo(false);
         token_approve(1);
         borrowTokenVault_setVault(address(0xdeadbeef), address(0x16), false);
         size_deposit(1, address(0x30000));
@@ -48,7 +48,7 @@ contract CryticVaultsTesterToFoundry is BaseTest, VaultsTargetFunctions, Foundry
         sender = 0x0000000000000000000000000000000000020000;
         borrowTokenVault_setVault(address(0xdeadbeef), address(0x16), false);
         sender = 0x0000000000000000000000000000000000030000;
-        maliciousVault_setSize(true);
+        maliciousVault_setRheo(true);
         sender = 0x0000000000000000000000000000000000030000;
         token_approve(1524785991);
         sender = 0x0000000000000000000000000000000000030000;

@@ -1,0 +1,126 @@
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.23;
+
+import {IPool} from "@aave/interfaces/IPool.sol";
+
+import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
+import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import {IWETH} from "@rheo-fm/src/market/interfaces/IWETH.sol";
+
+import {CreditPosition, DebtPosition} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
+import {CopyLimitOrderConfig, FixedMaturityLimitOrder} from "@rheo-fm/src/market/libraries/OfferLibrary.sol";
+
+import {IPriceFeed} from "@rheo-fm/src/oracle/IPriceFeed.sol";
+
+import {NonTransferrableRebasingTokenVault} from "@rheo-fm/src/market/token/NonTransferrableRebasingTokenVault.sol";
+import {NonTransferrableToken} from "@rheo-fm/src/market/token/NonTransferrableToken.sol";
+
+import {IRheoFactory} from "@rheo-fm/src/factory/interfaces/IRheoFactory.sol";
+
+struct User {
+    // The user's loan offer
+    FixedMaturityLimitOrder loanOffer;
+    // The user's borrow offer
+    FixedMaturityLimitOrder borrowOffer;
+    // The user-defined opening limit CR. If not set, the protocol's crOpening is used.
+    uint256 openingLimitBorrowCR;
+    // Whether the user has disabled all credit positions for sale
+    bool allCreditPositionsForSaleDisabled;
+}
+
+struct UserCopyLimitOrderConfigs {
+    // the loan offer copy parameters
+    CopyLimitOrderConfig copyLoanOfferConfig;
+    // the borrow offer copy parameters
+    CopyLimitOrderConfig copyBorrowOfferConfig;
+}
+
+struct FeeConfig {
+    // annual percentage rate of the protocol swap fee
+    uint256 swapFeeAPR;
+    // fee for fractionalizing credit positions
+    uint256 fragmentationFee;
+    // percent of the futureValue to be given to the liquidator
+    uint256 liquidationRewardPercent;
+    // percent of collateral remainder to be split with protocol on profitable liquidations for overdue loans
+    uint256 overdueCollateralProtocolPercent;
+    // percent of collateral to be split with protocol on profitable liquidations
+    uint256 collateralProtocolPercent;
+    // address to receive protocol fees
+    address feeRecipient;
+}
+
+struct RiskConfig {
+    // minimum collateral ratio for opening a loan
+    uint256 crOpening;
+    // maximum collateral ratio for liquidation
+    uint256 crLiquidation;
+    // minimum credit value of loans
+    uint256 minimumCreditBorrowToken;
+    // minimum tenor for a loan
+    uint256 minTenor;
+    // maximum tenor for a loan
+    uint256 maxTenor;
+    // allowed maturities (unix timestamps) for a loan
+    EnumerableSet.UintSet maturities;
+}
+
+struct Oracle {
+    // price feed oracle
+    IPriceFeed priceFeed;
+}
+
+struct Data {
+    // mapping of User structs
+    mapping(address => User) users;
+    // mapping of DebtPosition structs
+    mapping(uint256 => DebtPosition) debtPositions;
+    // mapping of CreditPosition structs
+    mapping(uint256 => CreditPosition) creditPositions;
+    // next debt position id
+    uint256 nextDebtPositionId;
+    // next credit position id
+    uint256 nextCreditPositionId;
+    // Wrapped Ether contract address
+    IWETH weth;
+    // the token used by borrowers to collateralize their loans
+    IERC20Metadata underlyingCollateralToken;
+    // the token lent from lenders to borrowers
+    IERC20Metadata underlyingBorrowToken;
+    // Rheo deposit underlying collateral token
+    NonTransferrableToken collateralToken;
+    // Rheo tokenized debt
+    NonTransferrableToken debtToken;
+    // Variable Pool (Aave v3)
+    IPool variablePool;
+    // Rheo deposit underlying borrow token (upgraded in v1.8)
+    NonTransferrableRebasingTokenVault borrowTokenVault;
+    // mapping of copy limit order configs (added in v1.6.1, updated in v1.8)
+    mapping(address => UserCopyLimitOrderConfigs) usersCopyLimitOrderConfigs;
+    // Rheo Factory (added in v1.7)
+    IRheoFactory sizeFactory;
+    // debtTokenCap (added in v1.8.2)
+    uint256 debtTokenCap;
+    // percent of the futureValue to be given to the liquidator for overdue liquidations (added in v1.8.3)
+    uint256 overdueLiquidationRewardPercent;
+}
+
+struct State {
+    // the fee configuration struct
+    FeeConfig feeConfig;
+    // the risk configuration struct
+    RiskConfig riskConfig;
+    // the oracle configuration struct
+    Oracle oracle;
+    // the protocol data (cannot be updated)
+    Data data;
+}
+
+/// @title RheoStorage
+/// @custom:security-contact security@rheo.xyz
+/// @author Rheo (https://rheo.xyz/)
+/// @notice Storage for the Rheo protocol
+/// @dev WARNING: Changing the order of the variables or inner structs in this contract may break the storage layout
+abstract contract RheoStorage {
+    State internal state;
+}

@@ -3,22 +3,23 @@ pragma solidity 0.8.23;
 
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
-import {PriceFeedV1_5} from "@deprecated/oracle/PriceFeedV1_5.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
-import {ISize} from "@src/market/interfaces/ISize.sol";
-import {Errors} from "@src/market/libraries/Errors.sol";
-import {UpdateConfigParams} from "@src/market/libraries/actions/UpdateConfig.sol";
-import {IPriceFeed} from "@src/oracle/IPriceFeed.sol";
-import {PriceFeed, PriceFeedParams} from "@src/oracle/v1.5.1/PriceFeed.sol";
-import {BaseTest} from "@test/BaseTest.sol";
-import {ForkTest} from "@test/fork/ForkTest.sol";
+import {PriceFeedV1_5} from "@rheo-fm/deprecated/oracle/PriceFeedV1_5.sol";
+import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
+import {UpdateConfigParams} from "@rheo-fm/src/market/libraries/actions/UpdateConfig.sol";
+import {IPriceFeed} from "@rheo-fm/src/oracle/IPriceFeed.sol";
+import {PriceFeed, PriceFeedParams} from "@rheo-fm/src/oracle/v1.5.1/PriceFeed.sol";
+import {ForkTest} from "@rheo-fm/test/fork/ForkTest.sol";
+
+import {Contract, Networks} from "@rheo-fm/script/Networks.sol";
+import {IRheoFactory} from "@rheo-fm/src/factory/interfaces/IRheoFactory.sol";
 
 import {IUniswapV3Pool} from "@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol";
-import {Test} from "forge-std/Test.sol";
 import {console} from "forge-std/console.sol";
 
 // On Oct-18-2024, Chainlink cbBTC/USD price feed went down for over 6h
-contract ForkChainlinkGoesDownUniswapIsUsedAsFallbackTest is ForkTest {
+contract ForkChainlinkGoesDownUniswapIsUsedAsFallbackTest is ForkTest, Networks {
     // https://basescan.org/tx/0x2797a77761aa4eda81640b54faa9fe19608c563e146eb566b3fdadea5941070e (aggregatorRoundId 397 executed at Oct-18-2024 03:37:21 PM +UTC)
     uint256 blockNumberChainlinkAggregatorRoundId397 = 21238247;
     // https://basescan.org/tx/0x5861fd0da0cdc07265494e4e7f80608f00f4e2e4211735ee06918f8330569786 (aggregatorRoundId 398 executed at Oct-18-2024 10:05:33 PM +UTC)
@@ -28,13 +29,16 @@ contract ForkChainlinkGoesDownUniswapIsUsedAsFallbackTest is ForkTest {
 
     uint256 updatedAt;
 
-    ISize sizeCbBtcUsdc;
+    IRheo sizeCbBtcUsdc;
     address sizeCbBtcUsdcOwner;
 
     function setUp() public override(ForkTest) {
         super.setUp();
         vm.createSelectFork("base_archive");
-        (sizeCbBtcUsdc,, sizeCbBtcUsdcOwner) = importDeployments("base-production-cbbtc-usdc");
+        sizeCbBtcUsdcOwner = contracts[block.chainid][Contract.RHEO_GOVERNANCE];
+        sizeCbBtcUsdc = findMarketByNetworkConfiguration(
+            IRheoFactory(contracts[block.chainid][Contract.RHEO_FACTORY]), "base-production-cbbtc-usdc"
+        );
 
         vm.rollFork(blockNumberChainlinkAggregatorRoundId397);
         (,,, updatedAt,) =

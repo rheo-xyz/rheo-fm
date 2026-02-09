@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {CollectionsManagerBase} from "@src/collections/CollectionsManagerBase.sol";
+import {CollectionsManagerBase} from "@rheo-fm/src/collections/CollectionsManagerBase.sol";
 
-import {CopyLimitOrderConfig} from "@src/market/libraries/OfferLibrary.sol";
-import {BaseTest} from "@test/BaseTest.sol";
+import {CopyLimitOrderConfig} from "@rheo-fm/src/market/libraries/OfferLibrary.sol";
+import {BaseTest} from "@rheo-fm/test/BaseTest.sol";
 
 contract CollectionsManagerUserActionsTest is BaseTest {
     function test_CollectionsManagerUserActions_subscribeToCollection_valid() public {
@@ -105,12 +105,12 @@ contract CollectionsManagerUserActionsTest is BaseTest {
         assertEq(collectionIds[1], collectionId2);
     }
 
-    function test_CollectionsManagerUserActions_subscribeToCollection_only_through_SizeFactory() public {
+    function test_CollectionsManagerUserActions_subscribeToCollection_only_through_RheoFactory() public {
         uint256 collectionId = _createCollection(alice);
         uint256[] memory collectionIds = new uint256[](1);
         collectionIds[0] = collectionId;
 
-        vm.expectRevert(abi.encodeWithSelector(CollectionsManagerBase.OnlySizeFactory.selector, bob));
+        vm.expectRevert(abi.encodeWithSelector(CollectionsManagerBase.OnlyRheoFactory.selector, bob));
         vm.prank(bob);
         collectionsManager.subscribeUserToCollections(bob, collectionIds);
     }

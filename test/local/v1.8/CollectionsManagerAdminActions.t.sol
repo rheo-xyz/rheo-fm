@@ -2,8 +2,8 @@
 pragma solidity 0.8.23;
 
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
-import {CollectionsManager} from "@src/collections/CollectionsManager.sol";
-import {BaseTest} from "@test/BaseTest.sol";
+import {CollectionsManager} from "@rheo-fm/src/collections/CollectionsManager.sol";
+import {BaseTest} from "@rheo-fm/test/BaseTest.sol";
 
 contract CollectionsManagerAdminActionsTest is BaseTest {
     function test_CollectionsManagerAdminActions_only_admin_can_upgrade() public {

@@ -397,8 +397,8 @@ jobs:
         with:
           name: abi
           path: |
-            out/Size.sol/Size.json
-            out/SizeFactory.sol/SizeFactory.json
+            out/Rheo.sol/Rheo.json
+            out/RheoFactory.sol/RheoFactory.json
             out/CollectionsManager.sol/CollectionsManager.json
             out/IPriceFeed.sol/IPriceFeed.json
             out/IERC20Metadata.sol/IERC20Metadata.json

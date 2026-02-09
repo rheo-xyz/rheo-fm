@@ -2,18 +2,18 @@
 pragma solidity 0.8.23;
 
 import {IERC4626} from "@openzeppelin/contracts/interfaces/IERC4626.sol";
-import {State} from "@src/market/SizeStorage.sol";
+import {State} from "@rheo-fm/src/market/RheoStorage.sol";
 
-import {Errors} from "@src/market/libraries/Errors.sol";
-import {Events} from "@src/market/libraries/Events.sol";
-import {Math, PERCENT, YEAR} from "@src/market/libraries/Math.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
+import {Events} from "@rheo-fm/src/market/libraries/Events.sol";
+import {Math, PERCENT, YEAR} from "@rheo-fm/src/market/libraries/Math.sol";
 
-import {CreditPosition, DebtPosition, LoanLibrary, RESERVED_ID} from "@src/market/libraries/LoanLibrary.sol";
-import {RiskLibrary} from "@src/market/libraries/RiskLibrary.sol";
+import {CreditPosition, DebtPosition, LoanLibrary, RESERVED_ID} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
+import {RiskLibrary} from "@rheo-fm/src/market/libraries/RiskLibrary.sol";
 
 /// @title AccountingLibrary
-/// @custom:security-contact security@size.credit
-/// @author Size (https://size.credit/)
+/// @custom:security-contact security@rheo.xyz
+/// @author Rheo (https://rheo.xyz/)
 library AccountingLibrary {
     using RiskLibrary for State;
     using LoanLibrary for DebtPosition;

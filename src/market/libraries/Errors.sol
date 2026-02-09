@@ -2,8 +2,8 @@
 pragma solidity 0.8.23;
 
 /// @title Errors
-/// @custom:security-contact security@size.credit
-/// @author Size (https://size.credit/)
+/// @custom:security-contact security@rheo.xyz
+/// @author Rheo (https://rheo.xyz/)
 library Errors {
     error MUST_IMPROVE_COLLATERAL_RATIO(address account, uint256 crBefore, uint256 crAfter);
     error NULL_ADDRESS();

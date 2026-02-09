@@ -3,15 +3,15 @@ pragma solidity 0.8.23;
 
 import {IERC4626} from "@openzeppelin/contracts/interfaces/IERC4626.sol";
 
-import {CreditPosition, DebtPosition, LoanLibrary, LoanStatus} from "@src/market/libraries/LoanLibrary.sol";
-import {Math} from "@src/market/libraries/Math.sol";
+import {CreditPosition, DebtPosition, LoanLibrary, LoanStatus} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
+import {Math} from "@rheo-fm/src/market/libraries/Math.sol";
 
-import {State} from "@src/market/SizeStorage.sol";
+import {State} from "@rheo-fm/src/market/RheoStorage.sol";
 
-import {AccountingLibrary} from "@src/market/libraries/AccountingLibrary.sol";
+import {AccountingLibrary} from "@rheo-fm/src/market/libraries/AccountingLibrary.sol";
 
-import {Errors} from "@src/market/libraries/Errors.sol";
-import {Events} from "@src/market/libraries/Events.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
+import {Events} from "@rheo-fm/src/market/libraries/Events.sol";
 
 struct ClaimParams {
     // The credit position ID to claim
@@ -19,8 +19,8 @@ struct ClaimParams {
 }
 
 /// @title Claim
-/// @custom:security-contact security@size.credit
-/// @author Size (https://size.credit/)
+/// @custom:security-contact security@rheo.xyz
+/// @author Rheo (https://rheo.xyz/)
 /// @notice Contains the logic for claiming a credit position
 library Claim {
     using LoanLibrary for CreditPosition;

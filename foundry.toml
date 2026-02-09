@@ -2,7 +2,6 @@
   src = "src"
   out = "out"
   libs = ["lib"]
-  fs_permissions = [{access = "read-write", path = "./deployments"}]
   no_match_contract = 'CryticTester|FoundryHandler|FoundryForkTester|FoundryTester'
   no_match_test = 'testFork_|testForkFuzz_'
   solc_version = '0.8.23'
@@ -17,7 +16,6 @@
   libs = ["lib"]
   solc_version = '0.8.23'
   evm_version = 'cancun'
-  fs_permissions = [{access = "read-write", path = "./deployments"}]
   no_match_contract = 'CryticTester|FoundryHandler|FoundryForkTester|FoundryTester'
   ffi = true
   no_match_test = 'test_|testFuzz_|invariant_'

@@ -6,11 +6,11 @@ import {Test} from "forge-std/Test.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 
-import {Errors} from "@src/market/libraries/Errors.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
 
-import {IOracle} from "@src/oracle/adapters/morpho/IOracle.sol";
-import {MorphoPriceFeed} from "@src/oracle/adapters/morpho/MorphoPriceFeed.sol";
-import {AssertsHelper} from "@test/helpers/AssertsHelper.sol";
+import {IOracle} from "@rheo-fm/src/oracle/adapters/morpho/IOracle.sol";
+import {MorphoPriceFeed} from "@rheo-fm/src/oracle/adapters/morpho/MorphoPriceFeed.sol";
+import {AssertsHelper} from "@rheo-fm/test/helpers/AssertsHelper.sol";
 
 contract MockERC20 {
     string public symbol;

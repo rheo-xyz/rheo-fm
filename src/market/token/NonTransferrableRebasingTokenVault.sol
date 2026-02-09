@@ -12,28 +12,29 @@ import {Ownable2StepUpgradeable} from "@openzeppelin/contracts-upgradeable/acces
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import {ReentrancyGuardUpgradeableWithViewModifier} from "@src/helpers/ReentrancyGuardUpgradeableWithViewModifier.sol";
+import {ReentrancyGuardUpgradeableWithViewModifier} from
+    "@rheo-fm/src/helpers/ReentrancyGuardUpgradeableWithViewModifier.sol";
 
 import {IERC20Metadata} from "@openzeppelin/contracts/interfaces/IERC20Metadata.sol";
 
 import {IERC4626} from "@openzeppelin/contracts/interfaces/IERC4626.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {ISizeFactory} from "@src/factory/interfaces/ISizeFactory.sol";
+import {IRheoFactory} from "@rheo-fm/src/factory/interfaces/IRheoFactory.sol";
 
-import {Math} from "@src/market/libraries/Math.sol";
+import {Math} from "@rheo-fm/src/market/libraries/Math.sol";
 
-import {Errors} from "@src/market/libraries/Errors.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
 
-import {IAaveAdapter} from "@src/market/token/adapters/IAaveAdapter.sol";
-import {IAdapter} from "@src/market/token/adapters/IAdapter.sol";
+import {IAaveAdapter} from "@rheo-fm/src/market/token/adapters/IAaveAdapter.sol";
+import {IAdapter} from "@rheo-fm/src/market/token/adapters/IAdapter.sol";
 
 bytes32 constant AAVE_ADAPTER_ID = bytes32("AaveAdapter");
 bytes32 constant ERC4626_ADAPTER_ID = bytes32("ERC4626Adapter");
 address constant DEFAULT_VAULT = address(0);
 
 /// @title NonTransferrableRebasingTokenVault
-/// @custom:security-contact security@size.credit
-/// @author Size (https://size.credit/)
+/// @custom:security-contact security@rheo.xyz
+/// @author Rheo (https://rheo.xyz/)
 /// @notice A non-transferrable rebasing ERC-20 token vault
 ///         This token vault deposits underlying tokens into vaults on behalf of users
 ///           and mints shares to represent their underlying balances. Currently, only Aave and ERC4626 vaults are supported.
@@ -62,7 +63,7 @@ contract NonTransferrableRebasingTokenVault is
     // slither-disable-start uninitialized-state
     // slither-disable-start constable-states
     // v1.5
-    ISizeFactory public sizeFactory;
+    IRheoFactory public sizeFactory;
     IPool public variablePool;
     IERC20Metadata public underlyingToken;
     string public name;
@@ -124,7 +125,7 @@ contract NonTransferrableRebasingTokenVault is
 
     /// @dev Changing the IAdapter requires a reset in AToken approvals
     function initialize(
-        ISizeFactory sizeFactory_,
+        IRheoFactory sizeFactory_,
         IPool variablePool_,
         IERC20Metadata underlyingToken_,
         address owner_,

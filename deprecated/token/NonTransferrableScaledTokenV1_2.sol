@@ -9,15 +9,15 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/interfaces/IERC20Metadata.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-import {Math} from "@src/market/libraries/Math.sol";
+import {Math} from "@rheo-fm/src/market/libraries/Math.sol";
 
-import {Errors} from "@src/market/libraries/Errors.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
 
 /// @title NonTransferrableScaledTokenV1_2
-/// @custom:security-contact security@size.credit
-/// @author Size (https://size.credit/)
+/// @custom:security-contact security@rheo.xyz
+/// @author Rheo (https://rheo.xyz/)
 /// @notice An ERC-20 that is not transferrable from outside of the protocol
-/// @dev The contract owner (i.e. the Size contract) can still mint, burn, and transfer tokens
+/// @dev The contract owner (i.e. the Rheo contract) can still mint, burn, and transfer tokens
 ///      Enables the owner to mint and burn scaled amounts.
 ///      For backward compatibility, emits the TransferUnscaled event representing the actual unscaled amount
 contract NonTransferrableScaledTokenV1_2 is Ownable, IERC20Metadata, IERC20Errors {

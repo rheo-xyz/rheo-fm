@@ -5,11 +5,11 @@ import {Test} from "forge-std/Test.sol";
 
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 import {MockV3Aggregator} from "@chainlink/contracts/src/v0.8/tests/MockV3Aggregator.sol";
-import {Math} from "@src/market/libraries/Math.sol";
-import {ChainlinkPriceFeed} from "@src/oracle/adapters/ChainlinkPriceFeed.sol";
-import {AssertsHelper} from "@test/helpers/AssertsHelper.sol";
+import {Math} from "@rheo-fm/src/market/libraries/Math.sol";
+import {ChainlinkPriceFeed} from "@rheo-fm/src/oracle/adapters/ChainlinkPriceFeed.sol";
+import {AssertsHelper} from "@rheo-fm/test/helpers/AssertsHelper.sol";
 
-import {Errors} from "@src/market/libraries/Errors.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
 
 contract ChainlinkPriceFeedTest is Test, AssertsHelper {
     ChainlinkPriceFeed public priceFeed;

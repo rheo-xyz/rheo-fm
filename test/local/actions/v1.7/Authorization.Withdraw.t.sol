@@ -3,13 +3,13 @@ pragma solidity 0.8.23;
 
 import {IAToken} from "@aave/interfaces/IAToken.sol";
 
-import {Action, Authorization} from "@src/factory/libraries/Authorization.sol";
-import {UserView} from "@src/market/SizeView.sol";
-import {ISize} from "@src/market/interfaces/ISize.sol";
-import {Errors} from "@src/market/libraries/Errors.sol";
+import {Action, Authorization} from "@rheo-fm/src/factory/libraries/Authorization.sol";
+import {UserView} from "@rheo-fm/src/market/RheoView.sol";
+import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
 
-import {WithdrawOnBehalfOfParams, WithdrawParams} from "@src/market/libraries/actions/Withdraw.sol";
-import {BaseTest} from "@test/BaseTest.sol";
+import {WithdrawOnBehalfOfParams, WithdrawParams} from "@rheo-fm/src/market/libraries/actions/Withdraw.sol";
+import {BaseTest} from "@rheo-fm/test/BaseTest.sol";
 
 contract AuthorizationWithdrawTest is BaseTest {
     function test_AuthorizationWithdraw_withdrawOnBehalfOf() public {

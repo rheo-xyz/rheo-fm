@@ -1,19 +1,20 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {ISize} from "@src/market/interfaces/ISize.sol";
-import {Errors} from "@src/market/libraries/Errors.sol";
+import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
 
-import {RESERVED_ID} from "@src/market/libraries/LoanLibrary.sol";
-import {Math, PERCENT} from "@src/market/libraries/Math.sol";
-import {BaseTest, Vars} from "@test/BaseTest.sol";
-import {FixedMaturityLimitOrderHelper} from "@test/helpers/libraries/FixedMaturityLimitOrderHelper.sol";
+import {RESERVED_ID} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
+import {Math, PERCENT} from "@rheo-fm/src/market/libraries/Math.sol";
+import {BaseTest, Vars} from "@rheo-fm/test/BaseTest.sol";
+import {FixedMaturityLimitOrderHelper} from "@rheo-fm/test/helpers/libraries/FixedMaturityLimitOrderHelper.sol";
 
-import {Action, Authorization} from "@src/factory/libraries/Authorization.sol";
-import {CREDIT_POSITION_ID_START, DEBT_POSITION_ID_START} from "@src/market/libraries/LoanLibrary.sol";
+import {Action, Authorization} from "@rheo-fm/src/factory/libraries/Authorization.sol";
+import {CREDIT_POSITION_ID_START, DEBT_POSITION_ID_START} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
 import {
-    BuyCreditMarketOnBehalfOfParams, BuyCreditMarketParams
-} from "@src/market/libraries/actions/BuyCreditMarket.sol";
+    BuyCreditMarketOnBehalfOfParams,
+    BuyCreditMarketParams
+} from "@rheo-fm/src/market/libraries/actions/BuyCreditMarket.sol";
 
 contract AuthorizationBuyCreditMarketTest is BaseTest {
     function test_AuthorizationBuyCreditMarket_buyCreditMarketOnBehalfOf() public {

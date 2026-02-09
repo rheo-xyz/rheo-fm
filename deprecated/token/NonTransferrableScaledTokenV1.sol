@@ -5,16 +5,16 @@ import {IPool} from "@aave/interfaces/IPool.sol";
 import {WadRayMath} from "@aave/protocol/libraries/math/WadRayMath.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/interfaces/IERC20Metadata.sol";
 
-import {Math} from "@src/market/libraries/Math.sol";
-import {NonTransferrableToken} from "@src/market/token/NonTransferrableToken.sol";
+import {Math} from "@rheo-fm/src/market/libraries/Math.sol";
+import {NonTransferrableToken} from "@rheo-fm/src/market/token/NonTransferrableToken.sol";
 
-import {Errors} from "@src/market/libraries/Errors.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
 
 /// @title NonTransferrableScaledTokenV1
-/// @custom:security-contact security@size.credit
-/// @author Size (https://size.credit/)
+/// @custom:security-contact security@rheo.xyz
+/// @author Rheo (https://rheo.xyz/)
 /// @notice An ERC-20 that is not transferrable from outside of the protocol
-/// @dev The contract owner (i.e. the Size contract) can still mint, burn, and transfer tokens
+/// @dev The contract owner (i.e. the Rheo contract) can still mint, burn, and transfer tokens
 ///      Enables the owner to mint and burn scaled amounts. Emits the TransferUnscaled event representing the actual unscaled amount
 contract NonTransferrableScaledTokenV1 is NonTransferrableToken {
     IPool private immutable variablePool;

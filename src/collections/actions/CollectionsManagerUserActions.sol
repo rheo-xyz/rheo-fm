@@ -3,14 +3,14 @@ pragma solidity 0.8.23;
 
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
-import {UserCollectionCopyLimitOrderConfigs} from "@src/collections/CollectionsManagerBase.sol";
-import {CollectionsManagerView} from "@src/collections/actions/CollectionsManagerView.sol";
-import {ICollectionsManagerUserActions} from "@src/collections/interfaces/ICollectionsManagerUserActions.sol";
-import {CopyLimitOrderConfig, OfferLibrary} from "@src/market/libraries/OfferLibrary.sol";
+import {UserCollectionCopyLimitOrderConfigs} from "@rheo-fm/src/collections/CollectionsManagerBase.sol";
+import {CollectionsManagerView} from "@rheo-fm/src/collections/actions/CollectionsManagerView.sol";
+import {ICollectionsManagerUserActions} from "@rheo-fm/src/collections/interfaces/ICollectionsManagerUserActions.sol";
+import {CopyLimitOrderConfig, OfferLibrary} from "@rheo-fm/src/market/libraries/OfferLibrary.sol";
 
 /// @title CollectionsManagerUserActions
-/// @custom:security-contact security@size.credit
-/// @author Size (https://size.credit/)
+/// @custom:security-contact security@rheo.xyz
+/// @author Rheo (https://rheo.xyz/)
 /// @notice See the documentation in {ICollectionsManagerUserActions}.
 abstract contract CollectionsManagerUserActions is ICollectionsManagerUserActions, CollectionsManagerView {
     using EnumerableSet for EnumerableSet.UintSet;
@@ -19,7 +19,7 @@ abstract contract CollectionsManagerUserActions is ICollectionsManagerUserAction
                             USER ACTIONS
     //////////////////////////////////////////////////////////////*/
 
-    function subscribeUserToCollections(address user, uint256[] memory collectionIds) external onlySizeFactory {
+    function subscribeUserToCollections(address user, uint256[] memory collectionIds) external onlyRheoFactory {
         CopyLimitOrderConfig memory fullCopy = CopyLimitOrderConfig({
             minTenor: 0,
             maxTenor: type(uint256).max,
@@ -41,7 +41,7 @@ abstract contract CollectionsManagerUserActions is ICollectionsManagerUserAction
         }
     }
 
-    function unsubscribeUserFromCollections(address user, uint256[] memory collectionIds) external onlySizeFactory {
+    function unsubscribeUserFromCollections(address user, uint256[] memory collectionIds) external onlyRheoFactory {
         // slither-disable-next-line uninitialized-local
         CopyLimitOrderConfig memory nullCopy;
 
@@ -63,7 +63,7 @@ abstract contract CollectionsManagerUserActions is ICollectionsManagerUserAction
         uint256 collectionId,
         CopyLimitOrderConfig memory copyLoanOfferConfig,
         CopyLimitOrderConfig memory copyBorrowOfferConfig
-    ) external onlySizeFactory {
+    ) external onlyRheoFactory {
         _setUserCollectionCopyLimitOrderConfigs(user, collectionId, copyLoanOfferConfig, copyBorrowOfferConfig);
     }
 

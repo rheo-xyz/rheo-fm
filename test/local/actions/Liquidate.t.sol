@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {LiquidateParams} from "@src/market/libraries/actions/Liquidate.sol";
-import {BaseTest} from "@test/BaseTest.sol";
-import {Vars} from "@test/BaseTest.sol";
+import {LiquidateParams} from "@rheo-fm/src/market/libraries/actions/Liquidate.sol";
+import {BaseTest} from "@rheo-fm/test/BaseTest.sol";
+import {Vars} from "@rheo-fm/test/BaseTest.sol";
 
-import {LoanStatus, RESERVED_ID} from "@src/market/libraries/LoanLibrary.sol";
-import {Math} from "@src/market/libraries/Math.sol";
-import {PERCENT} from "@src/market/libraries/Math.sol";
-import {FixedMaturityLimitOrderHelper} from "@test/helpers/libraries/FixedMaturityLimitOrderHelper.sol";
+import {LoanStatus, RESERVED_ID} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
+import {Math} from "@rheo-fm/src/market/libraries/Math.sol";
+import {PERCENT} from "@rheo-fm/src/market/libraries/Math.sol";
+import {FixedMaturityLimitOrderHelper} from "@rheo-fm/test/helpers/libraries/FixedMaturityLimitOrderHelper.sol";
 
 contract LiquidateTest is BaseTest {
     function test_Liquidate_liquidate_repays_loan() public {
