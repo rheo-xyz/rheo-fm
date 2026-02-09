@@ -9,7 +9,7 @@ import {CREDIT_POSITION_ID_START, RESERVED_ID} from "@src/market/libraries/LoanL
 import {BuyCreditMarketParams} from "@src/market/libraries/actions/BuyCreditMarket.sol";
 import {CompensateParams} from "@src/market/libraries/actions/Compensate.sol";
 
-import {YieldCurveHelper} from "@test/helpers/libraries/YieldCurveHelper.sol";
+import {FixedMaturityLimitOrderHelper} from "@test/helpers/libraries/FixedMaturityLimitOrderHelper.sol";
 
 import {Errors} from "@src/market/libraries/Errors.sol";
 
@@ -25,24 +25,24 @@ contract CompensateValidationTest is BaseTest {
         _deposit(james, weth, 100e18);
         _deposit(james, usdc, 100e6);
         _buyCreditLimit(
-            alice, block.timestamp + 12 days, [int256(0.05e18), int256(0.05e18)], [uint256(6 days), uint256(12 days)]
+            alice, block.timestamp + 60 days, [int256(0.05e18), int256(0.05e18)], [uint256(30 days), uint256(60 days)]
         );
         _buyCreditLimit(
-            bob, block.timestamp + 12 days, [int256(0.05e18), int256(0.05e18)], [uint256(6 days), uint256(12 days)]
+            bob, block.timestamp + 60 days, [int256(0.05e18), int256(0.05e18)], [uint256(30 days), uint256(60 days)]
         );
         _buyCreditLimit(
-            candy, block.timestamp + 12 days, [int256(0.05e18), int256(0.05e18)], [uint256(6 days), uint256(12 days)]
+            candy, block.timestamp + 60 days, [int256(0.05e18), int256(0.05e18)], [uint256(30 days), uint256(60 days)]
         );
         _buyCreditLimit(
-            james, block.timestamp + 12 days, [int256(0.05e18), int256(0.05e18)], [uint256(6 days), uint256(12 days)]
+            james, block.timestamp + 60 days, [int256(0.05e18), int256(0.05e18)], [uint256(30 days), uint256(60 days)]
         );
-        uint256 debtPositionId = _sellCreditMarket(bob, alice, RESERVED_ID, 20e6, 12 days, false);
+        uint256 debtPositionId = _sellCreditMarket(bob, alice, RESERVED_ID, 20e6, _maturity(60 days), false);
         uint256 creditPositionId = size.getCreditPositionIdsByDebtPositionId(debtPositionId)[0];
-        uint256 loanId2 = _sellCreditMarket(candy, bob, RESERVED_ID, 20e6, 12 days, false);
+        uint256 loanId2 = _sellCreditMarket(candy, bob, RESERVED_ID, 20e6, _maturity(60 days), false);
         uint256 creditPositionId2 = size.getCreditPositionIdsByDebtPositionId(loanId2)[0];
-        uint256 loanId3 = _sellCreditMarket(alice, james, RESERVED_ID, 20e6, 12 days, false);
+        uint256 loanId3 = _sellCreditMarket(alice, james, RESERVED_ID, 20e6, _maturity(60 days), false);
         uint256 creditPositionId3 = size.getCreditPositionIdsByDebtPositionId(loanId3)[0];
-        _sellCreditMarket(bob, alice, creditPositionId2, 10e6, 12 days);
+        _sellCreditMarket(bob, alice, creditPositionId2, 10e6, _maturity(60 days));
         uint256 creditPositionId2_1 = size.getCreditPositionIdsByDebtPositionId(loanId2)[0];
 
         vm.startPrank(bob);
@@ -109,18 +109,18 @@ contract CompensateValidationTest is BaseTest {
         );
         vm.stopPrank();
 
-        uint256 l1 = _sellCreditMarket(bob, alice, RESERVED_ID, 20e6, 12 days, false);
-        uint256 l2 = _sellCreditMarket(alice, james, RESERVED_ID, 20e6, 6 days, false);
+        uint256 l1 = _sellCreditMarket(bob, alice, RESERVED_ID, 20e6, _maturity(30 days), false);
+        uint256 l2 = _sellCreditMarket(alice, james, RESERVED_ID, 20e6, _maturity(60 days), false);
         uint256 creditPositionIdL2 = size.getCreditPositionIdsByDebtPositionId(l2)[0];
         uint256 creditPositionIdL1 = size.getCreditPositionIdsByDebtPositionId(l1)[0];
-        vm.startPrank(alice);
+        vm.startPrank(bob);
         vm.expectRevert(
-            abi.encodeWithSelector(Errors.DUE_DATE_NOT_COMPATIBLE.selector, creditPositionIdL2, creditPositionIdL1)
+            abi.encodeWithSelector(Errors.DUE_DATE_NOT_COMPATIBLE.selector, creditPositionIdL1, creditPositionIdL2)
         );
         size.compensate(
             CompensateParams({
-                creditPositionWithDebtToRepayId: creditPositionIdL2,
-                creditPositionToCompensateId: creditPositionIdL1,
+                creditPositionWithDebtToRepayId: creditPositionIdL1,
+                creditPositionToCompensateId: creditPositionIdL2,
                 amount: type(uint256).max
             })
         );
@@ -154,11 +154,11 @@ contract CompensateValidationTest is BaseTest {
         _deposit(bob, usdc, 100e6);
         _deposit(james, weth, 100e18);
         _deposit(james, usdc, 100e6);
-        _buyCreditLimit(alice, block.timestamp + 365 days, YieldCurveHelper.pointCurve(365 days, 1e18));
-        _buyCreditLimit(bob, block.timestamp + 365 days, YieldCurveHelper.pointCurve(365 days, 1e18));
-        _buyCreditLimit(james, block.timestamp + 365 days, YieldCurveHelper.pointCurve(365 days, 1e18));
+        _buyCreditLimit(alice, block.timestamp + 150 days, _pointOfferAtIndex(4, 1e18));
+        _buyCreditLimit(bob, block.timestamp + 150 days, _pointOfferAtIndex(4, 1e18));
+        _buyCreditLimit(james, block.timestamp + 150 days, _pointOfferAtIndex(4, 1e18));
 
-        uint256 dSelf = _sellCreditMarket(bob, bob, RESERVED_ID, 20e6, 365 days, false);
+        uint256 dSelf = _sellCreditMarket(bob, bob, RESERVED_ID, 20e6, _maturity(150 days), false);
         uint256 cSelf = size.getCreditPositionIdsByDebtPositionId(dSelf)[0];
 
         vm.prank(bob);

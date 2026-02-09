@@ -2,11 +2,13 @@
 pragma solidity 0.8.23;
 
 import {RESERVED_ID} from "@src/market/libraries/LoanLibrary.sol";
+
+import {Math} from "@src/market/libraries/Math.sol";
 import {DepositParams} from "@src/market/libraries/actions/Deposit.sol";
 
 import {Vars} from "@test/BaseTest.sol";
 import {BaseTestGenericMarket} from "@test/BaseTestGenericMarket.sol";
-import {YieldCurveHelper} from "@test/helpers/libraries/YieldCurveHelper.sol";
+import {FixedMaturityLimitOrderHelper} from "@test/helpers/libraries/FixedMaturityLimitOrderHelper.sol";
 
 contract GenericMarket_cbBTC_USDC_Test is BaseTestGenericMarket {
     function setUp() public virtual override {
@@ -49,16 +51,31 @@ contract GenericMarket_cbBTC_USDC_Test is BaseTestGenericMarket {
         _deposit(bob, address(collateralToken), 1e8);
         _deposit(liquidator, address(borrowToken), 2 * 60576e6);
 
-        _buyCreditLimit(alice, block.timestamp + 365 days, YieldCurveHelper.pointCurve(365 days, 0.25e18));
-        uint256 debtPositionId = _sellCreditMarket(bob, alice, RESERVED_ID, 30288e6, 365 days, false);
-        assertEqApprox(size.collateralRatio(bob), 1.6e18, 0.01e18);
+        _buyCreditLimit(alice, block.timestamp + 150 days, _pointOfferAtIndex(4, 0.25e18));
+        uint256 debtPositionId = _sellCreditMarket(bob, alice, RESERVED_ID, 30288e6, _maturity(150 days), false);
+        uint256 futureValue = size.getDebtPosition(debtPositionId).futureValue;
+        uint256 expectedCR = Math.mulDivDown(
+            size.data().collateralToken.balanceOf(bob) * 10 ** borrowToken.decimals(),
+            priceFeed.getPrice(),
+            size.data().debtToken.balanceOf(bob) * 10 ** collateralToken.decimals()
+        );
+        assertEqApprox(size.collateralRatio(bob), expectedCR, 0.01e18);
 
-        assertEq(_state().bob.debtBalance, 30288e6 + 30288e6 / 4);
+        assertEq(_state().bob.debtBalance, futureValue);
 
-        _setPrice(3 * priceFeed.getPrice() / 4);
-        assertEqApprox(size.collateralRatio(bob), 1.2e18, 0.01e18);
+        _setPrice(priceFeed.getPrice() / 3);
+        uint256 expectedCRAfter = Math.mulDivDown(
+            size.data().collateralToken.balanceOf(bob) * 10 ** borrowToken.decimals(),
+            priceFeed.getPrice(),
+            size.data().debtToken.balanceOf(bob) * 10 ** collateralToken.decimals()
+        );
+        assertEqApprox(size.collateralRatio(bob), expectedCRAfter, 0.01e18);
 
         Vars memory _before = _state();
+        uint256 assignedCollateral = size.getDebtPositionAssignedCollateral(debtPositionId);
+        uint256 debtInCollateralToken = size.debtTokenAmountToCollateralTokenAmount(futureValue);
+        uint256 liquidatorProfitCollateralToken =
+            assignedCollateral > debtInCollateralToken ? debtInCollateralToken : assignedCollateral;
 
         _liquidate(liquidator, debtPositionId);
 
@@ -66,7 +83,7 @@ contract GenericMarket_cbBTC_USDC_Test is BaseTestGenericMarket {
 
         assertEq(
             _after.liquidator.collateralTokenBalance,
-            _before.liquidator.collateralTokenBalance + ((30288e6 + 30288e6 / 4) * 4 * 0.9999e8 / (3 * 60576e6)) + 1
+            _before.liquidator.collateralTokenBalance + liquidatorProfitCollateralToken
         );
     }
 }

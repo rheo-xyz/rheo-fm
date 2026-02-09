@@ -39,7 +39,7 @@ abstract contract PropertiesSpecifications {
         "SET_VAULT_01: setVault with forfeitOldShares resets the sender's borrowTokenBalance";
 
     string internal constant LOAN_01 = "LOAN_01: loan.credit >= minimumCreditBorrowToken";
-    string internal constant LOAN_02 = "LOAN_02: minTenor <= loan.tenor <= maxTenor";
+    string internal constant LOAN_02 = "LOAN_02: loan.dueDate is an allowed risk maturity";
     string internal constant LOAN_03 = "LOAN_03: COUNT(credit positions) >= COUNT(debt positions)";
     string internal constant LOAN_04 = "LOAN_04: A CreditPosition's debtPositionId is never updated"; // TODO
 

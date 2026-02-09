@@ -7,14 +7,13 @@ import {RESERVED_ID} from "@src/market/libraries/LoanLibrary.sol";
 import {CopyLimitOrderConfig} from "@src/market/libraries/OfferLibrary.sol";
 
 import {OfferLibrary} from "@src/market/libraries/OfferLibrary.sol";
-import {YieldCurve} from "@src/market/libraries/YieldCurveLibrary.sol";
 
 import {BuyCreditMarketParams} from "@src/market/libraries/actions/BuyCreditMarket.sol";
 
 import {SellCreditMarketParams} from "@src/market/libraries/actions/SellCreditMarket.sol";
 import {SetCopyLimitOrderConfigsParams} from "@src/market/libraries/actions/SetCopyLimitOrderConfigs.sol";
 import {BaseTest} from "@test/BaseTest.sol";
-import {YieldCurveHelper} from "@test/helpers/libraries/YieldCurveHelper.sol";
+import {FixedMaturityLimitOrderHelper} from "@test/helpers/libraries/FixedMaturityLimitOrderHelper.sol";
 
 contract SetCopyLimitOrderConfigsTest is BaseTest {
     CopyLimitOrderConfig private nullCopy;
@@ -30,13 +29,13 @@ contract SetCopyLimitOrderConfigsTest is BaseTest {
     uint256 private constant MAX = 255;
 
     function test_SetCopyLimitOrderConfigs_setCopyLimitOrderConfigs_config() public {
-        _sellCreditLimit(bob, block.timestamp + 365 days, YieldCurveHelper.pointCurve(30 days, 0.05e18));
-        _buyCreditLimit(bob, block.timestamp + 365 days, YieldCurveHelper.pointCurve(60 days, 0.08e18));
+        _sellCreditLimit(bob, block.timestamp + 150 days, _pointOfferAtIndex(0, 0.05e18));
+        _buyCreditLimit(bob, block.timestamp + 150 days, _pointOfferAtIndex(1, 0.08e18));
 
-        uint256 borrowOfferAPR = size.getUserDefinedBorrowOfferAPR(bob, 30 days);
+        uint256 borrowOfferAPR = size.getUserDefinedBorrowOfferAPR(bob, block.timestamp + 30 days);
         assertEq(borrowOfferAPR, 0.05e18);
 
-        uint256 loanOfferAPR = size.getUserDefinedLoanOfferAPR(bob, 60 days);
+        uint256 loanOfferAPR = size.getUserDefinedLoanOfferAPR(bob, block.timestamp + 60 days);
         assertEq(loanOfferAPR, 0.08e18);
 
         _setCopyLimitOrderConfigs(
@@ -72,8 +71,8 @@ contract SetCopyLimitOrderConfigsTest is BaseTest {
     }
 
     function test_SetCopyLimitOrderConfigs_setCopyLimitOrderConfigs_reset_copy() public {
-        _sellCreditLimit(bob, block.timestamp + 365 days, YieldCurveHelper.pointCurve(30 days, 0.05e18));
-        _buyCreditLimit(bob, block.timestamp + 365 days, YieldCurveHelper.pointCurve(60 days, 0.08e18));
+        _sellCreditLimit(bob, block.timestamp + 150 days, _pointOfferAtIndex(0, 0.05e18));
+        _buyCreditLimit(bob, block.timestamp + 150 days, _pointOfferAtIndex(1, 0.08e18));
 
         _setCopyLimitOrderConfigs(alice, fullCopy, fullCopy);
         _setCopyLimitOrderConfigs(alice, nullCopy, nullCopy);

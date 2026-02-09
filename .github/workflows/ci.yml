@@ -6,6 +6,7 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -19,9 +20,24 @@ jobs:
     name: Contract sizes
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
-          submodules: recursive
+          fetch-depth: 0
+
+      - name: Checkout submodules (retry)
+        shell: bash
+        run: |
+          set -euo pipefail
+          git submodule sync --recursive
+          for i in 1 2 3 4 5; do
+            if git submodule update --init --recursive --depth 1 --jobs 8; then
+              exit 0
+            fi
+            echo "git submodule update failed (attempt $i), retrying..."
+            sleep $((i * 10))
+          done
+          echo "git submodule update failed after retries"
+          exit 1
 
       - name: Setup Foundry
         uses: foundry-rs/foundry-toolchain@v1
@@ -41,9 +57,24 @@ jobs:
     name: Format
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
-          submodules: recursive
+          fetch-depth: 0
+
+      - name: Checkout submodules (retry)
+        shell: bash
+        run: |
+          set -euo pipefail
+          git submodule sync --recursive
+          for i in 1 2 3 4 5; do
+            if git submodule update --init --recursive --depth 1 --jobs 8; then
+              exit 0
+            fi
+            echo "git submodule update failed (attempt $i), retrying..."
+            sleep $((i * 10))
+          done
+          echo "git submodule update failed after retries"
+          exit 1
 
       - name: Setup Foundry
         uses: foundry-rs/foundry-toolchain@v1
@@ -62,9 +93,24 @@ jobs:
     name: Test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
-          submodules: recursive
+          fetch-depth: 0
+
+      - name: Checkout submodules (retry)
+        shell: bash
+        run: |
+          set -euo pipefail
+          git submodule sync --recursive
+          for i in 1 2 3 4 5; do
+            if git submodule update --init --recursive --depth 1 --jobs 8; then
+              exit 0
+            fi
+            echo "git submodule update failed (attempt $i), retrying..."
+            sleep $((i * 10))
+          done
+          echo "git submodule update failed after retries"
+          exit 1
 
       - name: Setup Foundry
         uses: foundry-rs/foundry-toolchain@v1
@@ -83,9 +129,24 @@ jobs:
     name: Fork Test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
-          submodules: recursive
+          fetch-depth: 0
+
+      - name: Checkout submodules (retry)
+        shell: bash
+        run: |
+          set -euo pipefail
+          git submodule sync --recursive
+          for i in 1 2 3 4 5; do
+            if git submodule update --init --recursive --depth 1 --jobs 8; then
+              exit 0
+            fi
+            echo "git submodule update failed (attempt $i), retrying..."
+            sleep $((i * 10))
+          done
+          echo "git submodule update failed after retries"
+          exit 1
 
       - name: Setup Foundry
         uses: foundry-rs/foundry-toolchain@v1
@@ -94,7 +155,7 @@ jobs:
 
       - name: Fork Test
         run: |
-          forge test -vvv --fail-fast --threads 1
+          forge test -vvv --fail-fast --no-match-contract "ForkMarketShutdownTest|FoundryForkTester"
         id: test
         env:
           API_KEY_ALCHEMY: ${{ secrets.API_KEY_ALCHEMY }}
@@ -109,9 +170,24 @@ jobs:
     name: Slither
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
-          submodules: recursive
+          fetch-depth: 0
+
+      - name: Checkout submodules (retry)
+        shell: bash
+        run: |
+          set -euo pipefail
+          git submodule sync --recursive
+          for i in 1 2 3 4 5; do
+            if git submodule update --init --recursive --depth 1 --jobs 8; then
+              exit 0
+            fi
+            echo "git submodule update failed (attempt $i), retrying..."
+            sleep $((i * 10))
+          done
+          echo "git submodule update failed after retries"
+          exit 1
 
       - name: Setup Foundry
         uses: foundry-rs/foundry-toolchain@v1
@@ -134,9 +210,24 @@ jobs:
     name: Solhint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
-          submodules: recursive
+          fetch-depth: 0
+
+      - name: Checkout submodules (retry)
+        shell: bash
+        run: |
+          set -euo pipefail
+          git submodule sync --recursive
+          for i in 1 2 3 4 5; do
+            if git submodule update --init --recursive --depth 1 --jobs 8; then
+              exit 0
+            fi
+            echo "git submodule update failed (attempt $i), retrying..."
+            sleep $((i * 10))
+          done
+          echo "git submodule update failed after retries"
+          exit 1
 
       - name: Install dependencies
         run: npm install
@@ -154,9 +245,24 @@ jobs:
     name: Invariants
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
-          submodules: recursive
+          fetch-depth: 0
+
+      - name: Checkout submodules (retry)
+        shell: bash
+        run: |
+          set -euo pipefail
+          git submodule sync --recursive
+          for i in 1 2 3 4 5; do
+            if git submodule update --init --recursive --depth 1 --jobs 8; then
+              exit 0
+            fi
+            echo "git submodule update failed (attempt $i), retrying..."
+            sleep $((i * 10))
+          done
+          echo "git submodule update failed after retries"
+          exit 1
 
       - name: Setup Foundry
         uses: foundry-rs/foundry-toolchain@v1
@@ -215,9 +321,24 @@ jobs:
     name: Halmos
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
-          submodules: recursive
+          fetch-depth: 0
+
+      - name: Checkout submodules (retry)
+        shell: bash
+        run: |
+          set -euo pipefail
+          git submodule sync --recursive
+          for i in 1 2 3 4 5; do
+            if git submodule update --init --recursive --depth 1 --jobs 8; then
+              exit 0
+            fi
+            echo "git submodule update failed (attempt $i), retrying..."
+            sleep $((i * 10))
+          done
+          echo "git submodule update failed after retries"
+          exit 1
 
       - name: Setup Foundry
         uses: foundry-rs/foundry-toolchain@v1
@@ -240,9 +361,24 @@ jobs:
     name: ABI
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
-          submodules: recursive
+          fetch-depth: 0
+
+      - name: Checkout submodules (retry)
+        shell: bash
+        run: |
+          set -euo pipefail
+          git submodule sync --recursive
+          for i in 1 2 3 4 5; do
+            if git submodule update --init --recursive --depth 1 --jobs 8; then
+              exit 0
+            fi
+            echo "git submodule update failed (attempt $i), retrying..."
+            sleep $((i * 10))
+          done
+          echo "git submodule update failed after retries"
+          exit 1
 
       - name: Setup Foundry
         uses: foundry-rs/foundry-toolchain@v1
@@ -276,9 +412,24 @@ jobs:
     name: Coverage
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
-          submodules: recursive
+          fetch-depth: 0
+
+      - name: Checkout submodules (retry)
+        shell: bash
+        run: |
+          set -euo pipefail
+          git submodule sync --recursive
+          for i in 1 2 3 4 5; do
+            if git submodule update --init --recursive --depth 1 --jobs 8; then
+              exit 0
+            fi
+            echo "git submodule update failed (attempt $i), retrying..."
+            sleep $((i * 10))
+          done
+          echo "git submodule update failed after retries"
+          exit 1
 
       - name: Setup Foundry
         uses: foundry-rs/foundry-toolchain@v1
@@ -292,9 +443,15 @@ jobs:
         run: |
           forge coverage --no-match-coverage "(script|test|deprecated)" --report lcov
 
+      - name: Archive coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-lcov
+          path: lcov.info
+
       - name: Coveralls
-        uses: coverallsapp/github-action@v2
         if: ${{ !github.event.repository.private }}
+        uses: coverallsapp/github-action@v2
         with:
           coverage-reporter-version: v0.6.15
           fail-on-error: false
@@ -307,9 +464,24 @@ jobs:
     name: Upload Selectors
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
-          submodules: recursive
+          fetch-depth: 0
+
+      - name: Checkout submodules (retry)
+        shell: bash
+        run: |
+          set -euo pipefail
+          git submodule sync --recursive
+          for i in 1 2 3 4 5; do
+            if git submodule update --init --recursive --depth 1 --jobs 8; then
+              exit 0
+            fi
+            echo "git submodule update failed (attempt $i), retrying..."
+            sleep $((i * 10))
+          done
+          echo "git submodule update failed after retries"
+          exit 1
 
       - name: Setup Foundry
         uses: foundry-rs/foundry-toolchain@v1

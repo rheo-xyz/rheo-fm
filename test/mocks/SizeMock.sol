@@ -108,7 +108,7 @@ contract SizeMock is Size {
 
     function getSwapFee(uint256 cash, uint256 tenor) public view returns (uint256) {
         if (tenor == 0) {
-            revert Errors.NULL_TENOR();
+            revert Errors.NULL_MATURITY();
         }
         return state.getSwapFee(cash, tenor);
     }

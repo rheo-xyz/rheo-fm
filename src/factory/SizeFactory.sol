@@ -11,7 +11,6 @@ import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {CopyLimitOrderConfig} from "@src/market/libraries/OfferLibrary.sol";
 
 import {ICollectionsManager} from "@src/collections/interfaces/ICollectionsManager.sol";
-import {YieldCurve} from "@src/market/libraries/YieldCurveLibrary.sol";
 import {BuyCreditLimitOnBehalfOfParams, BuyCreditLimitParams} from "@src/market/libraries/actions/BuyCreditLimit.sol";
 import {
     SellCreditLimitOnBehalfOfParams, SellCreditLimitParams
@@ -58,7 +57,7 @@ import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.s
 import {ERC721Holder} from "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
 import {CollectionsManager} from "@src/collections/CollectionsManager.sol";
 
-import {BORROW_RATE_UPDATER_ROLE, KEEPER_ROLE, PAUSER_ROLE} from "@src/factory/interfaces/ISizeFactory.sol";
+import {PAUSER_ROLE} from "@src/factory/interfaces/ISizeFactory.sol";
 
 /// @title SizeFactory
 /// @custom:security-contact security@size.credit
@@ -87,8 +86,6 @@ contract SizeFactory is
 
         _grantRole(DEFAULT_ADMIN_ROLE, _owner);
         _grantRole(PAUSER_ROLE, _owner);
-        _grantRole(KEEPER_ROLE, _owner);
-        _grantRole(BORROW_RATE_UPDATER_ROLE, _owner);
     }
 
     function _authorizeUpgrade(address newImplementation) internal override onlyRole(DEFAULT_ADMIN_ROLE) {}
@@ -273,36 +270,36 @@ contract SizeFactory is
     }
 
     /// @inheritdoc ISizeFactoryV1_8
-    function getLoanOfferAPR(address user, uint256 collectionId, ISize market, address rateProvider, uint256 tenor)
+    function getLoanOfferAPR(address user, uint256 collectionId, ISize market, address rateProvider, uint256 maturity)
         external
         view
         returns (uint256)
     {
-        return collectionsManager.getLoanOfferAPR(user, collectionId, market, rateProvider, tenor);
+        return collectionsManager.getLoanOfferAPR(user, collectionId, market, rateProvider, maturity);
     }
 
     /// @inheritdoc ISizeFactoryV1_8
-    function getBorrowOfferAPR(address user, uint256 collectionId, ISize market, address rateProvider, uint256 tenor)
+    function getBorrowOfferAPR(address user, uint256 collectionId, ISize market, address rateProvider, uint256 maturity)
         external
         view
         returns (uint256)
     {
-        return collectionsManager.getBorrowOfferAPR(user, collectionId, market, rateProvider, tenor);
+        return collectionsManager.getBorrowOfferAPR(user, collectionId, market, rateProvider, maturity);
     }
 
-    function isBorrowAPRLowerThanLoanOfferAPRs(address user, uint256 borrowAPR, ISize market, uint256 tenor)
+    function isBorrowAPRLowerThanLoanOfferAPRs(address user, uint256 borrowAPR, ISize market, uint256 maturity)
         external
         view
         returns (bool)
     {
-        return collectionsManager.isBorrowAPRLowerThanLoanOfferAPRs(user, borrowAPR, market, tenor);
+        return collectionsManager.isBorrowAPRLowerThanLoanOfferAPRs(user, borrowAPR, market, maturity);
     }
 
-    function isLoanAPRGreaterThanBorrowOfferAPRs(address user, uint256 loanAPR, ISize market, uint256 tenor)
+    function isLoanAPRGreaterThanBorrowOfferAPRs(address user, uint256 loanAPR, ISize market, uint256 maturity)
         external
         view
         returns (bool)
     {
-        return collectionsManager.isLoanAPRGreaterThanBorrowOfferAPRs(user, loanAPR, market, tenor);
+        return collectionsManager.isLoanAPRGreaterThanBorrowOfferAPRs(user, loanAPR, market, maturity);
     }
 }

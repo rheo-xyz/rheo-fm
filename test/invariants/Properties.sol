@@ -47,18 +47,13 @@ abstract contract Properties is Ghosts, PropertiesSpecifications {
         gte(_before.creditPositionsCount, _before.debtPositionsCount, LOAN_03);
         gte(_after.creditPositionsCount, _after.debtPositionsCount, LOAN_03);
 
-        if (
-            (
-                _after.debtPositionsCount > _before.debtPositionsCount
-                    || _after.sig == ITargetFunctions.liquidateWithReplacement.selector
-            ) && success
-        ) {
+        if (_after.debtPositionsCount > _before.debtPositionsCount && success) {
             uint256 debtPositionId = _after.debtPositionsCount > _before.debtPositionsCount
                 ? _after.debtPositionsCount - 1
                 : _after.debtPositionId;
             DebtPosition memory debtPosition = size.getDebtPosition(debtPositionId);
-            uint256 tenor = debtPosition.dueDate - block.timestamp;
-            t(size.riskConfig().minTenor <= tenor && tenor <= size.riskConfig().maxTenor, LOAN_02);
+            uint256 maturity = debtPosition.dueDate;
+            t(_isRiskMaturity(maturity), LOAN_02);
         }
 
         return true;
@@ -183,7 +178,7 @@ abstract contract Properties is Ghosts, PropertiesSpecifications {
                 && (
                     Math.mulDivDown(
                         size.riskConfig().minimumCreditBorrowToken,
-                        size.riskConfig().minTenor * size.feeConfig().swapFeeAPR,
+                        Math.max(size.riskConfig().minTenor, _minRiskTenor()) * size.feeConfig().swapFeeAPR,
                         365 days * PERCENT
                     ) > 0
                 )
@@ -194,5 +189,32 @@ abstract contract Properties is Ghosts, PropertiesSpecifications {
         }
 
         return true;
+    }
+
+    function _minRiskTenor() internal view returns (uint256 minTenor) {
+        uint256[] memory maturities = size.riskConfig().maturities;
+        minTenor = type(uint256).max;
+        for (uint256 i = 0; i < maturities.length; i++) {
+            if (maturities[i] <= block.timestamp) {
+                continue;
+            }
+            uint256 tenor = maturities[i] - block.timestamp;
+            if (tenor < minTenor) {
+                minTenor = tenor;
+            }
+        }
+    }
+
+    function _isRiskMaturity(uint256 maturity) internal view returns (bool) {
+        if (maturity <= block.timestamp) {
+            return false;
+        }
+        uint256[] memory maturities = size.riskConfig().maturities;
+        for (uint256 i = 0; i < maturities.length; i++) {
+            if (maturities[i] == maturity) {
+                return true;
+            }
+        }
+        return false;
     }
 }

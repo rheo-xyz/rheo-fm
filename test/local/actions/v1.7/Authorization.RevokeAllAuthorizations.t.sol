@@ -10,7 +10,7 @@ import {Math, PERCENT} from "@src/market/libraries/Math.sol";
 
 import {Action, Authorization} from "@src/factory/libraries/Authorization.sol";
 import {BaseTest, Vars} from "@test/BaseTest.sol";
-import {YieldCurveHelper} from "@test/helpers/libraries/YieldCurveHelper.sol";
+import {FixedMaturityLimitOrderHelper} from "@test/helpers/libraries/FixedMaturityLimitOrderHelper.sol";
 
 contract AuthorizationRevokeAllAuthorizationsTest is BaseTest {
     function test_AuthorizationRevokeAllAuthorizations_revokeAllAuthorizations() public {

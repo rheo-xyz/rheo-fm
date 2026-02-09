@@ -3,7 +3,7 @@ pragma solidity 0.8.23;
 
 import {BaseTest} from "@test/BaseTest.sol";
 import {Vars} from "@test/BaseTest.sol";
-import {YieldCurveHelper} from "@test/helpers/libraries/YieldCurveHelper.sol";
+import {FixedMaturityLimitOrderHelper} from "@test/helpers/libraries/FixedMaturityLimitOrderHelper.sol";
 
 import {CreditPosition, DebtPosition, LoanStatus, RESERVED_ID} from "@src/market/libraries/LoanLibrary.sol";
 
@@ -13,9 +13,9 @@ contract ClaimTest is BaseTest {
         _deposit(alice, usdc, 100e6);
         _deposit(bob, weth, 100e18);
         _deposit(bob, usdc, 100e6);
-        _buyCreditLimit(alice, block.timestamp + 365 days, YieldCurveHelper.pointCurve(365 days, 0.05e18));
+        _buyCreditLimit(alice, block.timestamp + 150 days, _pointOfferAtIndex(4, 0.05e18));
         uint256 amountLoanId1 = 10e6;
-        uint256 debtPositionId = _sellCreditMarket(bob, alice, RESERVED_ID, amountLoanId1, 365 days, false);
+        uint256 debtPositionId = _sellCreditMarket(bob, alice, RESERVED_ID, amountLoanId1, _maturity(150 days), false);
         uint256 futureValue = size.getDebtPosition(debtPositionId).futureValue;
         uint256 creditId = size.getCreditPositionIdsByDebtPositionId(debtPositionId)[0];
         _repay(bob, debtPositionId, bob);
@@ -39,14 +39,14 @@ contract ClaimTest is BaseTest {
         _deposit(bob, usdc, 100e6);
         _deposit(candy, weth, 100e18);
         _deposit(candy, usdc, 100e6);
-        _buyCreditLimit(alice, block.timestamp + 365 days, YieldCurveHelper.pointCurve(365 days, 0.03e18));
-        uint256 debtPositionId = _sellCreditMarket(bob, alice, RESERVED_ID, 100e6, 365 days, false);
+        _buyCreditLimit(alice, block.timestamp + 150 days, _pointOfferAtIndex(4, 0.03e18));
+        uint256 debtPositionId = _sellCreditMarket(bob, alice, RESERVED_ID, 100e6, _maturity(150 days), false);
         uint256 futureValue = size.getDebtPosition(debtPositionId).futureValue;
         uint256 creditId = size.getCreditPositionIdsByDebtPositionId(debtPositionId)[0];
-        _buyCreditLimit(candy, block.timestamp + 365 days, YieldCurveHelper.pointCurve(365 days, 0.03e18));
+        _buyCreditLimit(candy, block.timestamp + 150 days, _pointOfferAtIndex(4, 0.03e18));
 
         uint256 futureValueExited = 10e6;
-        _sellCreditMarket(alice, candy, creditId, futureValueExited, 365 days);
+        _sellCreditMarket(alice, candy, creditId, futureValueExited, _maturity(150 days));
         _repay(bob, debtPositionId, bob);
 
         Vars memory _before = _state();
@@ -69,13 +69,13 @@ contract ClaimTest is BaseTest {
         _deposit(bob, usdc, 100e6);
         _deposit(candy, weth, 100e18);
         _deposit(candy, usdc, 100e6);
-        _buyCreditLimit(alice, block.timestamp + 365 days, YieldCurveHelper.pointCurve(365 days, 1e18));
-        _buyCreditLimit(candy, block.timestamp + 365 days, YieldCurveHelper.pointCurve(365 days, 1e18));
-        uint256 debtPositionId = _sellCreditMarket(bob, alice, RESERVED_ID, 100e6, 365 days, false);
+        _buyCreditLimit(alice, block.timestamp + 150 days, _pointOfferAtIndex(4, 1e18));
+        _buyCreditLimit(candy, block.timestamp + 150 days, _pointOfferAtIndex(4, 1e18));
+        uint256 debtPositionId = _sellCreditMarket(bob, alice, RESERVED_ID, 100e6, _maturity(150 days), false);
         uint256 futureValue = size.getDebtPosition(debtPositionId).futureValue;
         uint256 creditId = size.getCreditPositionIdsByDebtPositionId(debtPositionId)[0];
         uint256 exit = 30e6;
-        _sellCreditMarket(alice, candy, creditId, exit, 365 days);
+        _sellCreditMarket(alice, candy, creditId, exit, _maturity(150 days));
         uint256 creditId2 = size.getCreditPositionIdsByDebtPositionId(debtPositionId)[1];
 
         Vars memory _before = _state();
@@ -97,9 +97,10 @@ contract ClaimTest is BaseTest {
         _deposit(bob, usdc, 100e6);
         _deposit(candy, weth, 100e18);
         _deposit(candy, usdc, 100e6);
-        _buyCreditLimit(alice, block.timestamp + 365 days, YieldCurveHelper.pointCurve(365 days, 1e18));
-        _buyCreditLimit(candy, block.timestamp + 365 days, YieldCurveHelper.pointCurve(365 days, 1e18));
-        uint256 debtPositionId = _sellCreditMarket(bob, alice, RESERVED_ID, 100e6, 365 days, false);
+        _buyCreditLimit(alice, block.timestamp + 150 days, _pointOfferAtIndex(4, 1e18));
+        _buyCreditLimit(candy, block.timestamp + 150 days, _pointOfferAtIndex(4, 1e18));
+        uint256 debtPositionId = _sellCreditMarket(bob, alice, RESERVED_ID, 100e6, _maturity(150 days), false);
+        uint256 futureValue = size.getDebtPosition(debtPositionId).futureValue;
         uint256 creditId = size.getCreditPositionIdsByDebtPositionId(debtPositionId)[0];
 
         Vars memory _before = _state();
@@ -109,8 +110,8 @@ contract ClaimTest is BaseTest {
 
         Vars memory _after = _state();
 
-        assertEq(_after.alice.borrowTokenBalance, _before.alice.borrowTokenBalance + 200e6);
-        assertEq(_after.bob.borrowTokenBalance, _before.bob.borrowTokenBalance - 200e6);
+        assertEq(_after.alice.borrowTokenBalance, _before.alice.borrowTokenBalance + futureValue);
+        assertEq(_after.bob.borrowTokenBalance, _before.bob.borrowTokenBalance - futureValue);
 
         vm.expectRevert();
         _claim(alice, creditId);
@@ -124,9 +125,10 @@ contract ClaimTest is BaseTest {
         _deposit(bob, usdc, 100e6);
         _deposit(candy, weth, 100e18);
         _deposit(candy, usdc, 100e6);
-        _buyCreditLimit(alice, block.timestamp + 365 days, YieldCurveHelper.pointCurve(365 days, 1e18));
-        _buyCreditLimit(candy, block.timestamp + 365 days, YieldCurveHelper.pointCurve(365 days, 1e18));
-        uint256 debtPositionId = _sellCreditMarket(bob, alice, RESERVED_ID, 100e6, 365 days, false);
+        _buyCreditLimit(alice, block.timestamp + 150 days, _pointOfferAtIndex(4, 1e18));
+        _buyCreditLimit(candy, block.timestamp + 150 days, _pointOfferAtIndex(4, 1e18));
+        uint256 debtPositionId = _sellCreditMarket(bob, alice, RESERVED_ID, 100e6, _maturity(150 days), false);
+        uint256 futureValue = size.getDebtPosition(debtPositionId).futureValue;
         uint256 creditId = size.getCreditPositionIdsByDebtPositionId(debtPositionId)[0];
 
         Vars memory _before = _state();
@@ -136,8 +138,8 @@ contract ClaimTest is BaseTest {
 
         Vars memory _after = _state();
 
-        assertEq(_after.alice.borrowTokenBalance, _before.alice.borrowTokenBalance + 200e6);
-        assertEq(_after.bob.borrowTokenBalance, _before.bob.borrowTokenBalance - 200e6);
+        assertEq(_after.alice.borrowTokenBalance, _before.alice.borrowTokenBalance + futureValue);
+        assertEq(_after.bob.borrowTokenBalance, _before.bob.borrowTokenBalance - futureValue);
         assertEq(_after.bob.collateralTokenBalance, _before.bob.collateralTokenBalance);
         assertEq(_after.feeRecipient.collateralTokenBalance, _before.feeRecipient.collateralTokenBalance);
     }
@@ -146,15 +148,16 @@ contract ClaimTest is BaseTest {
         _setPrice(1e18);
 
         _deposit(alice, usdc, 120e6);
-        _deposit(bob, weth, 320e18);
+        _deposit(bob, weth, 220e18);
         _deposit(liquidator, usdc, 10000e6);
-        _buyCreditLimit(alice, block.timestamp + 365 days, YieldCurveHelper.pointCurve(365 days, 1e18));
-        uint256 debtPositionId = _sellCreditMarket(bob, alice, RESERVED_ID, 100e6, 365 days, false);
+        _buyCreditLimit(alice, block.timestamp + 150 days, _pointOfferAtIndex(4, 1e18));
+        uint256 debtPositionId = _sellCreditMarket(bob, alice, RESERVED_ID, 100e6, _maturity(150 days), false);
         uint256 futureValue = size.getDebtPosition(debtPositionId).futureValue;
         uint256 creditId = size.getCreditPositionIdsByDebtPositionId(debtPositionId)[0];
 
         _setPrice(0.75e18);
 
+        assertTrue(size.isDebtPositionLiquidatable(debtPositionId));
         _liquidate(liquidator, debtPositionId);
 
         Vars memory _before = _state();
@@ -174,11 +177,11 @@ contract ClaimTest is BaseTest {
         _deposit(bob, usdc, 100e6 + size.feeConfig().fragmentationFee);
         _deposit(candy, usdc, 10e6);
         _deposit(liquidator, usdc, 1000e6);
-        _buyCreditLimit(bob, block.timestamp + 12 days, YieldCurveHelper.pointCurve(12 days, 0));
-        _buyCreditLimit(candy, block.timestamp + 12 days, YieldCurveHelper.pointCurve(12 days, 0));
-        uint256 debtPositionId = _sellCreditMarket(alice, bob, RESERVED_ID, 100e6, 12 days, false);
+        _buyCreditLimit(bob, block.timestamp + 30 days, _pointOfferAtIndex(0, 0));
+        _buyCreditLimit(candy, block.timestamp + 30 days, _pointOfferAtIndex(0, 0));
+        uint256 debtPositionId = _sellCreditMarket(alice, bob, RESERVED_ID, 100e6, _maturity(30 days), false);
         uint256 creditId = size.getCreditPositionIdsByDebtPositionId(debtPositionId)[0];
-        _sellCreditMarket(bob, candy, creditId, 10e6, 12 days);
+        _sellCreditMarket(bob, candy, creditId, 10e6, _maturity(30 days));
         uint256 creditId2 = size.getCreditPositionIdsByDebtPositionId(debtPositionId)[1];
 
         Vars memory _s1 = _state();
@@ -229,11 +232,11 @@ contract ClaimTest is BaseTest {
         _setPrice(1e18);
         _deposit(alice, weth, 150e18);
         _deposit(bob, usdc, 100e6);
-        _buyCreditLimit(bob, block.timestamp + 365 days, YieldCurveHelper.pointCurve(365 days, 0.1e18));
-        uint256 debtPositionId = _sellCreditMarket(alice, bob, RESERVED_ID, 50e6, 365 days, false);
+        _buyCreditLimit(bob, block.timestamp + 150 days, _pointOfferAtIndex(4, 0.1e18));
+        uint256 debtPositionId = _sellCreditMarket(alice, bob, RESERVED_ID, 50e6, _maturity(150 days), false);
         uint256 creditPositionId = size.getCreditPositionIdsByDebtPositionId(debtPositionId)[0];
 
-        vm.warp(block.timestamp + 365 days);
+        vm.warp(block.timestamp + 150 days);
         _deposit(alice, usdc, 5e6);
 
         bytes[] memory data = new bytes[](2);
@@ -262,10 +265,10 @@ contract ClaimTest is BaseTest {
         _setPrice(1e18);
 
         _deposit(alice, usdc, 120e6);
-        _buyCreditLimit(alice, block.timestamp + 365 days, YieldCurveHelper.pointCurve(365 days, 0.03e18));
+        _buyCreditLimit(alice, block.timestamp + 150 days, _pointOfferAtIndex(4, 0.03e18));
         _deposit(james, weth, 5000e18);
 
-        uint256 debtPositionId = _sellCreditMarket(james, alice, RESERVED_ID, 100e6, 365 days, false);
+        uint256 debtPositionId = _sellCreditMarket(james, alice, RESERVED_ID, 100e6, _maturity(150 days), false);
         uint256 creditPositionId = size.getCreditPositionIdsByDebtPositionId(debtPositionId)[0];
         (uint256 debtPositions,) = size.getPositionsCount();
         assertGt(debtPositions, 0);
@@ -275,8 +278,8 @@ contract ClaimTest is BaseTest {
 
         _deposit(bob, usdc, 100e6);
         assertEq(_state().bob.borrowTokenBalance, 100e6);
-        _buyCreditLimit(bob, block.timestamp + 365 days, YieldCurveHelper.pointCurve(365 days, 0.02e18));
-        _sellCreditMarket(alice, bob, creditPositionId, 50e6, 365 days);
+        _buyCreditLimit(bob, block.timestamp + 150 days, _pointOfferAtIndex(4, 0.02e18));
+        _sellCreditMarket(alice, bob, creditPositionId, 50e6, _maturity(150 days));
 
         vm.expectRevert();
         _claim(alice, creditPositionId);
@@ -308,28 +311,31 @@ contract ClaimTest is BaseTest {
         _deposit(alice, usdc, (amount1 + amount2) * 2);
         _buyCreditLimit(
             alice,
-            block.timestamp + 3 * 365 days,
-            YieldCurveHelper.customCurve(365 days, int256(0.03e18), 2 * 365 days, int256(0.04e18))
+            block.timestamp + 150 days,
+            FixedMaturityLimitOrderHelper.customOffer(90 days, 0.03e18, 150 days, 0.04e18)
         );
         _deposit(bob, weth, 5000e18);
         _deposit(candy, weth, 5000e18);
 
-        uint256 debtPositionId1 = _sellCreditMarket(bob, alice, RESERVED_ID, amount1, 365 days, false);
+        uint256 maturity1 = _maturity(90 days);
+        uint256 debtPositionId1 = _sellCreditMarket(bob, alice, RESERVED_ID, amount1, maturity1, false);
         DebtPosition memory debtPosition1 = size.getDebtPosition(debtPositionId1);
 
         vm.warp(block.timestamp + 30 days);
 
-        uint256 debtPositionId2 = _sellCreditMarket(candy, alice, RESERVED_ID, amount2, 2 * 365 days, false);
+        _buyCreditLimit(alice, block.timestamp + 120 days, _pointOfferAtIndex(3, 0.04e18));
+        uint256 maturity2 = _maturity(120 days);
+        uint256 debtPositionId2 = _sellCreditMarket(candy, alice, RESERVED_ID, amount2, maturity2, false);
         uint256 creditPositionId2 = size.getCreditPositionIdsByDebtPositionId(debtPositionId2)[0];
         DebtPosition memory debtPosition2 = size.getDebtPosition(debtPositionId2);
 
-        vm.warp(block.timestamp + 335 days);
+        vm.warp(block.timestamp + 90 days);
 
         _setLiquidityIndex(liquidityIndex1);
         _deposit(bob, usdc, debtPosition1.futureValue);
         _repay(bob, debtPositionId1, bob);
 
-        vm.warp(block.timestamp + 365 days);
+        vm.warp(block.timestamp + 30 days);
 
         _deposit(candy, usdc, debtPosition2.futureValue);
         _repay(candy, debtPositionId2, candy);

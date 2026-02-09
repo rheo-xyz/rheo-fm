@@ -10,21 +10,21 @@ interface ITargetFunctions {
         address lender,
         uint256 creditPositionId,
         uint256 amount,
-        uint256 tenor,
+        uint256 maturity,
         bool exactAmountIn
     ) external;
 
-    function sellCreditLimit(uint256 maxDueDate, uint256 yieldCurveSeed) external;
+    function sellCreditLimit(uint256 maturity, uint256 offerSeed) external;
 
     function buyCreditMarket(
         address borrower,
         uint256 creditPositionId,
-        uint256 tenor,
+        uint256 maturity,
         uint256 amount,
         bool exactAmountIn
     ) external;
 
-    function buyCreditLimit(uint256 maxDueDate, uint256 yieldCurveSeed) external;
+    function buyCreditLimit(uint256 maturity, uint256 offerSeed) external;
 
     function repay(uint256 debtPositionId) external;
 
@@ -33,9 +33,6 @@ interface ITargetFunctions {
     function liquidate(uint256 debtPositionId, uint256 minimumCollateralProfit) external;
 
     function selfLiquidate(uint256 creditPositionId) external;
-
-    function liquidateWithReplacement(uint256 debtPositionId, uint256 minimumCollateralProfit, address borrower)
-        external;
 
     function compensate(uint256 creditPositionWithDebtToRepayId, uint256 creditPositionToCompensateId, uint256 amount)
         external;

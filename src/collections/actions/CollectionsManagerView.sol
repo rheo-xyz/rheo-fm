@@ -5,10 +5,12 @@ import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import {CollectionsManagerBase} from "@src/collections/CollectionsManagerBase.sol";
 import {ICollectionsManagerView} from "@src/collections/interfaces/ICollectionsManagerView.sol";
+
+import {Errors} from "@src/market/libraries/Errors.sol";
 import {RESERVED_ID} from "@src/market/libraries/LoanLibrary.sol";
 
 import {ISize} from "@src/market/interfaces/ISize.sol";
-import {CopyLimitOrderConfig, LimitOrder, OfferLibrary} from "@src/market/libraries/OfferLibrary.sol";
+import {CopyLimitOrderConfig, FixedMaturityLimitOrder, OfferLibrary} from "@src/market/libraries/OfferLibrary.sol";
 
 /// @title CollectionsManagerView
 /// @custom:security-contact security@size.credit
@@ -18,7 +20,7 @@ abstract contract CollectionsManagerView is ICollectionsManagerView, Collections
     using EnumerableSet for EnumerableSet.UintSet;
     using EnumerableSet for EnumerableSet.AddressSet;
     using OfferLibrary for CopyLimitOrderConfig;
-    using OfferLibrary for LimitOrder;
+    using OfferLibrary for FixedMaturityLimitOrder;
 
     /*//////////////////////////////////////////////////////////////
                             COLLECTION VIEW
@@ -92,21 +94,21 @@ abstract contract CollectionsManagerView is ICollectionsManagerView, Collections
     }
 
     /// @inheritdoc ICollectionsManagerView
-    function getLoanOfferAPR(address user, uint256 collectionId, ISize market, address rateProvider, uint256 tenor)
+    function getLoanOfferAPR(address user, uint256 collectionId, ISize market, address rateProvider, uint256 maturity)
         external
         view
         returns (uint256 apr)
     {
-        return getLimitOrderAPR(user, collectionId, market, rateProvider, tenor, true);
+        return getLimitOrderAPR(user, collectionId, market, rateProvider, maturity, true);
     }
 
     /// @inheritdoc ICollectionsManagerView
-    function getBorrowOfferAPR(address user, uint256 collectionId, ISize market, address rateProvider, uint256 tenor)
+    function getBorrowOfferAPR(address user, uint256 collectionId, ISize market, address rateProvider, uint256 maturity)
         external
         view
         returns (uint256 apr)
     {
-        return getLimitOrderAPR(user, collectionId, market, rateProvider, tenor, false);
+        return getLimitOrderAPR(user, collectionId, market, rateProvider, maturity, false);
     }
 
     function getLimitOrderAPR(
@@ -114,27 +116,31 @@ abstract contract CollectionsManagerView is ICollectionsManagerView, Collections
         uint256 collectionId,
         ISize market,
         address rateProvider,
-        uint256 tenor,
+        uint256 maturity,
         bool isLoanOffer
     ) public view returns (uint256 apr) {
-        // if collectionId is RESERVED_ID, return the user-defined yield curve
+        // if collectionId is RESERVED_ID, return the user-defined offer
         //   and ignore the user-defined CopyLimitOrderConfig params
         if (collectionId == RESERVED_ID) {
-            return _getUserDefinedLimitOrderAPR(user, market, tenor, isLoanOffer);
+            return _getUserDefinedLimitOrderAPR(user, market, maturity, isLoanOffer);
         }
         // else if the user is not copying the collection market rate provider, revert
         else if (!isCopyingCollectionMarketRateProvider(user, collectionId, market, rateProvider)) {
             revert InvalidCollectionMarketRateProvider(collectionId, address(market), rateProvider);
         }
-        // else, return the yield curve for that collection, market and rate provider
+        // else, return the offer APR for that collection, market and rate provider
         else {
             // validate min/max tenor
             CopyLimitOrderConfig memory copyLimitOrder =
                 _getCopyLimitOrderConfig(user, collectionId, market, isLoanOffer);
+            if (maturity <= block.timestamp) {
+                revert Errors.PAST_MATURITY(maturity);
+            }
+            uint256 tenor = maturity - block.timestamp;
             if (tenor < copyLimitOrder.minTenor || tenor > copyLimitOrder.maxTenor) {
-                revert InvalidTenor(tenor, copyLimitOrder.minTenor, copyLimitOrder.maxTenor);
+                revert InvalidMaturity(maturity, copyLimitOrder.minTenor, copyLimitOrder.maxTenor);
             } else {
-                uint256 baseAPR = _getUserDefinedLimitOrderAPR(rateProvider, market, tenor, isLoanOffer);
+                uint256 baseAPR = _getUserDefinedLimitOrderAPR(rateProvider, market, maturity, isLoanOffer);
                 // apply offset APR
                 apr = SafeCast.toUint256(SafeCast.toInt256(baseAPR) + copyLimitOrder.offsetAPR);
                 // validate min/max APR
@@ -147,39 +153,39 @@ abstract contract CollectionsManagerView is ICollectionsManagerView, Collections
         }
     }
 
-    function _getUserDefinedLimitOrderAPR(address user, ISize market, uint256 tenor, bool isLoanOffer)
+    function _getUserDefinedLimitOrderAPR(address user, ISize market, uint256 maturity, bool isLoanOffer)
         private
         view
         returns (uint256 apr)
     {
         if (isLoanOffer) {
-            return market.getUserDefinedLoanOfferAPR(user, tenor);
+            return market.getUserDefinedLoanOfferAPR(user, maturity);
         } else {
-            return market.getUserDefinedBorrowOfferAPR(user, tenor);
+            return market.getUserDefinedBorrowOfferAPR(user, maturity);
         }
     }
 
     /// @inheritdoc ICollectionsManagerView
-    function isLoanAPRGreaterThanBorrowOfferAPRs(address user, uint256 loanAPR, ISize market, uint256 tenor)
+    function isLoanAPRGreaterThanBorrowOfferAPRs(address user, uint256 loanAPR, ISize market, uint256 maturity)
         external
         view
         returns (bool)
     {
-        return _isAPRLowerThanOfferAPRs(user, loanAPR, market, tenor, true);
+        return _isAPRLowerThanOfferAPRs(user, loanAPR, market, maturity, true);
     }
 
     /// @inheritdoc ICollectionsManagerView
-    function isBorrowAPRLowerThanLoanOfferAPRs(address user, uint256 borrowAPR, ISize market, uint256 tenor)
+    function isBorrowAPRLowerThanLoanOfferAPRs(address user, uint256 borrowAPR, ISize market, uint256 maturity)
         external
         view
         returns (bool)
     {
-        return _isAPRLowerThanOfferAPRs(user, borrowAPR, market, tenor, false);
+        return _isAPRLowerThanOfferAPRs(user, borrowAPR, market, maturity, false);
     }
 
     // slither-disable-start var-read-using-this
     // slither-disable-start calls-loop
-    function _isAPRLowerThanOfferAPRs(address user, uint256 apr, ISize market, uint256 tenor, bool aprIsLoanAPR)
+    function _isAPRLowerThanOfferAPRs(address user, uint256 apr, ISize market, uint256 maturity, bool aprIsLoanAPR)
         private
         view
         returns (bool)
@@ -197,7 +203,7 @@ abstract contract CollectionsManagerView is ICollectionsManagerView, Collections
                 if (_isUserDefinedLimitOrderNull(rateProvider, market, !aprIsLoanAPR)) {
                     continue;
                 }
-                try this.getLimitOrderAPR(user, collectionId, market, rateProvider, tenor, !aprIsLoanAPR) returns (
+                try this.getLimitOrderAPR(user, collectionId, market, rateProvider, maturity, !aprIsLoanAPR) returns (
                     uint256 otherAPR
                 ) {
                     if ((aprIsLoanAPR && otherAPR >= apr) || (!aprIsLoanAPR && apr >= otherAPR)) {
@@ -213,7 +219,7 @@ abstract contract CollectionsManagerView is ICollectionsManagerView, Collections
         if (_isUserDefinedLimitOrderNull(user, market, !aprIsLoanAPR)) {
             return true;
         } else {
-            try this.getLimitOrderAPR(user, RESERVED_ID, market, address(0), tenor, !aprIsLoanAPR) returns (
+            try this.getLimitOrderAPR(user, RESERVED_ID, market, address(0), maturity, !aprIsLoanAPR) returns (
                 uint256 otherAPR
             ) {
                 if ((aprIsLoanAPR && otherAPR >= apr) || (!aprIsLoanAPR && apr >= otherAPR)) {

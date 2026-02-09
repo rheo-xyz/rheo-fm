@@ -46,7 +46,7 @@ struct CreditPosition {
 enum LoanStatus {
     // When the loan is created, it is in ACTIVE status
     ACTIVE,
-    // When tenor is reached, it is in OVERDUE status and subject to liquidation
+    // When maturity is reached, it is in OVERDUE status and subject to liquidation
     OVERDUE,
     // When the loan is repaid either by the borrower or by the liquidator, it is in REPAID status
     REPAID

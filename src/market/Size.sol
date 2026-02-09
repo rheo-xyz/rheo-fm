@@ -57,10 +57,6 @@ import {Multicall} from "@src/market/libraries/Multicall.sol";
 import {Compensate, CompensateOnBehalfOfParams, CompensateParams} from "@src/market/libraries/actions/Compensate.sol";
 import {PartialRepay, PartialRepayParams} from "@src/market/libraries/actions/PartialRepay.sol";
 
-import {
-    LiquidateWithReplacement,
-    LiquidateWithReplacementParams
-} from "@src/market/libraries/actions/LiquidateWithReplacement.sol";
 import {Repay, RepayParams} from "@src/market/libraries/actions/Repay.sol";
 import {
     SelfLiquidate,
@@ -85,9 +81,7 @@ import {ISizeV1_7} from "@src/market/interfaces/v1.7/ISizeV1_7.sol";
 import {ISizeV1_8} from "@src/market/interfaces/v1.8/ISizeV1_8.sol";
 import {Errors} from "@src/market/libraries/Errors.sol";
 
-import {
-    BORROW_RATE_UPDATER_ROLE, ISizeFactory, KEEPER_ROLE, PAUSER_ROLE
-} from "@src/factory/interfaces/ISizeFactory.sol";
+import {PAUSER_ROLE} from "@src/factory/interfaces/ISizeFactory.sol";
 
 import {UserView} from "@src/market/SizeViewData.sol";
 import {ISizeView} from "@src/market/interfaces/ISizeView.sol";
@@ -110,7 +104,6 @@ contract Size is ISize, SizeView, AccessControlUpgradeable, PausableUpgradeable,
     using Claim for State;
     using Liquidate for State;
     using SelfLiquidate for State;
-    using LiquidateWithReplacement for State;
     using Compensate for State;
     using PartialRepay for State;
     using SetUserConfiguration for State;
@@ -141,7 +134,6 @@ contract Size is ISize, SizeView, AccessControlUpgradeable, PausableUpgradeable,
         state.executeInitialize(f, r, o, d);
         _grantRole(DEFAULT_ADMIN_ROLE, owner);
         _grantRole(PAUSER_ROLE, owner);
-        _grantRole(KEEPER_ROLE, owner);
     }
 
     function _hasRole(bytes32 role, address account) internal view returns (bool) {
@@ -355,22 +347,6 @@ contract Size is ISize, SizeView, AccessControlUpgradeable, PausableUpgradeable,
     {
         state.validateSelfLiquidate(externalParams);
         state.executeSelfLiquidate(externalParams);
-    }
-
-    /// @inheritdoc ISize
-    function liquidateWithReplacement(LiquidateWithReplacementParams calldata params)
-        external
-        payable
-        override(ISize)
-        nonReentrant
-        whenNotPaused
-        onlyRoleOrSizeFactoryHasRole(KEEPER_ROLE)
-        returns (uint256 liquidatorProfitCollateralToken, uint256 liquidatorProfitBorrowToken)
-    {
-        state.validateLiquidateWithReplacement(params);
-        (liquidatorProfitCollateralToken, liquidatorProfitBorrowToken) = state.executeLiquidateWithReplacement(params);
-        state.validateUserIsNotBelowOpeningLimitBorrowCR(params.borrower);
-        state.validateMinimumCollateralProfit(params, liquidatorProfitCollateralToken);
     }
 
     /// @inheritdoc ISize

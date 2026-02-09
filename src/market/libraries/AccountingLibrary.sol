@@ -55,6 +55,7 @@ library AccountingLibrary {
     /// @notice Creates a debt and credit position
     /// @dev Updates the borrower's total debt tracker.
     ///      The debt position future value and the credit position amount are created with the same value.
+    ///      The `validateMaturity` call is performed here even though it is already checked in market order validations.
     /// @param state The state object
     /// @param lender The lender address
     /// @param borrower The borrower address
@@ -86,7 +87,7 @@ library AccountingLibrary {
         uint256 creditPositionId = state.data.nextCreditPositionId++;
         state.data.creditPositions[creditPositionId] = creditPosition;
         state.validateMinimumCreditOpening(creditPosition.credit);
-        state.validateTenor(dueDate - block.timestamp);
+        state.validateMaturity(dueDate);
 
         emit Events.CreateCreditPosition(
             creditPositionId, lender, debtPositionId, RESERVED_ID, creditPosition.credit, creditPosition.forSale

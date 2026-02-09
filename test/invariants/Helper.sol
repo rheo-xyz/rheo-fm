@@ -5,13 +5,38 @@ import {PropertiesConstants} from "@crytic/properties/contracts/util/PropertiesC
 import {CREDIT_POSITION_ID_START, RESERVED_ID} from "@src/market/libraries/LoanLibrary.sol";
 
 import {Deploy} from "@script/Deploy.sol";
-import {YieldCurve} from "@src/market/libraries/YieldCurveLibrary.sol";
-import {YieldCurveHelper} from "@test/helpers/libraries/YieldCurveHelper.sol";
+import {FixedMaturityLimitOrder} from "@src/market/libraries/OfferLibrary.sol";
 import {Bounds} from "@test/invariants/Bounds.sol";
 
 import {PERCENT} from "@src/market/libraries/Math.sol";
 
 abstract contract Helper is Deploy, PropertiesConstants, Bounds {
+    function _sortedFutureRiskMaturitiesForInvariant() internal view returns (uint256[] memory sorted) {
+        uint256[] memory maturities = size.riskConfig().maturities;
+        uint256 count;
+        for (uint256 i = 0; i < maturities.length; i++) {
+            if (maturities[i] > block.timestamp) {
+                count++;
+            }
+        }
+        sorted = new uint256[](count);
+        uint256 idx;
+        for (uint256 i = 0; i < maturities.length; i++) {
+            if (maturities[i] > block.timestamp) {
+                sorted[idx++] = maturities[i];
+            }
+        }
+        for (uint256 i = 1; i < sorted.length; i++) {
+            uint256 key = sorted[i];
+            uint256 j = i;
+            while (j > 0 && sorted[j - 1] > key) {
+                sorted[j] = sorted[j - 1];
+                j--;
+            }
+            sorted[j] = key;
+        }
+    }
+
     function _getRandomUser(address user) internal pure returns (address) {
         return uint160(user) % 3 == 0 ? USER1 : uint160(user) % 3 == 1 ? USER2 : USER3;
     }
@@ -48,7 +73,19 @@ abstract contract Helper is Deploy, PropertiesConstants, Bounds {
             : RESERVED_ID;
     }
 
-    function _getRandomYieldCurve(uint256 seed) internal pure returns (YieldCurve memory) {
-        return YieldCurveHelper.getRandomYieldCurve(seed);
+    function _getRandomOffer(uint256 seed) internal view returns (FixedMaturityLimitOrder memory) {
+        uint256[] memory available = _sortedFutureRiskMaturitiesForInvariant();
+        if (available.length == 0) {
+            return FixedMaturityLimitOrder({maturities: new uint256[](0), aprs: new uint256[](0)});
+        }
+
+        uint256 length = available.length;
+        uint256[] memory maturities = new uint256[](length);
+        uint256[] memory aprs = new uint256[](length);
+        for (uint256 i = 0; i < length; i++) {
+            maturities[i] = available[i];
+            aprs[i] = 0.01e18 + ((seed ^ i) % 6) * 0.01e18;
+        }
+        return FixedMaturityLimitOrder({maturities: maturities, aprs: aprs});
     }
 }
