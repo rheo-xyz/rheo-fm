@@ -3,19 +3,19 @@ pragma solidity 0.8.23;
 
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
-import {ActionsBitmap} from "@src/factory/libraries/Authorization.sol";
-import {ISize} from "@src/market/interfaces/ISize.sol";
-import {PriceFeed} from "@src/oracle/v1.5.1/PriceFeed.sol";
+import {ActionsBitmap} from "@rheo-fm/src/factory/libraries/Authorization.sol";
+import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
+import {PriceFeed} from "@rheo-fm/src/oracle/v1.5.1/PriceFeed.sol";
 
-/// @title ISizeFactoryGetters
-/// @custom:security-contact security@size.credit
-/// @author Size (https://size.credit/)
+/// @title IRheoFactoryGetters
+/// @custom:security-contact security@rheo.xyz
+/// @author Rheo (https://rheo.xyz/)
 /// @notice The interface for the size factory getters. These functions are only used by offchain components.
-interface ISizeFactoryOffchainGetters {
+interface IRheoFactoryOffchainGetters {
     /// @notice Get a market by index
     /// @param index The index of the market
     /// @return market The market
-    function getMarket(uint256 index) external view returns (ISize);
+    function getMarket(uint256 index) external view returns (IRheo);
 
     /// @notice Get the number of markets
     /// @return marketsCount The number of markets
@@ -23,11 +23,11 @@ interface ISizeFactoryOffchainGetters {
 
     /// @notice Get all markets
     /// @return markets The markets
-    function getMarkets() external view returns (ISize[] memory);
+    function getMarkets() external view returns (IRheo[] memory);
 
     /// @notice Get all market descriptions
-    ///         The market description is Size | COLLATERALSYMBOL | BORROWSYMBOL | CRLPERCENT | VERSION,
-    ///         such as Size | WETH | USDC | 130 | v1.2.1, for a ETH/USDC market with 130% CR
+    ///         The market description is Rheo | COLLATERALSYMBOL | BORROWSYMBOL | CRLPERCENT | VERSION,
+    ///         such as Rheo | WETH | USDC | 130 | v1.2.1, for a ETH/USDC market with 130% CR
     /// @return descriptions The market descriptions
     function getMarketDescriptions() external view returns (string[] memory descriptions);
 

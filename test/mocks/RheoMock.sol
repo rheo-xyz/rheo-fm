@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {Size} from "@src/market/Size.sol";
-import {State} from "@src/market/SizeStorage.sol";
-import {RiskLibrary} from "@src/market/libraries/RiskLibrary.sol";
+import {Rheo} from "@rheo-fm/src/market/Rheo.sol";
+import {State} from "@rheo-fm/src/market/RheoStorage.sol";
+import {RiskLibrary} from "@rheo-fm/src/market/libraries/RiskLibrary.sol";
 
-import {AccountingLibrary} from "@src/market/libraries/AccountingLibrary.sol";
-import {Errors} from "@src/market/libraries/Errors.sol";
-import {Math, PERCENT, YEAR} from "@src/market/libraries/Math.sol";
+import {AccountingLibrary} from "@rheo-fm/src/market/libraries/AccountingLibrary.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
+import {Math, PERCENT, YEAR} from "@rheo-fm/src/market/libraries/Math.sol";
 
 import {
     CREDIT_POSITION_ID_START,
@@ -16,9 +16,9 @@ import {
     DebtPosition,
     LoanLibrary,
     LoanStatus
-} from "@src/market/libraries/LoanLibrary.sol";
+} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
 
-contract SizeMock is Size {
+contract RheoMock is Rheo {
     using LoanLibrary for DebtPosition;
     using LoanLibrary for CreditPosition;
     using LoanLibrary for State;

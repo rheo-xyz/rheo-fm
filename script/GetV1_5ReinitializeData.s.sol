@@ -4,12 +4,12 @@ pragma solidity 0.8.23;
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {EnumerableMap} from "@openzeppelin/contracts/utils/structs/EnumerableMap.sol";
-import {BaseScript} from "@script/BaseScript.sol";
-import {ISizeFactory} from "@src/factory/interfaces/ISizeFactory.sol";
+import {BaseScript} from "@rheo-fm/script/BaseScript.sol";
+import {IRheoFactory} from "@rheo-fm/src/factory/interfaces/IRheoFactory.sol";
 
-import {NonTransferrableScaledTokenV1_2} from "@deprecated/token/NonTransferrableScaledTokenV1_2.sol";
-import {Networks} from "@script/Networks.sol";
-import {ISize} from "@src/market/interfaces/ISize.sol";
+import {NonTransferrableScaledTokenV1_2} from "@rheo-fm/deprecated/token/NonTransferrableScaledTokenV1_2.sol";
+import {Networks} from "@rheo-fm/script/Networks.sol";
+import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
 
 import {Vm} from "forge-std/Vm.sol";
 import {console2 as console} from "forge-std/console2.sol";
@@ -19,10 +19,10 @@ contract GetV1_5ReinitializeDataScript is BaseScript, Networks {
 
     EnumerableMap.AddressToUintMap private addressesWethUsdc;
     EnumerableMap.AddressToUintMap private addressesCbbtcUsdc;
-    ISizeFactory private sizeFactory;
+    IRheoFactory private sizeFactory;
 
     modifier parseEnv() {
-        sizeFactory = ISizeFactory(vm.envAddress("SIZE_FACTORY"));
+        sizeFactory = IRheoFactory(vm.envAddress("RHEO_FACTORY"));
         _;
     }
 
@@ -33,13 +33,13 @@ contract GetV1_5ReinitializeDataScript is BaseScript, Networks {
         uint256[2] memory deploymentBlocks = block.chainid == BASE_MAINNET
             ? [uint256(17147278), uint256(20637165)]
             : [uint256(18082649), uint256(18082796)];
-        ISize market0 = sizeFactory.getMarket(0);
+        IRheo market0 = sizeFactory.getMarket(0);
         address borrowTokenVault = address(market0.data().borrowTokenVault);
 
         console.log("GetV1_5ReinitializeData...");
 
         for (uint256 i = 0; i < markets.length; i++) {
-            (ISize market,,) = importDeployments(markets[i]);
+            (IRheo market,,) = importDeployments(markets[i]);
             EnumerableMap.AddressToUintMap storage addresses =
                 Strings.equal(markets[i], markets[0]) ? addressesWethUsdc : addressesCbbtcUsdc;
 
@@ -53,12 +53,12 @@ contract GetV1_5ReinitializeDataScript is BaseScript, Networks {
 
             uint256 toBlock = vm.getBlockNumber();
             uint256 fromBlock = deploymentBlocks[i];
-            uint256 batchSize = 100_000;
+            uint256 batchRheo = 100_000;
 
             Vm.EthGetLogs[] memory logs;
 
             while (fromBlock < toBlock) {
-                uint256 endBlock = (fromBlock + batchSize > toBlock) ? toBlock : fromBlock + batchSize;
+                uint256 endBlock = (fromBlock + batchRheo > toBlock) ? toBlock : fromBlock + batchRheo;
 
                 console.log("block range: %s - %s", fromBlock, endBlock);
 

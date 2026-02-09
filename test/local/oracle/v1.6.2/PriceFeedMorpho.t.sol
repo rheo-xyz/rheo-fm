@@ -7,9 +7,9 @@ import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/Ag
 import {MockV3Aggregator} from "@chainlink/contracts/src/v0.8/tests/MockV3Aggregator.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
-import {IOracle} from "@src/oracle/adapters/morpho/IOracle.sol";
-import {PriceFeedMorpho} from "@src/oracle/v1.6.2/PriceFeedMorpho.sol";
-import {AssertsHelper} from "@test/helpers/AssertsHelper.sol";
+import {IOracle} from "@rheo-fm/src/oracle/adapters/morpho/IOracle.sol";
+import {PriceFeedMorpho} from "@rheo-fm/src/oracle/v1.6.2/PriceFeedMorpho.sol";
+import {AssertsHelper} from "@rheo-fm/test/helpers/AssertsHelper.sol";
 
 contract MockERC20 {
     string public symbol;

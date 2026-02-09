@@ -11,46 +11,47 @@ import {IERC4626} from "@openzeppelin/contracts/interfaces/IERC4626.sol";
 import {ERC20Mock} from "@openzeppelin/contracts/mocks/token/ERC20Mock.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
+
+import {RheoFactory} from "@rheo-fm/src/factory/RheoFactory.sol";
+import {IRheoFactory} from "@rheo-fm/src/factory/interfaces/IRheoFactory.sol";
+import {Action, Authorization} from "@rheo-fm/src/factory/libraries/Authorization.sol";
+import {Rheo} from "@rheo-fm/src/market/Rheo.sol";
 import {MockERC4626 as ERC4626Solady} from "@solady/test/utils/mocks/MockERC4626.sol";
-import {SizeFactory} from "@src/factory/SizeFactory.sol";
-import {ISizeFactory} from "@src/factory/interfaces/ISizeFactory.sol";
-import {Action, Authorization} from "@src/factory/libraries/Authorization.sol";
-import {Size} from "@src/market/Size.sol";
 
-import {DataView} from "@src/market/SizeViewData.sol";
-import {ISize} from "@src/market/interfaces/ISize.sol";
+import {DataView} from "@rheo-fm/src/market/RheoViewData.sol";
+import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
 
-import {DepositParams} from "@src/market/libraries/actions/Deposit.sol";
+import {DepositParams} from "@rheo-fm/src/market/libraries/actions/Deposit.sol";
 import {
     Initialize,
     InitializeDataParams,
     InitializeFeeConfigParams,
     InitializeOracleParams,
     InitializeRiskConfigParams
-} from "@src/market/libraries/actions/Initialize.sol";
-import {ERC4626Adapter} from "@src/market/token/adapters/ERC4626Adapter.sol";
-import {IPriceFeed} from "@src/oracle/IPriceFeed.sol";
-import "@test/mocks/NonTransferrableRebasingTokenVaultMock.sol";
-import "@test/mocks/PoolMock.sol";
-import {PriceFeedMock} from "@test/mocks/PriceFeedMock.sol";
-import "@test/mocks/USDC.sol";
+} from "@rheo-fm/src/market/libraries/actions/Initialize.sol";
+import {ERC4626Adapter} from "@rheo-fm/src/market/token/adapters/ERC4626Adapter.sol";
+import {IPriceFeed} from "@rheo-fm/src/oracle/IPriceFeed.sol";
+import "@rheo-fm/test/mocks/NonTransferrableRebasingTokenVaultMock.sol";
+import "@rheo-fm/test/mocks/PoolMock.sol";
+import {PriceFeedMock} from "@rheo-fm/test/mocks/PriceFeedMock.sol";
+import "@rheo-fm/test/mocks/USDC.sol";
 
-import {WETH} from "@test/mocks/WETH.sol";
+import {WETH} from "@rheo-fm/test/mocks/WETH.sol";
 
-import {PriceFeed, PriceFeedParams} from "@src/oracle/v1.5.1/PriceFeed.sol";
+import {PriceFeed, PriceFeedParams} from "@rheo-fm/src/oracle/v1.5.1/PriceFeed.sol";
 
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
-import "@src/market/token/NonTransferrableRebasingTokenVault.sol";
-import {AaveAdapter} from "@src/market/token/adapters/AaveAdapter.sol";
-import {PriceFeedMock} from "@test/mocks/PriceFeedMock.sol";
+import "@rheo-fm/src/market/token/NonTransferrableRebasingTokenVault.sol";
+import {AaveAdapter} from "@rheo-fm/src/market/token/adapters/AaveAdapter.sol";
+import {PriceFeedMock} from "@rheo-fm/test/mocks/PriceFeedMock.sol";
 
-contract HalmosSizeTest is Test, HalmosHelpers {
+contract HalmosRheoTest is Test, HalmosHelpers {
     uint256 private constant USDC_INITIAL_BALANCE = 1_000_000e6;
     address deployer = address(0xcafe0000);
     address feeRecipient = address(0xcafe0001);
 
-    SizeFactory internal sizeFactory;
+    RheoFactory internal sizeFactory;
     address internal implementation;
     IERC20Metadata internal collateral;
     PriceFeedMock internal priceFeed;
@@ -65,7 +66,7 @@ contract HalmosSizeTest is Test, HalmosHelpers {
     ERC1967Proxy internal proxy;
     AaveAdapter private aaveAdapter;
 
-    Size internal size;
+    Rheo internal size;
     NonTransferrableRebasingTokenVaultMock private token;
     IPool private variablePool;
 
@@ -115,15 +116,15 @@ contract HalmosSizeTest is Test, HalmosHelpers {
         variablePool = IPool(address(new PoolMock()));
 
         token = new NonTransferrableRebasingTokenVaultMock();
-        sizeFactory = SizeFactory(
-            address(new ERC1967Proxy(address(new SizeFactory()), abi.encodeCall(SizeFactory.initialize, (deployer))))
+        sizeFactory = RheoFactory(
+            address(new ERC1967Proxy(address(new RheoFactory()), abi.encodeCall(RheoFactory.initialize, (deployer))))
         );
         token.initialize(
-            ISizeFactory(address(sizeFactory)),
+            IRheoFactory(address(sizeFactory)),
             variablePool,
             usdc,
             address(deployer),
-            string.concat("Size ", usdc.name(), " Vault"),
+            string.concat("Rheo ", usdc.name(), " Vault"),
             string.concat("sv", usdc.symbol()),
             usdc.decimals()
         );
@@ -157,10 +158,10 @@ contract HalmosSizeTest is Test, HalmosHelpers {
             sizeFactory: address(sizeFactory)
         });
 
-        implementation = address(new Size());
-        sizeFactory.setSizeImplementation(implementation);
+        implementation = address(new Rheo());
+        sizeFactory.setRheoImplementation(implementation);
         proxy = ERC1967Proxy(payable(address(sizeFactory.createMarket(f, r, o, d))));
-        size = Size(payable(proxy));
+        size = Rheo(payable(proxy));
         PriceFeedMock(address(priceFeed)).setPrice(1337e18);
 
         erc4626Adapter = new ERC4626Adapter(token);
@@ -200,7 +201,7 @@ contract HalmosSizeTest is Test, HalmosHelpers {
         vm.stopPrank();
 
         vm.startPrank(getConfigurer());
-        halmosHelpersRegisterTargetAddress(address(size), "Size");
+        halmosHelpersRegisterTargetAddress(address(size), "Rheo");
         /* 
         * heuristics: multicall causes path explosion and doesn't create any new coverage.
         * So I've decided to exclude this function from invariant testing.
@@ -218,7 +219,7 @@ contract HalmosSizeTest is Test, HalmosHelpers {
         //vm.stopPrank();
 
         halmosHelpersSymbolicBatchStartPrank(actors);
-        executeSymbolicallyAllTargets("check_balanceIntegritySize");
+        executeSymbolicallyAllTargets("check_balanceIntegrityRheo");
         vm.stopPrank();
 
         vaultSoladyBalanceNotBrokenInvarint();
@@ -235,7 +236,7 @@ contract HalmosSizeTest is Test, HalmosHelpers {
         vm.stopPrank();
 
         halmosHelpersSymbolicBatchStartPrank(actors);
-        executeSymbolicallyAllTargets("check_balanceIntegritySize");
+        executeSymbolicallyAllTargets("check_balanceIntegrityRheo");
         vm.stopPrank();
 
         vaultSoladyBalanceNotBrokenInvarint();
@@ -254,7 +255,7 @@ contract HalmosSizeTest is Test, HalmosHelpers {
         vm.stopPrank();
 
         halmosHelpersSymbolicBatchStartPrank(actors);
-        executeSymbolicallyAllTargets("check_balanceIntegritySize");
+        executeSymbolicallyAllTargets("check_balanceIntegrityRheo");
         vm.stopPrank();
 
         vaultSoladyBalanceNotBrokenInvarint();
@@ -283,8 +284,8 @@ contract HalmosSizeTest is Test, HalmosHelpers {
         halmosHelpersRegisterTargetAddress(address(usdc), "WETH");
         halmosHelpersRegisterTargetAddress(address(variablePool), "IPool");
         halmosHelpersRegisterTargetAddress(address(token), "NonTransferrableRebasingTokenVault");
-        halmosHelpersRegisterTargetAddress(address(sizeFactory), "SizeFactory");
-        halmosHelpersRegisterTargetAddress(address(implementation), "Size");
+        halmosHelpersRegisterTargetAddress(address(sizeFactory), "RheoFactory");
+        halmosHelpersRegisterTargetAddress(address(implementation), "Rheo");
         halmosHelpersRegisterTargetAddress(address(erc4626Adapter), "ERC4626Adapter");
         halmosHelpersRegisterTargetAddress(address(aaveAdapter), "AaveAdapter");
         halmosHelpersRegisterTargetAddress(address(vaultSolady), "IERC4626");

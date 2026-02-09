@@ -3,12 +3,12 @@ pragma solidity ^0.8.19;
 
 import {EnumerableMap} from "@openzeppelin/contracts/utils/structs/EnumerableMap.sol";
 
-import {SizeFactory} from "@src/factory/SizeFactory.sol";
-import {ISize} from "@src/market/interfaces/ISize.sol";
+import {RheoFactory} from "@rheo-fm/src/factory/RheoFactory.sol";
+import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
 
-import {ISizeV1_5} from "@deprecated/interfaces/ISizeV1_5.sol";
 import {EnumerableMap} from "@openzeppelin/contracts/utils/structs/EnumerableMap.sol";
-import {IPriceFeed} from "@src/oracle/IPriceFeed.sol";
+import {IRheoV1_5} from "@rheo-fm/deprecated/interfaces/IRheoV1_5.sol";
+import {IPriceFeed} from "@rheo-fm/src/oracle/IPriceFeed.sol";
 import {Script} from "forge-std/Script.sol";
 import {stdJson} from "forge-std/StdJson.sol";
 import {Vm} from "forge-std/Vm.sol";
@@ -94,7 +94,7 @@ abstract contract BaseScript is Script {
 
     function importDeployments(string memory networkConfiguration)
         internal
-        returns (ISize size, IPriceFeed priceFeed, address owner)
+        returns (IRheo size, IPriceFeed priceFeed, address owner)
     {
         root = vm.projectRoot();
         path = string.concat(root, "/deployments/");
@@ -102,7 +102,7 @@ abstract contract BaseScript is Script {
 
         string memory json = vm.readFile(path);
 
-        size = ISize(abi.decode(json.parseRaw(".deployments.Size-proxy"), (address)));
+        size = IRheo(abi.decode(json.parseRaw(".deployments.Rheo-proxy"), (address)));
         priceFeed = IPriceFeed(abi.decode(json.parseRaw(".deployments.PriceFeed"), (address)));
         owner = address(abi.decode(json.parseRaw(".parameters.owner"), (address)));
     }
@@ -127,7 +127,7 @@ abstract contract BaseScript is Script {
         finalObject = vm.serializeUint(".", "values", values);
         finalObject = vm.serializeUint(".", "blockNumber", blockNumber);
         finalObject =
-            vm.serializeBytes(".", "data", abi.encodeCall(ISizeV1_5.reinitialize, (address(borrowTokenVault), users)));
+            vm.serializeBytes(".", "data", abi.encodeCall(IRheoV1_5.reinitialize, (address(borrowTokenVault), users)));
         vm.writeJson(finalObject, path);
     }
 
@@ -153,14 +153,14 @@ abstract contract BaseScript is Script {
         }
     }
 
-    function importSizeFactory(string memory networkConfiguration) internal returns (SizeFactory sizeFactory) {
+    function importRheoFactory(string memory networkConfiguration) internal returns (RheoFactory sizeFactory) {
         root = vm.projectRoot();
         path = string.concat(root, "/deployments/");
         path = string.concat(path, string.concat(networkConfiguration, ".json"));
 
         string memory json = vm.readFile(path);
 
-        sizeFactory = SizeFactory(abi.decode(json.parseRaw(".deployments.SizeFactory-proxy"), (address)));
+        sizeFactory = RheoFactory(abi.decode(json.parseRaw(".deployments.RheoFactory-proxy"), (address)));
     }
 
     function getCommitHash() internal returns (string memory) {

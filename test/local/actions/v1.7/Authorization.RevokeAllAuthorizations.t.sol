@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {ISize} from "@src/market/interfaces/ISize.sol";
-import {ISizeV1_7} from "@src/market/interfaces/v1.7/ISizeV1_7.sol";
-import {Errors} from "@src/market/libraries/Errors.sol";
+import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
+import {IRheoV1_7} from "@rheo-fm/src/market/interfaces/v1.7/IRheoV1_7.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
 
-import {RESERVED_ID} from "@src/market/libraries/LoanLibrary.sol";
-import {Math, PERCENT} from "@src/market/libraries/Math.sol";
+import {RESERVED_ID} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
+import {Math, PERCENT} from "@rheo-fm/src/market/libraries/Math.sol";
 
-import {Action, Authorization} from "@src/factory/libraries/Authorization.sol";
-import {BaseTest, Vars} from "@test/BaseTest.sol";
-import {FixedMaturityLimitOrderHelper} from "@test/helpers/libraries/FixedMaturityLimitOrderHelper.sol";
+import {Action, Authorization} from "@rheo-fm/src/factory/libraries/Authorization.sol";
+import {BaseTest, Vars} from "@rheo-fm/test/BaseTest.sol";
+import {FixedMaturityLimitOrderHelper} from "@rheo-fm/test/helpers/libraries/FixedMaturityLimitOrderHelper.sol";
 
 contract AuthorizationRevokeAllAuthorizationsTest is BaseTest {
     function test_AuthorizationRevokeAllAuthorizations_revokeAllAuthorizations() public {

@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {State} from "@src/market/SizeStorage.sol";
+import {State} from "@rheo-fm/src/market/RheoStorage.sol";
 
-import {AccountingLibrary} from "@src/market/libraries/AccountingLibrary.sol";
-import {Errors} from "@src/market/libraries/Errors.sol";
-import {Math} from "@src/market/libraries/Math.sol";
+import {AccountingLibrary} from "@rheo-fm/src/market/libraries/AccountingLibrary.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
+import {Math} from "@rheo-fm/src/market/libraries/Math.sol";
 
 uint256 constant DEBT_POSITION_ID_START = 0;
 uint256 constant CREDIT_POSITION_ID_START = type(uint256).max / 2;
@@ -53,8 +53,8 @@ enum LoanStatus {
 }
 
 /// @title LoanLibrary
-/// @custom:security-contact security@size.credit
-/// @author Size (https://size.credit/)
+/// @custom:security-contact security@rheo.xyz
+/// @author Rheo (https://rheo.xyz/)
 library LoanLibrary {
     using AccountingLibrary for State;
 

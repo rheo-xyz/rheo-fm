@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {ISize} from "@src/market/interfaces/ISize.sol";
+import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
 
 /// @title ICollectionsManagerCuratorActions
-/// @custom:security-contact security@size.credit
-/// @author Size (https://size.credit/)
+/// @custom:security-contact security@rheo.xyz
+/// @author Rheo (https://rheo.xyz/)
 interface ICollectionsManagerCuratorActions {
     /*//////////////////////////////////////////////////////////////
                             EVENTS
@@ -35,7 +35,7 @@ interface ICollectionsManagerCuratorActions {
     /// @param collectionId The collection ID
     /// @param markets The markets to add
     /// @dev By default, the collection market configs are set to "full", ie, the rate providers limit orders are fully copied without alterations
-    function addMarketsToCollection(uint256 collectionId, ISize[] memory markets) external;
+    function addMarketsToCollection(uint256 collectionId, IRheo[] memory markets) external;
 
     /// @notice Sets the collection market configs
     /// @param collectionId The collection ID
@@ -46,7 +46,7 @@ interface ICollectionsManagerCuratorActions {
     /// @dev Removed in v1.8.1
     // function setCollectionMarketConfigs(
     //     uint256 collectionId,
-    //     ISize[] memory markets,
+    //     IRheo[] memory markets,
     //     CopyLimitOrderConfig[] memory copyLoanOfferConfigs,
     //     CopyLimitOrderConfig[] memory copyBorrowOfferConfigs
     // ) external;
@@ -54,19 +54,19 @@ interface ICollectionsManagerCuratorActions {
     /// @notice Removes markets from a collection
     /// @param collectionId The collection ID
     /// @param markets The markets to remove
-    function removeMarketsFromCollection(uint256 collectionId, ISize[] memory markets) external;
+    function removeMarketsFromCollection(uint256 collectionId, IRheo[] memory markets) external;
 
     /// @notice Adds rate providers to a collection market
     /// @param collectionId The collection ID
     /// @param market The market to add the rate providers to
     /// @param rateProviders The rate providers to add
-    function addRateProvidersToCollectionMarket(uint256 collectionId, ISize market, address[] memory rateProviders)
+    function addRateProvidersToCollectionMarket(uint256 collectionId, IRheo market, address[] memory rateProviders)
         external;
 
     /// @notice Removes rate providers from a collection market
     /// @param collectionId The collection ID
     /// @param market The market to remove the rate providers from
     /// @param rateProviders The rate providers to remove
-    function removeRateProvidersFromCollectionMarket(uint256 collectionId, ISize market, address[] memory rateProviders)
+    function removeRateProvidersFromCollectionMarket(uint256 collectionId, IRheo market, address[] memory rateProviders)
         external;
 }

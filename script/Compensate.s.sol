@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {Size} from "@src/market/Size.sol";
-import {CompensateParams} from "@src/market/libraries/actions/Compensate.sol";
-import {Logger} from "@test/Logger.sol";
+import {Rheo} from "@rheo-fm/src/market/Rheo.sol";
+import {CompensateParams} from "@rheo-fm/src/market/libraries/actions/Compensate.sol";
+import {Logger} from "@rheo-fm/test/Logger.sol";
 import {Script} from "forge-std/Script.sol";
 import {console2 as console} from "forge-std/console2.sol";
 
@@ -18,7 +18,7 @@ contract CompensateScript is Script, Logger {
         console.log("borrower", borrower);
 
         address currentAddress = vm.addr(deployerPrivateKey);
-        Size size = Size(payable(sizeContractAddress));
+        Rheo size = Rheo(payable(sizeContractAddress));
 
         console.log(currentAddress);
 

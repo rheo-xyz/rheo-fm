@@ -2,10 +2,10 @@
 pragma solidity 0.8.23;
 
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import {State} from "@src/market/SizeStorage.sol";
-import {ISize} from "@src/market/interfaces/ISize.sol";
-import {Errors} from "@src/market/libraries/Errors.sol";
-import {Math} from "@src/market/libraries/Math.sol";
+import {State} from "@rheo-fm/src/market/RheoStorage.sol";
+import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
+import {Math} from "@rheo-fm/src/market/libraries/Math.sol";
 
 struct FixedMaturityLimitOrder {
     // Sorted list of fixed maturity timestamps
@@ -28,8 +28,8 @@ struct CopyLimitOrderConfig {
 }
 
 /// @title OfferLibrary
-/// @custom:security-contact security@size.credit
-/// @author Size (https://size.credit/)
+/// @custom:security-contact security@rheo.xyz
+/// @author Rheo (https://rheo.xyz/)
 library OfferLibrary {
     using EnumerableSet for EnumerableSet.UintSet;
     /// @notice Check if the limit order is null
@@ -183,7 +183,7 @@ library OfferLibrary {
         address rateProvider,
         uint256 maturity
     ) public view returns (uint256 apr) {
-        return state.data.sizeFactory.getLoanOfferAPR(user, collectionId, ISize(address(this)), rateProvider, maturity);
+        return state.data.sizeFactory.getLoanOfferAPR(user, collectionId, IRheo(address(this)), rateProvider, maturity);
     }
 
     /// @notice Get the absolute rate per tenor of a loan offer
@@ -222,7 +222,7 @@ library OfferLibrary {
         uint256 maturity
     ) public view returns (uint256 apr) {
         return
-            state.data.sizeFactory.getBorrowOfferAPR(user, collectionId, ISize(address(this)), rateProvider, maturity);
+            state.data.sizeFactory.getBorrowOfferAPR(user, collectionId, IRheo(address(this)), rateProvider, maturity);
     }
 
     /// @notice Get the absolute rate per tenor of a borrow offer
@@ -251,7 +251,7 @@ library OfferLibrary {
         view
         returns (bool)
     {
-        return state.data.sizeFactory.isBorrowAPRLowerThanLoanOfferAPRs(user, borrowAPR, ISize(address(this)), maturity);
+        return state.data.sizeFactory.isBorrowAPRLowerThanLoanOfferAPRs(user, borrowAPR, IRheo(address(this)), maturity);
     }
 
     function isLoanAPRGreaterThanBorrowOfferAPRs(State storage state, address user, uint256 loanAPR, uint256 maturity)
@@ -259,6 +259,6 @@ library OfferLibrary {
         view
         returns (bool)
     {
-        return state.data.sizeFactory.isLoanAPRGreaterThanBorrowOfferAPRs(user, loanAPR, ISize(address(this)), maturity);
+        return state.data.sizeFactory.isLoanAPRGreaterThanBorrowOfferAPRs(user, loanAPR, IRheo(address(this)), maturity);
     }
 }

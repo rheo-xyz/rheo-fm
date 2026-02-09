@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {RESERVED_ID} from "@src/market/libraries/LoanLibrary.sol";
-import {SetUserConfigurationParams} from "@src/market/libraries/actions/SetUserConfiguration.sol";
-import {BaseTest} from "@test/BaseTest.sol";
-import {FixedMaturityLimitOrderHelper} from "@test/helpers/libraries/FixedMaturityLimitOrderHelper.sol";
+import {RESERVED_ID} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
+import {SetUserConfigurationParams} from "@rheo-fm/src/market/libraries/actions/SetUserConfiguration.sol";
+import {BaseTest} from "@rheo-fm/test/BaseTest.sol";
+import {FixedMaturityLimitOrderHelper} from "@rheo-fm/test/helpers/libraries/FixedMaturityLimitOrderHelper.sol";
 
-import {Errors} from "@src/market/libraries/Errors.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
 
 contract SetUserConfigurationValidationTest is BaseTest {
     function test_SetUserConfiguration_validation() public {

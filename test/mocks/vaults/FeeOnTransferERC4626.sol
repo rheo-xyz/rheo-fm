@@ -8,7 +8,7 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {ERC4626} from "@openzeppelin/contracts/token/ERC20/extensions/ERC4626.sol";
 
 import {Math as MathOZ} from "@openzeppelin/contracts/utils/math/Math.sol";
-import {Math, PERCENT} from "@src/market/libraries/Math.sol";
+import {Math, PERCENT} from "@rheo-fm/src/market/libraries/Math.sol";
 
 contract FeeOnTransferERC4626 is ERC4626, Ownable {
     uint256 public feePercent;

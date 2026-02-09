@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {CopyLimitOrderConfig} from "@src/market/libraries/OfferLibrary.sol";
+import {CopyLimitOrderConfig} from "@rheo-fm/src/market/libraries/OfferLibrary.sol";
 
-/// @title ISizeViewV1_8
-/// @custom:security-contact security@size.credit
-/// @author Size (https://size.credit/)
-/// @notice The interface for the Size v1.8 view methods
-interface ISizeViewV1_8 {
+/// @title IRheoViewV1_8
+/// @custom:security-contact security@rheo.xyz
+/// @author Rheo (https://rheo.xyz/)
+/// @notice The interface for the Rheo v1.8 view methods
+interface IRheoViewV1_8 {
     /// @notice Get the APR for a user-defined loan offer
     /// @param lender The address of the lender
     /// @param maturity The maturity of the loan

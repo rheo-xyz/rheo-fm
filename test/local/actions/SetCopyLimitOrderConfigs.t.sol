@@ -1,19 +1,19 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {Errors} from "@src/market/libraries/Errors.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
 
-import {RESERVED_ID} from "@src/market/libraries/LoanLibrary.sol";
-import {CopyLimitOrderConfig} from "@src/market/libraries/OfferLibrary.sol";
+import {RESERVED_ID} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
+import {CopyLimitOrderConfig} from "@rheo-fm/src/market/libraries/OfferLibrary.sol";
 
-import {OfferLibrary} from "@src/market/libraries/OfferLibrary.sol";
+import {OfferLibrary} from "@rheo-fm/src/market/libraries/OfferLibrary.sol";
 
-import {BuyCreditMarketParams} from "@src/market/libraries/actions/BuyCreditMarket.sol";
+import {BuyCreditMarketParams} from "@rheo-fm/src/market/libraries/actions/BuyCreditMarket.sol";
 
-import {SellCreditMarketParams} from "@src/market/libraries/actions/SellCreditMarket.sol";
-import {SetCopyLimitOrderConfigsParams} from "@src/market/libraries/actions/SetCopyLimitOrderConfigs.sol";
-import {BaseTest} from "@test/BaseTest.sol";
-import {FixedMaturityLimitOrderHelper} from "@test/helpers/libraries/FixedMaturityLimitOrderHelper.sol";
+import {SellCreditMarketParams} from "@rheo-fm/src/market/libraries/actions/SellCreditMarket.sol";
+import {SetCopyLimitOrderConfigsParams} from "@rheo-fm/src/market/libraries/actions/SetCopyLimitOrderConfigs.sol";
+import {BaseTest} from "@rheo-fm/test/BaseTest.sol";
+import {FixedMaturityLimitOrderHelper} from "@rheo-fm/test/helpers/libraries/FixedMaturityLimitOrderHelper.sol";
 
 contract SetCopyLimitOrderConfigsTest is BaseTest {
     CopyLimitOrderConfig private nullCopy;

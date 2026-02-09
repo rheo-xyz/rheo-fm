@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {Size} from "@src/market/Size.sol";
+import {Rheo} from "@rheo-fm/src/market/Rheo.sol";
 
-import {BuyCreditLimitParams} from "@src/market/libraries/actions/BuyCreditLimit.sol";
-import {InitializeRiskConfigParams} from "@src/market/libraries/actions/Initialize.sol";
+import {BuyCreditLimitParams} from "@rheo-fm/src/market/libraries/actions/BuyCreditLimit.sol";
+import {InitializeRiskConfigParams} from "@rheo-fm/src/market/libraries/actions/Initialize.sol";
 import {Script} from "forge-std/Script.sol";
 import {console2 as console} from "forge-std/console2.sol";
 
@@ -12,7 +12,7 @@ contract BuyCreditLimitScript is Script {
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         address sizeContractAddress = vm.envAddress("SIZE_CONTRACT_ADDRESS");
-        Size size = Size(payable(sizeContractAddress));
+        Rheo size = Rheo(payable(sizeContractAddress));
 
         console.log("Current Timestamp:", block.timestamp);
 

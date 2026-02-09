@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import "@src/market/Size.sol";
+import "@rheo-fm/src/market/Rheo.sol";
 import "forge-std/Script.sol";
 
 contract DepositWETHScript is Script {
@@ -19,7 +19,7 @@ contract DepositWETHScript is Script {
         console.log("lender", lender);
         console.log("borrower", borrower);
 
-        Size size = Size(payable(sizeContractAddress));
+        Rheo size = Rheo(payable(sizeContractAddress));
 
         DepositParams memory params = DepositParams({token: wethAddress, amount: amount, to: borrower});
 

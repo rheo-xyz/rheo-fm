@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {ICollectionsManager} from "@src/collections/interfaces/ICollectionsManager.sol";
-import {ISize} from "@src/market/interfaces/ISize.sol";
-import {CopyLimitOrderConfig} from "@src/market/libraries/OfferLibrary.sol";
+import {ICollectionsManager} from "@rheo-fm/src/collections/interfaces/ICollectionsManager.sol";
+import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
+import {CopyLimitOrderConfig} from "@rheo-fm/src/market/libraries/OfferLibrary.sol";
 
-/// @title ISizeFactoryV1_8
-/// @custom:security-contact security@size.credit
-/// @author Size (https://size.credit/)
+/// @title IRheoFactoryV1_8
+/// @custom:security-contact security@rheo.xyz
+/// @author Rheo (https://rheo.xyz/)
 /// @notice The interface for the size factory v1.8
-interface ISizeFactoryV1_8 {
+interface IRheoFactoryV1_8 {
     /// @notice Reinitialize the factory
     /// @param _collectionsManager The collections manager contract
     /// @param _users The users to reinitialize the factory for
@@ -18,7 +18,7 @@ interface ISizeFactoryV1_8 {
     /// @param _collectionMarkets The markets for the collection
     /// @dev Before v1.8, users could copy rate providers directly through `copyLimitOrders`.
     ///        In v1.8, this method was deprecated in favor of collections and `setCopyLimitOrderConfigs`. The `reinitialize` function serves as a migration path
-    ///        for users who are following the only off-chain collection currently offered by Size.
+    ///        for users who are following the only off-chain collection currently offered by Rheo.
     ///      On mainnet, there are no off-chain collections. On Base, there is only one off-chain collection.
     ///      Although users could theoretically DoS/grief the reinitialization process by sybil copying the rate provider with multiple accounts,
     ///        these addresses are filtered on the backend by liquidity, so this is not a concern.
@@ -28,15 +28,15 @@ interface ISizeFactoryV1_8 {
     //     address[] memory _users,
     //     address _curator,
     //     address _rateProvider,
-    //     ISize[] memory _collectionMarkets
+    //     IRheo[] memory _collectionMarkets
     // ) external;
 
     /// @notice Call a market with data. This can be used to batch operations on multiple markets.
     /// @param market The market to call
     /// @param data The data to call the market with
-    /// @dev Anybody can do arbitrary Size calls with this function, so users MUST revoke authorizations at the end of the transaction.
-    ///      Since this function executes arbitrary calls on Size markets, it should not have any trust assumptions on the ACL of factory-executed calls.
-    function callMarket(ISize market, bytes calldata data) external returns (bytes memory);
+    /// @dev Anybody can do arbitrary Rheo calls with this function, so users MUST revoke authorizations at the end of the transaction.
+    ///      Since this function executes arbitrary calls on Rheo markets, it should not have any trust assumptions on the ACL of factory-executed calls.
+    function callMarket(IRheo market, bytes calldata data) external returns (bytes memory);
 
     /// @notice Subscribe to collections
     /// @param collectionIds The collection ids to subscribe to
@@ -76,8 +76,8 @@ interface ISizeFactoryV1_8 {
     /// @param rateProvider The rate provider
     /// @param maturity The maturity
     /// @return apr The APR
-    /// @dev Since v1.8, this function is moved to the SizeFactory contract as it contains the link to the CollectionsManager, where collections provide APRs for different markets through rate providers
-    function getLoanOfferAPR(address user, uint256 collectionId, ISize market, address rateProvider, uint256 maturity)
+    /// @dev Since v1.8, this function is moved to the RheoFactory contract as it contains the link to the CollectionsManager, where collections provide APRs for different markets through rate providers
+    function getLoanOfferAPR(address user, uint256 collectionId, IRheo market, address rateProvider, uint256 maturity)
         external
         view
         returns (uint256);
@@ -89,8 +89,8 @@ interface ISizeFactoryV1_8 {
     /// @param rateProvider The rate provider
     /// @param maturity The maturity
     /// @return apr The APR
-    /// @dev Since v1.8, this function is moved to the SizeFactory contract as it contains the link to the CollectionsManager, where collections provide APRs for different markets through rate providers
-    function getBorrowOfferAPR(address user, uint256 collectionId, ISize market, address rateProvider, uint256 maturity)
+    /// @dev Since v1.8, this function is moved to the RheoFactory contract as it contains the link to the CollectionsManager, where collections provide APRs for different markets through rate providers
+    function getBorrowOfferAPR(address user, uint256 collectionId, IRheo market, address rateProvider, uint256 maturity)
         external
         view
         returns (uint256);
@@ -101,7 +101,7 @@ interface ISizeFactoryV1_8 {
     /// @param market The market
     /// @param maturity The maturity
     /// @return isLower True if the borrow APR is lower than the loan offer APRs, false otherwise
-    function isBorrowAPRLowerThanLoanOfferAPRs(address user, uint256 borrowAPR, ISize market, uint256 maturity)
+    function isBorrowAPRLowerThanLoanOfferAPRs(address user, uint256 borrowAPR, IRheo market, uint256 maturity)
         external
         view
         returns (bool);
@@ -112,7 +112,7 @@ interface ISizeFactoryV1_8 {
     /// @param market The market
     /// @param maturity The maturity
     /// @return isGreater True if the loan APR is greater than the borrow offer APRs, false otherwise
-    function isLoanAPRGreaterThanBorrowOfferAPRs(address user, uint256 loanAPR, ISize market, uint256 maturity)
+    function isLoanAPRGreaterThanBorrowOfferAPRs(address user, uint256 loanAPR, IRheo market, uint256 maturity)
         external
         view
         returns (bool);

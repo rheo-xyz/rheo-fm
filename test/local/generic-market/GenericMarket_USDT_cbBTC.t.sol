@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {RESERVED_ID} from "@src/market/libraries/LoanLibrary.sol";
-import {DepositParams} from "@src/market/libraries/actions/Deposit.sol";
+import {RESERVED_ID} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
+import {DepositParams} from "@rheo-fm/src/market/libraries/actions/Deposit.sol";
 
-import {Math} from "@src/market/libraries/Math.sol";
-import {Vars} from "@test/BaseTest.sol";
-import {BaseTestGenericMarket} from "@test/BaseTestGenericMarket.sol";
-import {FixedMaturityLimitOrderHelper} from "@test/helpers/libraries/FixedMaturityLimitOrderHelper.sol";
+import {Math} from "@rheo-fm/src/market/libraries/Math.sol";
+import {Vars} from "@rheo-fm/test/BaseTest.sol";
+import {BaseTestGenericMarket} from "@rheo-fm/test/BaseTestGenericMarket.sol";
+import {FixedMaturityLimitOrderHelper} from "@rheo-fm/test/helpers/libraries/FixedMaturityLimitOrderHelper.sol";
 
 contract GenericMarket_USDT_cbBTC_Test is BaseTestGenericMarket {
     function setUp() public virtual override {

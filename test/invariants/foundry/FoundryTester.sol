@@ -3,7 +3,7 @@ pragma solidity 0.8.23;
 
 import {FoundryHandler} from "./FoundryHandler.sol";
 
-import {PropertiesSpecifications} from "@test/invariants/PropertiesSpecifications.sol";
+import {PropertiesSpecifications} from "@rheo-fm/test/invariants/PropertiesSpecifications.sol";
 import {Test} from "forge-std/Test.sol";
 
 contract FoundryTester is Test, PropertiesSpecifications {

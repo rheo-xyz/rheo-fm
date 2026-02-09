@@ -5,12 +5,12 @@ import {TargetFunctions} from "./TargetFunctions.sol";
 
 import {Asserts} from "@chimera/Asserts.sol";
 import {FoundryAsserts} from "@chimera/FoundryAsserts.sol";
-import {SetupLocal} from "@test/invariants/SetupLocal.sol";
+import {SetupLocal} from "@rheo-fm/test/invariants/SetupLocal.sol";
 import {console} from "forge-std/console.sol";
 
-import {Logger} from "@test/Logger.sol";
+import {Logger} from "@rheo-fm/test/Logger.sol";
 
-import {BaseTest} from "@test/BaseTest.sol";
+import {BaseTest} from "@rheo-fm/test/BaseTest.sol";
 
 contract CryticToFoundry is BaseTest, TargetFunctions, SetupLocal, FoundryAsserts, Logger {
     function setUp() public override {

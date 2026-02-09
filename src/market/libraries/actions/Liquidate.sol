@@ -1,19 +1,19 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {Math} from "@src/market/libraries/Math.sol";
+import {Math} from "@rheo-fm/src/market/libraries/Math.sol";
 
-import {PERCENT} from "@src/market/libraries/Math.sol";
+import {PERCENT} from "@rheo-fm/src/market/libraries/Math.sol";
 
-import {DebtPosition, LoanLibrary, LoanStatus} from "@src/market/libraries/LoanLibrary.sol";
+import {DebtPosition, LoanLibrary, LoanStatus} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
 
-import {AccountingLibrary} from "@src/market/libraries/AccountingLibrary.sol";
-import {RiskLibrary} from "@src/market/libraries/RiskLibrary.sol";
+import {AccountingLibrary} from "@rheo-fm/src/market/libraries/AccountingLibrary.sol";
+import {RiskLibrary} from "@rheo-fm/src/market/libraries/RiskLibrary.sol";
 
-import {State} from "@src/market/SizeStorage.sol";
+import {State} from "@rheo-fm/src/market/RheoStorage.sol";
 
-import {Errors} from "@src/market/libraries/Errors.sol";
-import {Events} from "@src/market/libraries/Events.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
+import {Events} from "@rheo-fm/src/market/libraries/Events.sol";
 
 struct LiquidateParams {
     // The debt position ID to liquidate
@@ -25,8 +25,8 @@ struct LiquidateParams {
 }
 
 /// @title Liquidate
-/// @custom:security-contact security@size.credit
-/// @author Size (https://size.credit/)
+/// @custom:security-contact security@rheo.xyz
+/// @author Rheo (https://rheo.xyz/)
 /// @notice Contains the logic for liquidating a debt position
 library Liquidate {
     using LoanLibrary for DebtPosition;

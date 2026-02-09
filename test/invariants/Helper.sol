@@ -2,13 +2,13 @@
 pragma solidity 0.8.23;
 
 import {PropertiesConstants} from "@crytic/properties/contracts/util/PropertiesConstants.sol";
-import {CREDIT_POSITION_ID_START, RESERVED_ID} from "@src/market/libraries/LoanLibrary.sol";
+import {CREDIT_POSITION_ID_START, RESERVED_ID} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
 
-import {Deploy} from "@script/Deploy.sol";
-import {FixedMaturityLimitOrder} from "@src/market/libraries/OfferLibrary.sol";
-import {Bounds} from "@test/invariants/Bounds.sol";
+import {Deploy} from "@rheo-fm/script/Deploy.sol";
+import {FixedMaturityLimitOrder} from "@rheo-fm/src/market/libraries/OfferLibrary.sol";
+import {Bounds} from "@rheo-fm/test/invariants/Bounds.sol";
 
-import {PERCENT} from "@src/market/libraries/Math.sol";
+import {PERCENT} from "@rheo-fm/src/market/libraries/Math.sol";
 
 abstract contract Helper is Deploy, PropertiesConstants, Bounds {
     function _sortedFutureRiskMaturitiesForInvariant() internal view returns (uint256[] memory sorted) {

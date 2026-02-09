@@ -2,12 +2,12 @@
 pragma solidity 0.8.23;
 
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import {BaseScript} from "@script/BaseScript.sol";
-import {CollectionsManager} from "@src/collections/CollectionsManager.sol";
-import {ICollectionsManager} from "@src/collections/interfaces/ICollectionsManager.sol";
-import {SizeFactory} from "@src/factory/SizeFactory.sol";
+import {BaseScript} from "@rheo-fm/script/BaseScript.sol";
+import {CollectionsManager} from "@rheo-fm/src/collections/CollectionsManager.sol";
+import {ICollectionsManager} from "@rheo-fm/src/collections/interfaces/ICollectionsManager.sol";
+import {RheoFactory} from "@rheo-fm/src/factory/RheoFactory.sol";
 
-import {Contract, Networks} from "@script/Networks.sol";
+import {Contract, Networks} from "@rheo-fm/script/Networks.sol";
 import {console} from "forge-std/console.sol";
 
 import {Safe} from "@safe-utils/Safe.sol";
@@ -17,7 +17,7 @@ contract ProposeSafeTxUpgradeToV1_8_1Script is BaseScript, Networks {
 
     address signer;
     string derivationPath;
-    SizeFactory private sizeFactory;
+    RheoFactory private sizeFactory;
     ICollectionsManager private collectionsManager;
 
     modifier parseEnv() {
@@ -39,7 +39,7 @@ contract ProposeSafeTxUpgradeToV1_8_1Script is BaseScript, Networks {
     }
 
     function getUpgradeToV1_8_1Data() public returns (address[] memory targets, bytes[] memory datas) {
-        sizeFactory = SizeFactory(contracts[block.chainid][Contract.SIZE_FACTORY]);
+        sizeFactory = RheoFactory(contracts[block.chainid][Contract.RHEO_FACTORY]);
         collectionsManager = sizeFactory.collectionsManager();
 
         CollectionsManager newCollectionsManagerImplementation = new CollectionsManager();
@@ -47,17 +47,17 @@ contract ProposeSafeTxUpgradeToV1_8_1Script is BaseScript, Networks {
             "ProposeSafeTxUpgradeToV1_8_1Script: newCollectionsManagerImplementation",
             address(newCollectionsManagerImplementation)
         );
-        SizeFactory newSizeFactoryImplementation = new SizeFactory();
+        RheoFactory newRheoFactoryImplementation = new RheoFactory();
         console.log(
-            "ProposeSafeTxUpgradeToV1_8_1Script: newSizeFactoryImplementation", address(newSizeFactoryImplementation)
+            "ProposeSafeTxUpgradeToV1_8_1Script: newRheoFactoryImplementation", address(newRheoFactoryImplementation)
         );
 
         targets = new address[](2);
         datas = new bytes[](2);
 
-        // Upgrade SizeFactory
+        // Upgrade RheoFactory
         targets[0] = address(sizeFactory);
-        datas[0] = abi.encodeCall(UUPSUpgradeable.upgradeToAndCall, (address(newSizeFactoryImplementation), ""));
+        datas[0] = abi.encodeCall(UUPSUpgradeable.upgradeToAndCall, (address(newRheoFactoryImplementation), ""));
 
         // Upgrade CollectionsManager
         targets[1] = address(collectionsManager);

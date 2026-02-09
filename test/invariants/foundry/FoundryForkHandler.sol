@@ -3,8 +3,8 @@ pragma solidity 0.8.23;
 
 import {FoundryAsserts} from "@chimera/FoundryAsserts.sol";
 
-import {ForkTest} from "@test/fork/ForkTest.sol";
-import {TargetFunctions} from "@test/invariants/TargetFunctions.sol";
+import {ForkTest} from "@rheo-fm/test/fork/ForkTest.sol";
+import {TargetFunctions} from "@rheo-fm/test/invariants/TargetFunctions.sol";
 
 contract FoundryForkHandler is TargetFunctions, FoundryAsserts, ForkTest {
     constructor() {

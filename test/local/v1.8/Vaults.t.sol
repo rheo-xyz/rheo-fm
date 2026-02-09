@@ -4,21 +4,21 @@ pragma solidity 0.8.23;
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 
-import {RESERVED_ID} from "@src/market/libraries/LoanLibrary.sol";
+import {RESERVED_ID} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
 import {console} from "forge-std/console.sol";
 
 import {IERC20Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
-import {PERCENT} from "@src/market/libraries/Math.sol";
-import {NonTransferrableRebasingTokenVault} from "@src/market/token/NonTransferrableRebasingTokenVault.sol";
-import {DEFAULT_VAULT, ERC4626_ADAPTER_ID} from "@src/market/token/NonTransferrableRebasingTokenVault.sol";
-import {BaseTest, Vars} from "@test/BaseTest.sol";
-import {FixedMaturityLimitOrderHelper} from "@test/helpers/libraries/FixedMaturityLimitOrderHelper.sol";
+import {PERCENT} from "@rheo-fm/src/market/libraries/Math.sol";
+import {NonTransferrableRebasingTokenVault} from "@rheo-fm/src/market/token/NonTransferrableRebasingTokenVault.sol";
+import {DEFAULT_VAULT, ERC4626_ADAPTER_ID} from "@rheo-fm/src/market/token/NonTransferrableRebasingTokenVault.sol";
+import {BaseTest, Vars} from "@rheo-fm/test/BaseTest.sol";
+import {FixedMaturityLimitOrderHelper} from "@rheo-fm/test/helpers/libraries/FixedMaturityLimitOrderHelper.sol";
 
-import {BuyCreditMarketParams} from "@src/market/libraries/actions/BuyCreditMarket.sol";
-import {DepositParams} from "@src/market/libraries/actions/Deposit.sol";
+import {BuyCreditMarketParams} from "@rheo-fm/src/market/libraries/actions/BuyCreditMarket.sol";
+import {DepositParams} from "@rheo-fm/src/market/libraries/actions/Deposit.sol";
 
-import {SellCreditMarketParams} from "@src/market/libraries/actions/SellCreditMarket.sol";
-import {SetVaultParams} from "@src/market/libraries/actions/SetVault.sol";
+import {SellCreditMarketParams} from "@rheo-fm/src/market/libraries/actions/SellCreditMarket.sol";
+import {SetVaultParams} from "@rheo-fm/src/market/libraries/actions/SetVault.sol";
 
 import {IERC4626} from "@openzeppelin/contracts/interfaces/IERC4626.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -36,24 +36,24 @@ import {ControlledAsyncDeposit} from "@ERC-7540-Reference/src/ControlledAsyncDep
 import {ControlledAsyncRedeem} from "@ERC-7540-Reference/src/ControlledAsyncRedeem.sol";
 import {FullyAsyncVault} from "@ERC-7540-Reference/src/FullyAsyncVault.sol";
 
-import {Action, Authorization} from "@src/factory/libraries/Authorization.sol";
-import {FeeOnEntryExitERC4626} from "@test/mocks/vaults/FeeOnEntryExitERC4626.sol";
-import {FeeOnTransferERC4626} from "@test/mocks/vaults/FeeOnTransferERC4626.sol";
-import {LimitsERC4626} from "@test/mocks/vaults/LimitsERC4626.sol";
+import {Action, Authorization} from "@rheo-fm/src/factory/libraries/Authorization.sol";
+import {FeeOnEntryExitERC4626} from "@rheo-fm/test/mocks/vaults/FeeOnEntryExitERC4626.sol";
+import {FeeOnTransferERC4626} from "@rheo-fm/test/mocks/vaults/FeeOnTransferERC4626.sol";
+import {LimitsERC4626} from "@rheo-fm/test/mocks/vaults/LimitsERC4626.sol";
 
-import {MaliciousERC4626Reentrancy} from "@test/mocks/vaults/MaliciousERC4626Reentrancy.sol";
-import {MaliciousERC4626WithdrawNotAllowed} from "@test/mocks/vaults/MaliciousERC4626WithdrawNotAllowed.sol";
+import {MaliciousERC4626Reentrancy} from "@rheo-fm/test/mocks/vaults/MaliciousERC4626Reentrancy.sol";
+import {MaliciousERC4626WithdrawNotAllowed} from "@rheo-fm/test/mocks/vaults/MaliciousERC4626WithdrawNotAllowed.sol";
 
-import {IAdapter} from "@src/market/token/adapters/IAdapter.sol";
+import {IAdapter} from "@rheo-fm/src/market/token/adapters/IAdapter.sol";
 
-import {Errors} from "@src/market/libraries/Errors.sol";
-import {Events} from "@src/market/libraries/Events.sol";
-import {ERC4626Adapter} from "@src/market/token/adapters/ERC4626Adapter.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
+import {Events} from "@rheo-fm/src/market/libraries/Events.sol";
+import {ERC4626Adapter} from "@rheo-fm/src/market/token/adapters/ERC4626Adapter.sol";
 
 contract VaultsTest is BaseTest {
     function setUp() public override {
         super.setUp();
-        _deploySizeMarket2();
+        _deployRheoMarket2();
     }
 
     function test_Vaults_borrower_vault_lender_aave() public {
@@ -535,7 +535,7 @@ contract VaultsTest is BaseTest {
     }
 
     function test_Vaults_reentrancy_malicious_erc4626_same_market() public {
-        MaliciousERC4626Reentrancy(address(vaultMaliciousReentrancy)).setSize(size);
+        MaliciousERC4626Reentrancy(address(vaultMaliciousReentrancy)).setRheo(size);
         MaliciousERC4626Reentrancy(address(vaultMaliciousReentrancy)).setOnBehalfOf(alice);
 
         _setVaultAdapter(vaultMaliciousReentrancy, ERC4626_ADAPTER_ID);
@@ -569,7 +569,7 @@ contract VaultsTest is BaseTest {
     }
 
     function test_Vaults_reentrancy_malicious_erc4626_multiple_markets() public {
-        MaliciousERC4626Reentrancy(address(vaultMaliciousReentrancy)).setSize(size2);
+        MaliciousERC4626Reentrancy(address(vaultMaliciousReentrancy)).setRheo(size2);
         MaliciousERC4626Reentrancy(address(vaultMaliciousReentrancy)).setOnBehalfOf(alice);
 
         address borrowTokenVaultImplementation = address(new NonTransferrableRebasingTokenVault());

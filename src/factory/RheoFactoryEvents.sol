@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-/// @title SizeFactoryEvents
-/// @custom:security-contact security@size.credit
-/// @author Size (https://size.credit/)
-abstract contract SizeFactoryEvents {
-    event SizeImplementationSet(address indexed oldSizeImplementation, address indexed newSizeImplementation);
+/// @title RheoFactoryEvents
+/// @custom:security-contact security@rheo.xyz
+/// @author Rheo (https://rheo.xyz/)
+abstract contract RheoFactoryEvents {
+    event RheoImplementationSet(address indexed oldRheoImplementation, address indexed newRheoImplementation);
     event NonTransferrableRebasingTokenVaultImplementationSet(
         address indexed oldNonTransferrableRebasingTokenVaultImplementation,
         address indexed newNonTransferrableRebasingTokenVaultImplementation

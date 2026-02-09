@@ -1,48 +1,48 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {Contract, Networks} from "@script/Networks.sol";
-import {ForkTest} from "@test/fork/ForkTest.sol";
+import {Contract, Networks} from "@rheo-fm/script/Networks.sol";
+import {ForkTest} from "@rheo-fm/test/fork/ForkTest.sol";
 import {console} from "forge-std/console.sol";
 
 import {IAToken} from "@aave/interfaces/IAToken.sol";
 import {IERC4626} from "@openzeppelin/contracts/interfaces/IERC4626.sol";
 import {IERC20Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
-import {SizeMock} from "@test/mocks/SizeMock.sol";
-import {USDC} from "@test/mocks/USDC.sol";
-import {WETH} from "@test/mocks/WETH.sol";
+import {RheoMock} from "@rheo-fm/test/mocks/RheoMock.sol";
+import {USDC} from "@rheo-fm/test/mocks/USDC.sol";
+import {WETH} from "@rheo-fm/test/mocks/WETH.sol";
 
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
-import {IERC4626Morpho} from "@test/fork/v1.8/interfaces/IERC4626Morpho.sol";
+import {IERC4626Morpho} from "@rheo-fm/test/fork/v1.8/interfaces/IERC4626Morpho.sol";
 
-import {Errors} from "@src/market/libraries/Errors.sol";
-import {ClaimParams} from "@src/market/libraries/actions/Claim.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
+import {ClaimParams} from "@rheo-fm/src/market/libraries/actions/Claim.sol";
 
-import {SizeFactory} from "@src/factory/SizeFactory.sol";
-import {Size} from "@src/market/Size.sol";
-import {ISize} from "@src/market/interfaces/ISize.sol";
-import {NonTransferrableRebasingTokenVault} from "@src/market/token/NonTransferrableRebasingTokenVault.sol";
-import {ERC4626_ADAPTER_ID} from "@src/market/token/NonTransferrableRebasingTokenVault.sol";
+import {RheoFactory} from "@rheo-fm/src/factory/RheoFactory.sol";
+import {Rheo} from "@rheo-fm/src/market/Rheo.sol";
+import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
+import {NonTransferrableRebasingTokenVault} from "@rheo-fm/src/market/token/NonTransferrableRebasingTokenVault.sol";
+import {ERC4626_ADAPTER_ID} from "@rheo-fm/src/market/token/NonTransferrableRebasingTokenVault.sol";
 
-import {Math} from "@src/market/libraries/Math.sol";
+import {Math} from "@rheo-fm/src/market/libraries/Math.sol";
 
 contract ForkVaultsTest is ForkTest, Networks {
     IERC4626 public eUSDC22 = IERC4626(0xe0a80d35bB6618CBA260120b279d357978c42BCE);
     IERC4626Morpho public morphoUSUALUSDCplus = IERC4626Morpho(0xd63070114470f685b75B74D60EEc7c1113d33a3D);
     IERC20Metadata public liquidUSD = IERC20Metadata(0x08c6F91e2B681FaF5e17227F2a44C307b3C1364C);
-    address Size_PT_wstUSR_29JAN2026 = 0xeD5F3300C21B37f16267981D80CD01Ec883a7822;
+    address Rheo_PT_wstUSR_29JAN2026 = 0xeD5F3300C21B37f16267981D80CD01Ec883a7822;
 
     function setUp() public override(ForkTest) {
         vm.createSelectFork("mainnet");
         // 2025-10-21 13h00 UTC
         vm.rollFork(23626090);
 
-        sizeFactory = importSizeFactory("mainnet-size-factory");
-        size = SizeMock(address(sizeFactory.getMarket(0)));
+        sizeFactory = importRheoFactory("mainnet-rheo-factory");
+        size = RheoMock(address(sizeFactory.getMarket(0)));
         usdc = USDC(address(size.data().underlyingBorrowToken));
         weth = WETH(payable(address(size.data().underlyingCollateralToken)));
         variablePool = size.data().variablePool;
-        owner = Networks.contracts[block.chainid][Contract.SIZE_GOVERNANCE];
+        owner = Networks.contracts[block.chainid][Contract.RHEO_GOVERNANCE];
 
         _labels();
     }
@@ -141,7 +141,7 @@ contract ForkVaultsTest is ForkTest, Networks {
 
     function testFork_ForkVaults_repay_then_claim() public {
         vm.createSelectFork("mainnet");
-        size = SizeMock(Size_PT_wstUSR_29JAN2026);
+        size = RheoMock(Rheo_PT_wstUSR_29JAN2026);
         uint256 createDebtPositionBlock = 23512263;
         uint256 liquidateBlock = 23540358;
         uint256 claimAttemptBlock = 23633327;

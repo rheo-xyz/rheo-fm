@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {State, UserCopyLimitOrderConfigs} from "@src/market/SizeStorage.sol";
+import {State, UserCopyLimitOrderConfigs} from "@rheo-fm/src/market/RheoStorage.sol";
 
-import {Action} from "@src/factory/libraries/Authorization.sol";
-import {Errors} from "@src/market/libraries/Errors.sol";
-import {Events} from "@src/market/libraries/Events.sol";
-import {CopyLimitOrderConfig, OfferLibrary} from "@src/market/libraries/OfferLibrary.sol";
+import {Action} from "@rheo-fm/src/factory/libraries/Authorization.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
+import {Events} from "@rheo-fm/src/market/libraries/Events.sol";
+import {CopyLimitOrderConfig, OfferLibrary} from "@rheo-fm/src/market/libraries/OfferLibrary.sol";
 
 struct SetCopyLimitOrderConfigsParams {
     // the loan offer copy config parameters
@@ -23,8 +23,8 @@ struct SetCopyLimitOrderConfigsOnBehalfOfParams {
 }
 
 /// @title SetCopyLimitOrderConfigs
-/// @custom:security-contact security@size.credit
-/// @author Size (https://size.credit/)
+/// @custom:security-contact security@rheo.xyz
+/// @author Rheo (https://rheo.xyz/)
 /// @notice Contains the logic for setting copy limit order configs
 library SetCopyLimitOrderConfigs {
     using OfferLibrary for CopyLimitOrderConfig;

@@ -3,7 +3,7 @@ pragma solidity 0.8.23;
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-contract SizeFactoryMock is Ownable {
+contract RheoFactoryMock is Ownable {
     constructor(address _owner) Ownable(_owner) {}
 
     mapping(address => bool) public isMarket;

@@ -1,25 +1,25 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {UserCopyLimitOrderConfigs} from "@src/market/SizeStorage.sol";
+import {UserCopyLimitOrderConfigs} from "@rheo-fm/src/market/RheoStorage.sol";
 
-import {DataView, UserView} from "@src/market/SizeViewData.sol";
-import {CreditPosition, DebtPosition, LoanStatus} from "@src/market/libraries/LoanLibrary.sol";
-import {BuyCreditMarket, BuyCreditMarketParams} from "@src/market/libraries/actions/BuyCreditMarket.sol";
+import {DataView, UserView} from "@rheo-fm/src/market/RheoViewData.sol";
+import {CreditPosition, DebtPosition, LoanStatus} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
+import {BuyCreditMarket, BuyCreditMarketParams} from "@rheo-fm/src/market/libraries/actions/BuyCreditMarket.sol";
 import {
     InitializeFeeConfigParams,
     InitializeOracleParams,
     InitializeRiskConfigParams
-} from "@src/market/libraries/actions/Initialize.sol";
-import {SellCreditMarket, SellCreditMarketParams} from "@src/market/libraries/actions/SellCreditMarket.sol";
+} from "@rheo-fm/src/market/libraries/actions/Initialize.sol";
+import {SellCreditMarket, SellCreditMarketParams} from "@rheo-fm/src/market/libraries/actions/SellCreditMarket.sol";
 
-import {ISizeViewV1_8} from "@src/market/interfaces/v1.8/ISizeViewV1_8.sol";
-/// @title ISizeView
-/// @custom:security-contact security@size.credit
-/// @author Size (https://size.credit/)
-/// @notice View methods for the Size protocol
+import {IRheoViewV1_8} from "@rheo-fm/src/market/interfaces/v1.8/IRheoViewV1_8.sol";
+/// @title IRheoView
+/// @custom:security-contact security@rheo.xyz
+/// @author Rheo (https://rheo.xyz/)
+/// @notice View methods for the Rheo protocol
 
-interface ISizeView is ISizeViewV1_8 {
+interface IRheoView is IRheoViewV1_8 {
     /// @notice Get the collateral ratio of a user
     /// @param user The address of the user
     /// @return The collateral ratio of the user
@@ -82,7 +82,7 @@ interface ISizeView is ISizeViewV1_8 {
     /// @return result The value of the storage slot
     function extSload(bytes32 key) external view returns (bytes32 result);
 
-    /// @notice Get the version of the Size protocol
-    /// @return The version of the Size protocol
+    /// @notice Get the version of the Rheo protocol
+    /// @return The version of the Rheo protocol
     function version() external view returns (string memory);
 }

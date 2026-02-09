@@ -3,16 +3,16 @@ pragma solidity 0.8.23;
 
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
-import {ICollectionsManager} from "@src/collections/interfaces/ICollectionsManager.sol";
-import {ActionsBitmap} from "@src/factory/libraries/Authorization.sol";
-import {ISize} from "@src/market/interfaces/ISize.sol";
+import {ICollectionsManager} from "@rheo-fm/src/collections/interfaces/ICollectionsManager.sol";
+import {ActionsBitmap} from "@rheo-fm/src/factory/libraries/Authorization.sol";
+import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
 
-/// @title SizeFactoryStorage
-/// @custom:security-contact security@size.credit
-/// @author Size (https://size.credit/)
+/// @title RheoFactoryStorage
+/// @custom:security-contact security@rheo.xyz
+/// @author Rheo (https://rheo.xyz/)
 // slither-disable-start uninitialized-state
 // slither-disable-start constable-states
-abstract contract SizeFactoryStorage {
+abstract contract RheoFactoryStorage {
     // the markets
     EnumerableSet.AddressSet markets;
     // deprecated in v1.7

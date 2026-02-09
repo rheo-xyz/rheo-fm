@@ -3,8 +3,8 @@ pragma solidity 0.8.23;
 
 import {console} from "forge-std/Script.sol";
 
-import {BaseScript} from "@script/BaseScript.sol";
-import {PriceFeedMock} from "@test/mocks/PriceFeedMock.sol";
+import {BaseScript} from "@rheo-fm/script/BaseScript.sol";
+import {PriceFeedMock} from "@rheo-fm/test/mocks/PriceFeedMock.sol";
 
 contract DeployPriceFeedMockScript is BaseScript {
     function setUp() public {}

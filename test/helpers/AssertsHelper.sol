@@ -3,9 +3,9 @@ pragma solidity 0.8.23;
 
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
-import {UserView} from "@src/market/SizeView.sol";
-import {LoanStatus} from "@src/market/libraries/LoanLibrary.sol";
-import {Vars} from "@test/BaseTest.sol";
+import {UserView} from "@rheo-fm/src/market/RheoView.sol";
+import {LoanStatus} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
+import {Vars} from "@rheo-fm/test/BaseTest.sol";
 import {Test} from "forge-std/Test.sol";
 
 abstract contract AssertsHelper is Test {

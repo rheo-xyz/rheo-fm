@@ -2,17 +2,17 @@
 pragma solidity 0.8.23;
 
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
-import {Errors} from "@src/market/libraries/Errors.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
 
-import {Math} from "@src/market/libraries/Math.sol";
-import {IPriceFeed} from "@src/oracle/IPriceFeed.sol";
+import {Math} from "@rheo-fm/src/market/libraries/Math.sol";
+import {IPriceFeed} from "@rheo-fm/src/oracle/IPriceFeed.sol";
 
 /// @title PriceFeedIPriceFeed2x
-/// @custom:security-contact security@size.credit
-/// @author Size (https://size.credit/)
+/// @custom:security-contact security@rheo.xyz
+/// @author Rheo (https://rheo.xyz/)
 /// @notice A contract that provides the price of a `base` asset in terms of a `quote` asset, scaled to 18 decimals,
 ///         by calculating `base / quote`, using IPriceFeed only.
-/// @dev `decimals` must be 18 to comply with Size contracts
+/// @dev `decimals` must be 18 to comply with Rheo contracts
 ///      Only networks without a sequencer are supported.
 contract PriceFeedIPriceFeed2x is IPriceFeed {
     /* solhint-disable */

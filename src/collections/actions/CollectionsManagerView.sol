@@ -3,18 +3,20 @@ pragma solidity 0.8.23;
 
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import {CollectionsManagerBase} from "@src/collections/CollectionsManagerBase.sol";
-import {ICollectionsManagerView} from "@src/collections/interfaces/ICollectionsManagerView.sol";
+import {CollectionsManagerBase} from "@rheo-fm/src/collections/CollectionsManagerBase.sol";
+import {ICollectionsManagerView} from "@rheo-fm/src/collections/interfaces/ICollectionsManagerView.sol";
 
-import {Errors} from "@src/market/libraries/Errors.sol";
-import {RESERVED_ID} from "@src/market/libraries/LoanLibrary.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
+import {RESERVED_ID} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
 
-import {ISize} from "@src/market/interfaces/ISize.sol";
-import {CopyLimitOrderConfig, FixedMaturityLimitOrder, OfferLibrary} from "@src/market/libraries/OfferLibrary.sol";
+import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
+import {
+    CopyLimitOrderConfig, FixedMaturityLimitOrder, OfferLibrary
+} from "@rheo-fm/src/market/libraries/OfferLibrary.sol";
 
 /// @title CollectionsManagerView
-/// @custom:security-contact security@size.credit
-/// @author Size (https://size.credit/)
+/// @custom:security-contact security@rheo.xyz
+/// @author Rheo (https://rheo.xyz/)
 /// @notice See the documentation in {ICollectionsManagerView}.
 abstract contract CollectionsManagerView is ICollectionsManagerView, CollectionsManagerBase {
     using EnumerableSet for EnumerableSet.UintSet;
@@ -37,7 +39,7 @@ abstract contract CollectionsManagerView is ICollectionsManagerView, Collections
     }
 
     /// @inheritdoc ICollectionsManagerView
-    function collectionContainsMarket(uint256 collectionId, ISize market) external view returns (bool) {
+    function collectionContainsMarket(uint256 collectionId, IRheo market) external view returns (bool) {
         if (!isValidCollectionId(collectionId)) {
             return false;
         }
@@ -45,7 +47,7 @@ abstract contract CollectionsManagerView is ICollectionsManagerView, Collections
     }
 
     /// @inheritdoc ICollectionsManagerView
-    function getCollectionMarketRateProviders(uint256 collectionId, ISize market)
+    function getCollectionMarketRateProviders(uint256 collectionId, IRheo market)
         external
         view
         returns (address[] memory)
@@ -63,7 +65,7 @@ abstract contract CollectionsManagerView is ICollectionsManagerView, Collections
     function isCopyingCollectionMarketRateProvider(
         address user,
         uint256 collectionId,
-        ISize market,
+        IRheo market,
         address rateProvider
     ) public view returns (bool) {
         if (!isValidCollectionId(collectionId)) {
@@ -87,14 +89,14 @@ abstract contract CollectionsManagerView is ICollectionsManagerView, Collections
                             APR VIEW
     //////////////////////////////////////////////////////////////*/
 
-    function _isUserDefinedLimitOrderNull(address user, ISize market, bool isLoanOffer) private view returns (bool) {
+    function _isUserDefinedLimitOrderNull(address user, IRheo market, bool isLoanOffer) private view returns (bool) {
         // slither-disable-next-line calls-loop
         (bool isLoanOfferNull, bool isBorrowOfferNull) = market.isUserDefinedLimitOrdersNull(user);
         return isLoanOffer ? isLoanOfferNull : isBorrowOfferNull;
     }
 
     /// @inheritdoc ICollectionsManagerView
-    function getLoanOfferAPR(address user, uint256 collectionId, ISize market, address rateProvider, uint256 maturity)
+    function getLoanOfferAPR(address user, uint256 collectionId, IRheo market, address rateProvider, uint256 maturity)
         external
         view
         returns (uint256 apr)
@@ -103,7 +105,7 @@ abstract contract CollectionsManagerView is ICollectionsManagerView, Collections
     }
 
     /// @inheritdoc ICollectionsManagerView
-    function getBorrowOfferAPR(address user, uint256 collectionId, ISize market, address rateProvider, uint256 maturity)
+    function getBorrowOfferAPR(address user, uint256 collectionId, IRheo market, address rateProvider, uint256 maturity)
         external
         view
         returns (uint256 apr)
@@ -114,7 +116,7 @@ abstract contract CollectionsManagerView is ICollectionsManagerView, Collections
     function getLimitOrderAPR(
         address user,
         uint256 collectionId,
-        ISize market,
+        IRheo market,
         address rateProvider,
         uint256 maturity,
         bool isLoanOffer
@@ -153,7 +155,7 @@ abstract contract CollectionsManagerView is ICollectionsManagerView, Collections
         }
     }
 
-    function _getUserDefinedLimitOrderAPR(address user, ISize market, uint256 maturity, bool isLoanOffer)
+    function _getUserDefinedLimitOrderAPR(address user, IRheo market, uint256 maturity, bool isLoanOffer)
         private
         view
         returns (uint256 apr)
@@ -166,7 +168,7 @@ abstract contract CollectionsManagerView is ICollectionsManagerView, Collections
     }
 
     /// @inheritdoc ICollectionsManagerView
-    function isLoanAPRGreaterThanBorrowOfferAPRs(address user, uint256 loanAPR, ISize market, uint256 maturity)
+    function isLoanAPRGreaterThanBorrowOfferAPRs(address user, uint256 loanAPR, IRheo market, uint256 maturity)
         external
         view
         returns (bool)
@@ -175,7 +177,7 @@ abstract contract CollectionsManagerView is ICollectionsManagerView, Collections
     }
 
     /// @inheritdoc ICollectionsManagerView
-    function isBorrowAPRLowerThanLoanOfferAPRs(address user, uint256 borrowAPR, ISize market, uint256 maturity)
+    function isBorrowAPRLowerThanLoanOfferAPRs(address user, uint256 borrowAPR, IRheo market, uint256 maturity)
         external
         view
         returns (bool)
@@ -185,7 +187,7 @@ abstract contract CollectionsManagerView is ICollectionsManagerView, Collections
 
     // slither-disable-start var-read-using-this
     // slither-disable-start calls-loop
-    function _isAPRLowerThanOfferAPRs(address user, uint256 apr, ISize market, uint256 maturity, bool aprIsLoanAPR)
+    function _isAPRLowerThanOfferAPRs(address user, uint256 apr, IRheo market, uint256 maturity, bool aprIsLoanAPR)
         private
         view
         returns (bool)
@@ -259,7 +261,7 @@ abstract contract CollectionsManagerView is ICollectionsManagerView, Collections
 
     /// @dev Reverts if the collection id is invalid or the market is not in the collection
     /// @dev Changed in v1.8.1
-    function _getCopyLimitOrderConfig(address user, uint256 collectionId, ISize market, bool isLoanOffer)
+    function _getCopyLimitOrderConfig(address user, uint256 collectionId, IRheo market, bool isLoanOffer)
         private
         view
         returns (CopyLimitOrderConfig memory copyLimitOrder)
@@ -270,7 +272,7 @@ abstract contract CollectionsManagerView is ICollectionsManagerView, Collections
         }
     }
 
-    function _getUserDefinedMarketCopyLimitOrderConfig(address user, ISize market, bool isLoanOffer)
+    function _getUserDefinedMarketCopyLimitOrderConfig(address user, IRheo market, bool isLoanOffer)
         private
         view
         returns (CopyLimitOrderConfig memory copyLimitOrder)

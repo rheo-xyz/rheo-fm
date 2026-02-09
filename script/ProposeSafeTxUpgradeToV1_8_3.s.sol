@@ -2,18 +2,18 @@
 pragma solidity 0.8.23;
 
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import {BaseScript} from "@script/BaseScript.sol";
-import {ICollectionsManager} from "@src/collections/interfaces/ICollectionsManager.sol";
-import {SizeFactory} from "@src/factory/SizeFactory.sol";
-import {UpdateConfigParams} from "@src/market/libraries/actions/UpdateConfig.sol";
+import {BaseScript} from "@rheo-fm/script/BaseScript.sol";
+import {ICollectionsManager} from "@rheo-fm/src/collections/interfaces/ICollectionsManager.sol";
+import {RheoFactory} from "@rheo-fm/src/factory/RheoFactory.sol";
+import {UpdateConfigParams} from "@rheo-fm/src/market/libraries/actions/UpdateConfig.sol";
 
-import {Contract, Networks} from "@script/Networks.sol";
+import {Contract, Networks} from "@rheo-fm/script/Networks.sol";
 
-import {Size} from "@src/market/Size.sol";
+import {Rheo} from "@rheo-fm/src/market/Rheo.sol";
 
-import {IMulticall} from "@src/market/interfaces/IMulticall.sol";
-import {ISize} from "@src/market/interfaces/ISize.sol";
-import {ISizeAdmin} from "@src/market/interfaces/ISizeAdmin.sol";
+import {IMulticall} from "@rheo-fm/src/market/interfaces/IMulticall.sol";
+import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
+import {IRheoAdmin} from "@rheo-fm/src/market/interfaces/IRheoAdmin.sol";
 
 import {console} from "forge-std/console.sol";
 
@@ -24,7 +24,7 @@ contract ProposeSafeTxUpgradeToV1_8_3Script is BaseScript, Networks {
 
     address signer;
     string derivationPath;
-    SizeFactory private sizeFactory;
+    RheoFactory private sizeFactory;
     ICollectionsManager private collectionsManager;
 
     uint256 private constant OVERDUE_LIQUIDATION_REWARD_PERCENT = 0.01e18;
@@ -53,12 +53,12 @@ contract ProposeSafeTxUpgradeToV1_8_3Script is BaseScript, Networks {
     }
 
     function getUpgradeToV1_8_3Data() public returns (address[] memory targets, bytes[] memory datas) {
-        sizeFactory = SizeFactory(contracts[block.chainid][Contract.SIZE_FACTORY]);
+        sizeFactory = RheoFactory(contracts[block.chainid][Contract.RHEO_FACTORY]);
 
-        ISize[] memory unpausedMarkets = getUnpausedMarkets(sizeFactory);
+        IRheo[] memory unpausedMarkets = getUnpausedMarkets(sizeFactory);
 
-        Size newSizeImplementation = new Size();
-        console.log("ProposeSafeTxUpgradeToV1_8_3Script: newSizeImplementation", address(newSizeImplementation));
+        Rheo newRheoImplementation = new Rheo();
+        console.log("ProposeSafeTxUpgradeToV1_8_3Script: newRheoImplementation", address(newRheoImplementation));
 
         targets = new address[](unpausedMarkets.length + 1);
         datas = new bytes[](unpausedMarkets.length + 1);
@@ -66,7 +66,7 @@ contract ProposeSafeTxUpgradeToV1_8_3Script is BaseScript, Networks {
             targets[i] = address(unpausedMarkets[i]);
             bytes[] memory multicallDatas = new bytes[](2);
             multicallDatas[0] = abi.encodeCall(
-                ISizeAdmin.updateConfig,
+                IRheoAdmin.updateConfig,
                 (
                     UpdateConfigParams({
                         key: "overdueCollateralProtocolPercent",
@@ -75,7 +75,7 @@ contract ProposeSafeTxUpgradeToV1_8_3Script is BaseScript, Networks {
                 )
             );
             multicallDatas[1] = abi.encodeCall(
-                ISizeAdmin.updateConfig,
+                IRheoAdmin.updateConfig,
                 (
                     UpdateConfigParams({
                         key: "overdueLiquidationRewardPercent",
@@ -85,11 +85,11 @@ contract ProposeSafeTxUpgradeToV1_8_3Script is BaseScript, Networks {
             );
             datas[i] = abi.encodeCall(
                 UUPSUpgradeable.upgradeToAndCall,
-                (address(newSizeImplementation), abi.encodeCall(IMulticall.multicall, (multicallDatas)))
+                (address(newRheoImplementation), abi.encodeCall(IMulticall.multicall, (multicallDatas)))
             );
         }
         targets[unpausedMarkets.length] = address(sizeFactory);
         datas[unpausedMarkets.length] =
-            abi.encodeCall(SizeFactory.setSizeImplementation, (address(newSizeImplementation)));
+            abi.encodeCall(RheoFactory.setRheoImplementation, (address(newRheoImplementation)));
     }
 }

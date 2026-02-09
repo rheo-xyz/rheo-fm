@@ -2,7 +2,7 @@
 pragma solidity 0.8.23;
 
 import {WadRayMath} from "@aave/protocol/libraries/math/WadRayMath.sol";
-import {BaseTest} from "@test/BaseTest.sol";
+import {BaseTest} from "@rheo-fm/test/BaseTest.sol";
 
 contract WadRayMathTest is BaseTest {
     function testFuzz_WadRayMath_rayDiv_rayMul_identity(uint256 x, uint256 y) public pure {

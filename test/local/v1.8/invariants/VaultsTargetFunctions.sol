@@ -13,19 +13,19 @@ import {ERC4626 as ERC4626OpenZeppelin} from "@openzeppelin/contracts/token/ERC2
 import {
     ERC4626_ADAPTER_ID,
     NonTransferrableRebasingTokenVault
-} from "@src/market/token/NonTransferrableRebasingTokenVault.sol";
+} from "@rheo-fm/src/market/token/NonTransferrableRebasingTokenVault.sol";
 
-import {Deploy} from "@script/Deploy.sol";
-import {SetupLocal} from "@test/invariants/SetupLocal.sol";
-import {SimplePool} from "@test/local/token/differential/mocks/SimplePool.sol";
-import {USDC} from "@test/mocks/USDC.sol";
-import {MaliciousERC4626ReentrancyGeneric} from "@test/mocks/vaults/MaliciousERC4626ReentrancyGeneric.sol";
+import {Deploy} from "@rheo-fm/script/Deploy.sol";
+import {SetupLocal} from "@rheo-fm/test/invariants/SetupLocal.sol";
+import {SimplePool} from "@rheo-fm/test/local/token/differential/mocks/SimplePool.sol";
+import {USDC} from "@rheo-fm/test/mocks/USDC.sol";
+import {MaliciousERC4626ReentrancyGeneric} from "@rheo-fm/test/mocks/vaults/MaliciousERC4626ReentrancyGeneric.sol";
 
-import {DepositParams} from "@src/market/libraries/actions/Deposit.sol";
-import {WithdrawParams} from "@src/market/libraries/actions/Withdraw.sol";
+import {DepositParams} from "@rheo-fm/src/market/libraries/actions/Deposit.sol";
+import {WithdrawParams} from "@rheo-fm/src/market/libraries/actions/Withdraw.sol";
 
-import {Action, ActionsBitmap, Authorization} from "@src/factory/libraries/Authorization.sol";
-import {SetupLocal} from "@test/invariants/SetupLocal.sol";
+import {Action, ActionsBitmap, Authorization} from "@rheo-fm/src/factory/libraries/Authorization.sol";
+import {SetupLocal} from "@rheo-fm/test/invariants/SetupLocal.sol";
 
 abstract contract VaultsTargetFunctions is Asserts, Deploy, SetupLocal {
     uint256 private constant MAX_REENTER_COUNT = 5;
@@ -37,7 +37,7 @@ abstract contract VaultsTargetFunctions is Asserts, Deploy, SetupLocal {
 
     function setup() internal override {
         super.setup();
-        _deploySizeMarket2();
+        _deployRheoMarket2();
 
         borrowTokenVault = size.data().borrowTokenVault;
         token = address(usdc);
@@ -88,8 +88,8 @@ abstract contract VaultsTargetFunctions is Asserts, Deploy, SetupLocal {
         borrowTokenVault.setVault(_user, _vault, _forfeitOldShares);
     }
 
-    function maliciousVault_setSize(bool _isSize1) public {
-        maliciousVault.setSize(_isSize1 ? size1 : size2);
+    function maliciousVault_setRheo(bool _isRheo1) public {
+        maliciousVault.setRheo(_isRheo1 ? size1 : size2);
     }
 
     function maliciousVault_setReenterCount(uint256 _reenterCount) public {

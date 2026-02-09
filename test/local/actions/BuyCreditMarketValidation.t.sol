@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {BaseTest} from "@test/BaseTest.sol";
+import {BaseTest} from "@rheo-fm/test/BaseTest.sol";
 
-import {Errors} from "@src/market/libraries/Errors.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
 
-import {LoanStatus, RESERVED_ID} from "@src/market/libraries/LoanLibrary.sol";
-import {BuyCreditMarketParams} from "@src/market/libraries/actions/BuyCreditMarket.sol";
+import {LoanStatus, RESERVED_ID} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
+import {BuyCreditMarketParams} from "@rheo-fm/src/market/libraries/actions/BuyCreditMarket.sol";
 
 contract BuyCreditMarketTest is BaseTest {
     function test_BuyCreditMarket_validation() public {

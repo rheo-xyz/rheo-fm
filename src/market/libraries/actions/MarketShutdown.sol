@@ -1,18 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {State} from "@src/market/SizeStorage.sol";
+import {State} from "@rheo-fm/src/market/RheoStorage.sol";
 
-import {Claim, ClaimParams} from "@src/market/libraries/actions/Claim.sol";
-import {Liquidate, LiquidateParams} from "@src/market/libraries/actions/Liquidate.sol";
-import {UpdateConfig, UpdateConfigParams} from "@src/market/libraries/actions/UpdateConfig.sol";
+import {Claim, ClaimParams} from "@rheo-fm/src/market/libraries/actions/Claim.sol";
+import {Liquidate, LiquidateParams} from "@rheo-fm/src/market/libraries/actions/Liquidate.sol";
+import {UpdateConfig, UpdateConfigParams} from "@rheo-fm/src/market/libraries/actions/UpdateConfig.sol";
 
-import {Withdraw, WithdrawOnBehalfOfParams, WithdrawParams} from "@src/market/libraries/actions/Withdraw.sol";
+import {Withdraw, WithdrawOnBehalfOfParams, WithdrawParams} from "@rheo-fm/src/market/libraries/actions/Withdraw.sol";
 
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 
-import {Errors} from "@src/market/libraries/Errors.sol";
-import {Events} from "@src/market/libraries/Events.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
+import {Events} from "@rheo-fm/src/market/libraries/Events.sol";
 
 struct MarketShutdownParams {
     uint256[] debtPositionIdsToForceLiquidate;
@@ -22,8 +22,8 @@ struct MarketShutdownParams {
 }
 
 /// @title MarketShutdown
-/// @custom:security-contact security@size.credit
-/// @author Size (https://size.credit/)
+/// @custom:security-contact security@rheo.xyz
+/// @author Rheo (https://rheo.xyz/)
 /// @notice Contains the logic for shutting down the market
 library MarketShutdown {
     /// @notice Validates the market shutdown parameters

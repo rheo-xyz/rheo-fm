@@ -4,13 +4,13 @@ pragma solidity 0.8.23;
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
-import {Errors} from "@src/market/libraries/Errors.sol";
-import {IPriceFeed} from "@src/oracle/IPriceFeed.sol";
-import {IOracle} from "@src/oracle/adapters/morpho/IOracle.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
+import {IPriceFeed} from "@rheo-fm/src/oracle/IPriceFeed.sol";
+import {IOracle} from "@rheo-fm/src/oracle/adapters/morpho/IOracle.sol";
 
 /// @title MorphoPriceFeedV2
-/// @custom:security-contact security@size.credit
-/// @author Size (https://size.credit/)
+/// @custom:security-contact security@rheo.xyz
+/// @author Rheo (https://rheo.xyz/)
 /// @notice This contract returns the price of 1 `baseToken` in terms of `quoteToken` scaled to `decimals` using a Morpho oracle
 contract MorphoPriceFeedV2 is IPriceFeed {
     /* solhint-disable */

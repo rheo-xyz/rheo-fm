@@ -3,22 +3,22 @@ pragma solidity 0.8.23;
 
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
-import {BaseScript} from "@script/BaseScript.sol";
-import {SizeFactory} from "@src/factory/SizeFactory.sol";
-import {ISize} from "@src/market/interfaces/ISize.sol";
+import {BaseScript} from "@rheo-fm/script/BaseScript.sol";
+import {RheoFactory} from "@rheo-fm/src/factory/RheoFactory.sol";
+import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
 
-import {Contract, Networks} from "@script/Networks.sol";
+import {Contract, Networks} from "@rheo-fm/script/Networks.sol";
 
 import {console} from "forge-std/console.sol";
 
 import {Safe} from "@safe-utils/Safe.sol";
 
-contract ProposeSafeTxUpgradeSizeFactoryRemoveMarketScript is BaseScript, Networks {
+contract ProposeSafeTxUpgradeRheoFactoryRemoveMarketScript is BaseScript, Networks {
     using Safe for *;
 
     address signer;
     string derivationPath;
-    SizeFactory private sizeFactory;
+    RheoFactory private sizeFactory;
 
     modifier parseEnv() {
         safe.initialize(vm.envAddress("OWNER"));
@@ -29,11 +29,11 @@ contract ProposeSafeTxUpgradeSizeFactoryRemoveMarketScript is BaseScript, Networ
     }
 
     function run() public parseEnv {
-        console.log("ProposeSafeTxUpgradeSizeFactoryRemoveMarketScript");
+        console.log("ProposeSafeTxUpgradeRheoFactoryRemoveMarketScript");
 
         vm.startBroadcast();
 
-        (address[] memory targets, bytes[] memory datas) = getUpgradeSizeFactoryData();
+        (address[] memory targets, bytes[] memory datas) = getUpgradeRheoFactoryData();
 
         vm.stopBroadcast();
 
@@ -43,23 +43,23 @@ contract ProposeSafeTxUpgradeSizeFactoryRemoveMarketScript is BaseScript, Networ
         }
         safe.proposeTransactions(targets, datas, signer, derivationPath);
 
-        console.log("ProposeSafeTxUpgradeSizeFactoryRemoveMarketScript: done");
+        console.log("ProposeSafeTxUpgradeRheoFactoryRemoveMarketScript: done");
     }
 
-    function getUpgradeSizeFactoryData() public returns (address[] memory targets, bytes[] memory datas) {
-        sizeFactory = SizeFactory(contracts[block.chainid][Contract.SIZE_FACTORY]);
+    function getUpgradeRheoFactoryData() public returns (address[] memory targets, bytes[] memory datas) {
+        sizeFactory = RheoFactory(contracts[block.chainid][Contract.RHEO_FACTORY]);
 
         // Find all paused markets
-        ISize[] memory pausedMarkets = _getPausedMarkets();
+        IRheo[] memory pausedMarkets = _getPausedMarkets();
         console.log("Found paused markets:", pausedMarkets.length);
         for (uint256 i = 0; i < pausedMarkets.length; i++) {
             console.log("  Paused market:", address(pausedMarkets[i]));
         }
 
-        SizeFactory newSizeFactoryImplementation = new SizeFactory();
+        RheoFactory newRheoFactoryImplementation = new RheoFactory();
         console.log(
-            "ProposeSafeTxUpgradeSizeFactoryRemoveMarketScript: newSizeFactoryImplementation",
-            address(newSizeFactoryImplementation)
+            "ProposeSafeTxUpgradeRheoFactoryRemoveMarketScript: newRheoFactoryImplementation",
+            address(newRheoFactoryImplementation)
         );
 
         // 1 upgrade + N removeMarket calls
@@ -69,18 +69,18 @@ contract ProposeSafeTxUpgradeSizeFactoryRemoveMarketScript is BaseScript, Networ
 
         // First call: upgrade the factory
         targets[0] = address(sizeFactory);
-        datas[0] = abi.encodeCall(UUPSUpgradeable.upgradeToAndCall, (address(newSizeFactoryImplementation), ""));
+        datas[0] = abi.encodeCall(UUPSUpgradeable.upgradeToAndCall, (address(newRheoFactoryImplementation), ""));
 
         // Subsequent calls: remove each paused market
         for (uint256 i = 0; i < pausedMarkets.length; i++) {
             targets[i + 1] = address(sizeFactory);
-            datas[i + 1] = abi.encodeCall(SizeFactory.removeMarket, (address(pausedMarkets[i])));
+            datas[i + 1] = abi.encodeCall(RheoFactory.removeMarket, (address(pausedMarkets[i])));
         }
     }
 
-    function _getPausedMarkets() internal view returns (ISize[] memory pausedMarkets) {
-        ISize[] memory allMarkets = sizeFactory.getMarkets();
-        pausedMarkets = new ISize[](allMarkets.length);
+    function _getPausedMarkets() internal view returns (IRheo[] memory pausedMarkets) {
+        IRheo[] memory allMarkets = sizeFactory.getMarkets();
+        pausedMarkets = new IRheo[](allMarkets.length);
         uint256 pausedCount = 0;
 
         for (uint256 i = 0; i < allMarkets.length; i++) {

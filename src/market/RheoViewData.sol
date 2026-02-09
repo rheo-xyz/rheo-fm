@@ -4,10 +4,10 @@ pragma solidity 0.8.23;
 import {IPool} from "@aave/interfaces/IPool.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
-import {User} from "@src/market/SizeStorage.sol";
+import {User} from "@rheo-fm/src/market/RheoStorage.sol";
 
-import {NonTransferrableRebasingTokenVault} from "@src/market/token/NonTransferrableRebasingTokenVault.sol";
-import {NonTransferrableToken} from "@src/market/token/NonTransferrableToken.sol";
+import {NonTransferrableRebasingTokenVault} from "@rheo-fm/src/market/token/NonTransferrableRebasingTokenVault.sol";
+import {NonTransferrableToken} from "@rheo-fm/src/market/token/NonTransferrableToken.sol";
 
 struct UserView {
     // The user struct

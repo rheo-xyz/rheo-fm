@@ -3,7 +3,7 @@ pragma solidity >=0.5.0;
 
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
-import {IOracle} from "@src/oracle/adapters/morpho/IOracle.sol";
+import {IOracle} from "@rheo-fm/src/oracle/adapters/morpho/IOracle.sol";
 
 /// @title IMorphoChainlinkOracleV2
 /// @author Morpho Labs

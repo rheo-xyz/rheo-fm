@@ -1,10 +1,10 @@
 @openzeppelin/contracts=lib/openzeppelin-contracts/contracts
 @openzeppelin/contracts-upgradeable=lib/openzeppelin-contracts-upgradeable/contracts
 @chainlink=lib/chainlink
-@src=src
-@test=test
-@deprecated=deprecated
-@script=script
+@rheo-fm/src/=src/
+@rheo-fm/test/=test/
+@rheo-fm/deprecated/=deprecated/
+@rheo-fm/script/=script/
 @solady=lib/solady
 @chimera=lib/chimera/src
 @crytic/properties=lib/properties

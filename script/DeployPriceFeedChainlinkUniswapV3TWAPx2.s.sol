@@ -4,17 +4,17 @@ pragma solidity 0.8.23;
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
-import {SizeFactory} from "@src/factory/SizeFactory.sol";
+import {RheoFactory} from "@rheo-fm/src/factory/RheoFactory.sol";
 import {console2 as console} from "forge-std/Script.sol";
 
-import {BaseScript, Deployment, Parameter} from "@script/BaseScript.sol";
-import {Deploy} from "@script/Deploy.sol";
-import {NetworkConfiguration, Networks} from "@script/Networks.sol";
+import {BaseScript, Deployment, Parameter} from "@rheo-fm/script/BaseScript.sol";
+import {Deploy} from "@rheo-fm/script/Deploy.sol";
+import {NetworkConfiguration, Networks} from "@rheo-fm/script/Networks.sol";
 
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
-import {PriceFeedParams} from "@src/oracle/v1.5.1/PriceFeed.sol";
-import {PriceFeedChainlinkUniswapV3TWAPx2} from "@src/oracle/v1.5.2/PriceFeedChainlinkUniswapV3TWAPx2.sol";
+import {PriceFeedParams} from "@rheo-fm/src/oracle/v1.5.1/PriceFeed.sol";
+import {PriceFeedChainlinkUniswapV3TWAPx2} from "@rheo-fm/src/oracle/v1.5.2/PriceFeedChainlinkUniswapV3TWAPx2.sol";
 
 contract DeployPriceFeedChainlinkUniswapV3TWAPx2Script is BaseScript, Networks, Deploy {
     address deployer;

@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {MarketShutdownParams} from "@src/market/libraries/actions/MarketShutdown.sol";
-import {UpdateConfigParams} from "@src/market/libraries/actions/UpdateConfig.sol";
+import {MarketShutdownParams} from "@rheo-fm/src/market/libraries/actions/MarketShutdown.sol";
+import {UpdateConfigParams} from "@rheo-fm/src/market/libraries/actions/UpdateConfig.sol";
 
-/// @title ISizeAdmin
-/// @custom:security-contact security@size.credit
-/// @author Size (https://size.credit/)
+/// @title IRheoAdmin
+/// @custom:security-contact security@rheo.xyz
+/// @author Rheo (https://rheo.xyz/)
 /// @notice The interface for admin acitons
-interface ISizeAdmin {
+interface IRheoAdmin {
     /// @notice Updates the configuration of the protocol
     ///         Only callable by the DEFAULT_ADMIN_ROLE
     /// @dev For `address` parameters, the `value` is converted to `uint160` and then to `address`

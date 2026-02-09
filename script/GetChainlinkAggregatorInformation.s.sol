@@ -6,9 +6,9 @@ import {console} from "forge-std/Script.sol";
 
 import {Vm} from "forge-std/Vm.sol";
 
-import {BaseScript} from "@script/BaseScript.sol";
-import {Deploy} from "@script/Deploy.sol";
-import {Networks} from "@script/Networks.sol";
+import {BaseScript} from "@rheo-fm/script/BaseScript.sol";
+import {Deploy} from "@rheo-fm/script/Deploy.sol";
+import {Networks} from "@rheo-fm/script/Networks.sol";
 
 contract GetChainlinkAggregatorInformationScript is BaseScript, Networks, Deploy {
     EnumerableMap.AddressToUintMap addresses;
@@ -26,12 +26,12 @@ contract GetChainlinkAggregatorInformationScript is BaseScript, Networks, Deploy
 
         uint256 toBlock = vm.getBlockNumber();
         uint256 fromBlock = deploymentBlock;
-        uint256 batchSize = 100_000;
+        uint256 batchRheo = 100_000;
 
         Vm.EthGetLogs[] memory logs;
 
         while (fromBlock < toBlock) {
-            uint256 endBlock = (fromBlock + batchSize > toBlock) ? toBlock : fromBlock + batchSize;
+            uint256 endBlock = (fromBlock + batchRheo > toBlock) ? toBlock : fromBlock + batchRheo;
 
             logs = vm.eth_getLogs(fromBlock, endBlock, aggregator, topics);
 

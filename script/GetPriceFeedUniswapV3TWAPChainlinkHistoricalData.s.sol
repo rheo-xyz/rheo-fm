@@ -4,19 +4,19 @@ pragma solidity 0.8.23;
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
-import {SizeFactory} from "@src/factory/SizeFactory.sol";
+import {RheoFactory} from "@rheo-fm/src/factory/RheoFactory.sol";
 import {console2 as console} from "forge-std/Script.sol";
 
-import {BaseScript, Deployment, Parameter} from "@script/BaseScript.sol";
-import {Deploy} from "@script/Deploy.sol";
-import {NetworkConfiguration, Networks} from "@script/Networks.sol";
+import {BaseScript, Deployment, Parameter} from "@rheo-fm/script/BaseScript.sol";
+import {Deploy} from "@rheo-fm/script/Deploy.sol";
+import {NetworkConfiguration, Networks} from "@rheo-fm/script/Networks.sol";
 
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
-import {PriceFeed, PriceFeedParams} from "@src/oracle/v1.5.1/PriceFeed.sol";
+import {PriceFeed, PriceFeedParams} from "@rheo-fm/src/oracle/v1.5.1/PriceFeed.sol";
 
-import {UniswapV3PriceFeed} from "@src/oracle/adapters/UniswapV3PriceFeed.sol";
-import {PriceFeedUniswapV3TWAPChainlink} from "@src/oracle/v1.5.2/PriceFeedUniswapV3TWAPChainlink.sol";
+import {UniswapV3PriceFeed} from "@rheo-fm/src/oracle/adapters/UniswapV3PriceFeed.sol";
+import {PriceFeedUniswapV3TWAPChainlink} from "@rheo-fm/src/oracle/v1.5.2/PriceFeedUniswapV3TWAPChainlink.sol";
 
 contract GetPriceFeedUniswapV3TWAPChainlinkHistoricalDataScript is BaseScript, Networks, Deploy {
     function setUp() public {}

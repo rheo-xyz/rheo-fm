@@ -2,19 +2,19 @@
 pragma solidity 0.8.23;
 
 import {IAToken} from "@aave/interfaces/IAToken.sol";
-import {UserView} from "@src/market/SizeView.sol";
-import {ISize} from "@src/market/interfaces/ISize.sol";
-import {Errors} from "@src/market/libraries/Errors.sol";
+import {UserView} from "@rheo-fm/src/market/RheoView.sol";
+import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
 
-import {CreditPosition, RESERVED_ID} from "@src/market/libraries/LoanLibrary.sol";
+import {CreditPosition, RESERVED_ID} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
 import {
     SetUserConfigurationOnBehalfOfParams,
     SetUserConfigurationParams
-} from "@src/market/libraries/actions/SetUserConfiguration.sol";
+} from "@rheo-fm/src/market/libraries/actions/SetUserConfiguration.sol";
 
-import {Action, Authorization} from "@src/factory/libraries/Authorization.sol";
-import {BaseTest} from "@test/BaseTest.sol";
-import {FixedMaturityLimitOrderHelper} from "@test/helpers/libraries/FixedMaturityLimitOrderHelper.sol";
+import {Action, Authorization} from "@rheo-fm/src/factory/libraries/Authorization.sol";
+import {BaseTest} from "@rheo-fm/test/BaseTest.sol";
+import {FixedMaturityLimitOrderHelper} from "@rheo-fm/test/helpers/libraries/FixedMaturityLimitOrderHelper.sol";
 
 contract AuthorizationSetUserConfigurationTest is BaseTest {
     function test_AuthorizationSetUserConfiguration_setUserConfigurationOnBehalfOf() public {

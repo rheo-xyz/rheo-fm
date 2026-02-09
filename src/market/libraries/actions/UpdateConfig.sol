@@ -4,21 +4,21 @@ pragma solidity 0.8.23;
 import {Arrays} from "@openzeppelin/contracts/utils/Arrays.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import {State} from "@src/market/SizeStorage.sol";
-import {Errors} from "@src/market/libraries/Errors.sol";
-import {Events} from "@src/market/libraries/Events.sol";
+import {State} from "@rheo-fm/src/market/RheoStorage.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
+import {Events} from "@rheo-fm/src/market/libraries/Events.sol";
 
-import {Math, PERCENT, YEAR} from "@src/market/libraries/Math.sol";
-import {Initialize} from "@src/market/libraries/actions/Initialize.sol";
+import {Math, PERCENT, YEAR} from "@rheo-fm/src/market/libraries/Math.sol";
+import {Initialize} from "@rheo-fm/src/market/libraries/actions/Initialize.sol";
 
-import {IPriceFeed} from "@src/oracle/IPriceFeed.sol";
+import {IPriceFeed} from "@rheo-fm/src/oracle/IPriceFeed.sol";
 
 import {
     InitializeDataParams,
     InitializeFeeConfigParams,
     InitializeOracleParams,
     InitializeRiskConfigParams
-} from "@src/market/libraries/actions/Initialize.sol";
+} from "@rheo-fm/src/market/libraries/actions/Initialize.sol";
 
 struct UpdateConfigParams {
     // The key of the configuration parameter to update
@@ -29,8 +29,8 @@ struct UpdateConfigParams {
 }
 
 /// @title UpdateConfig
-/// @custom:security-contact security@size.credit
-/// @author Size (https://size.credit/)
+/// @custom:security-contact security@rheo.xyz
+/// @author Rheo (https://rheo.xyz/)
 /// @notice Contains the logic to update the configuration of the protocol
 /// @dev The input validation is performed using the Initialize library
 ///      A `key` string is used to identify the configuration parameter to update and a `value` uint256 is used to set the new value

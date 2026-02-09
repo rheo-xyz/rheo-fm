@@ -6,52 +6,52 @@ import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IER
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import {ISize} from "@src/market/interfaces/ISize.sol";
-import {Math, PERCENT} from "@src/market/libraries/Math.sol";
-import {PriceFeed} from "@src/oracle/v1.5.1/PriceFeed.sol";
+import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
+import {Math, PERCENT} from "@rheo-fm/src/market/libraries/Math.sol";
+import {PriceFeed} from "@rheo-fm/src/oracle/v1.5.1/PriceFeed.sol";
 
-import {ISizeFactoryOffchainGetters} from "@src/factory/interfaces/ISizeFactoryOffchainGetters.sol";
-import {IPriceFeedV1_5_2} from "@src/oracle/v1.5.2/IPriceFeedV1_5_2.sol";
+import {IRheoFactoryOffchainGetters} from "@rheo-fm/src/factory/interfaces/IRheoFactoryOffchainGetters.sol";
+import {IPriceFeedV1_5_2} from "@rheo-fm/src/oracle/v1.5.2/IPriceFeedV1_5_2.sol";
 
-import {SizeFactoryStorage} from "@src/factory/SizeFactoryStorage.sol";
-import {ActionsBitmap, Authorization} from "@src/factory/libraries/Authorization.sol";
+import {RheoFactoryStorage} from "@rheo-fm/src/factory/RheoFactoryStorage.sol";
+import {ActionsBitmap, Authorization} from "@rheo-fm/src/factory/libraries/Authorization.sol";
 
-import {VERSION} from "@src/market/interfaces/ISize.sol";
+import {VERSION} from "@rheo-fm/src/market/interfaces/IRheo.sol";
 
-/// @title SizeFactoryOffchainGetters
-/// @custom:security-contact security@size.credit
-/// @author Size (https://size.credit/)
-/// @notice See the documentation in {ISizeFactory}.
-abstract contract SizeFactoryOffchainGetters is ISizeFactoryOffchainGetters, SizeFactoryStorage {
+/// @title RheoFactoryOffchainGetters
+/// @custom:security-contact security@rheo.xyz
+/// @author Rheo (https://rheo.xyz/)
+/// @notice See the documentation in {IRheoFactory}.
+abstract contract RheoFactoryOffchainGetters is IRheoFactoryOffchainGetters, RheoFactoryStorage {
     using EnumerableSet for EnumerableSet.AddressSet;
 
-    /// @inheritdoc ISizeFactoryOffchainGetters
-    function getMarket(uint256 index) external view returns (ISize) {
-        return ISize(markets.at(index));
+    /// @inheritdoc IRheoFactoryOffchainGetters
+    function getMarket(uint256 index) external view returns (IRheo) {
+        return IRheo(markets.at(index));
     }
 
-    /// @inheritdoc ISizeFactoryOffchainGetters
+    /// @inheritdoc IRheoFactoryOffchainGetters
     function getMarketsCount() external view returns (uint256) {
         return markets.length();
     }
 
-    /// @inheritdoc ISizeFactoryOffchainGetters
-    function getMarkets() external view returns (ISize[] memory _markets) {
-        _markets = new ISize[](markets.length());
+    /// @inheritdoc IRheoFactoryOffchainGetters
+    function getMarkets() external view returns (IRheo[] memory _markets) {
+        _markets = new IRheo[](markets.length());
         for (uint256 i = 0; i < _markets.length; i++) {
-            _markets[i] = ISize(markets.at(i));
+            _markets[i] = IRheo(markets.at(i));
         }
     }
 
-    /// @inheritdoc ISizeFactoryOffchainGetters
+    /// @inheritdoc IRheoFactoryOffchainGetters
     function getMarketDescriptions() external view returns (string[] memory descriptions) {
         descriptions = new string[](markets.length());
         // slither-disable-start calls-loop
         for (uint256 i = 0; i < descriptions.length; i++) {
-            ISize size = ISize(markets.at(i));
+            IRheo size = IRheo(markets.at(i));
             uint256 crLiquidationPercent = Math.mulDivDown(100, size.riskConfig().crLiquidation, PERCENT);
             descriptions[i] = string.concat(
-                "Size | ",
+                "Rheo | ",
                 size.data().underlyingCollateralToken.symbol(),
                 " | ",
                 size.data().underlyingBorrowToken.symbol(),
@@ -64,7 +64,7 @@ abstract contract SizeFactoryOffchainGetters is ISizeFactoryOffchainGetters, Siz
         // slither-disable-end calls-loop
     }
 
-    /// @inheritdoc ISizeFactoryOffchainGetters
+    /// @inheritdoc IRheoFactoryOffchainGetters
     function isAuthorizedAll(address operator, address onBehalfOf, ActionsBitmap actionsBitmap)
         external
         view
@@ -80,7 +80,7 @@ abstract contract SizeFactoryOffchainGetters is ISizeFactoryOffchainGetters, Siz
         }
     }
 
-    /// @inheritdoc ISizeFactoryOffchainGetters
+    /// @inheritdoc IRheoFactoryOffchainGetters
     function version() external pure returns (string memory) {
         return VERSION;
     }

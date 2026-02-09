@@ -1,39 +1,39 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {Contract, Networks} from "@script/Networks.sol";
-import {ForkTest} from "@test/fork/ForkTest.sol";
+import {Contract, Networks} from "@rheo-fm/script/Networks.sol";
+import {ForkTest} from "@rheo-fm/test/fork/ForkTest.sol";
 import {console} from "forge-std/console.sol";
 
-import {SizeMock} from "@test/mocks/SizeMock.sol";
-import {USDC} from "@test/mocks/USDC.sol";
-import {WETH} from "@test/mocks/WETH.sol";
+import {RheoMock} from "@rheo-fm/test/mocks/RheoMock.sol";
+import {USDC} from "@rheo-fm/test/mocks/USDC.sol";
+import {WETH} from "@rheo-fm/test/mocks/WETH.sol";
 
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
-import {IERC4626Morpho} from "@test/fork/v1.8/interfaces/IERC4626Morpho.sol";
+import {IERC4626Morpho} from "@rheo-fm/test/fork/v1.8/interfaces/IERC4626Morpho.sol";
 
-import {Errors} from "@src/market/libraries/Errors.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
 
 import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
-import {SizeFactory} from "@src/factory/SizeFactory.sol";
-import {Size} from "@src/market/Size.sol";
-import {ISize} from "@src/market/interfaces/ISize.sol";
+import {RheoFactory} from "@rheo-fm/src/factory/RheoFactory.sol";
+import {Rheo} from "@rheo-fm/src/market/Rheo.sol";
+import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
 
 import {
     SellCreditMarketOnBehalfOfParams,
     SellCreditMarketParams
-} from "@src/market/libraries/actions/SellCreditMarket.sol";
+} from "@rheo-fm/src/market/libraries/actions/SellCreditMarket.sol";
 
-import {ICollectionsManagerView} from "@src/collections/interfaces/ICollectionsManagerView.sol";
-import {RESERVED_ID} from "@src/market/libraries/LoanLibrary.sol";
+import {ICollectionsManagerView} from "@rheo-fm/src/collections/interfaces/ICollectionsManagerView.sol";
+import {RESERVED_ID} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
 
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
-import {ProposeSafeTxUpgradeToV1_8_1Script} from "@script/ProposeSafeTxUpgradeToV1_8_1.s.sol";
-import {CopyLimitOrderConfig} from "@src/market/libraries/OfferLibrary.sol";
+import {ProposeSafeTxUpgradeToV1_8_1Script} from "@rheo-fm/script/ProposeSafeTxUpgradeToV1_8_1.s.sol";
+import {CopyLimitOrderConfig} from "@rheo-fm/src/market/libraries/OfferLibrary.sol";
 
 contract ForkCollectionsTest is ForkTest, Networks {
     address[] users;
-    ISize[] collectionMarkets;
+    IRheo[] collectionMarkets;
     address curator;
     address rateProvider;
 
@@ -47,12 +47,12 @@ contract ForkCollectionsTest is ForkTest, Networks {
         // 2025-10-21 14h10 UTC
         vm.rollFork(37133235);
 
-        sizeFactory = importSizeFactory("base-production-size-factory");
-        size = SizeMock(address(sizeFactory.getMarket(0)));
+        sizeFactory = importRheoFactory("base-production-rheo-factory");
+        size = RheoMock(address(sizeFactory.getMarket(0)));
         usdc = USDC(address(size.data().underlyingBorrowToken));
         weth = WETH(payable(address(size.data().underlyingCollateralToken)));
         variablePool = size.data().variablePool;
-        owner = Networks.contracts[block.chainid][Contract.SIZE_GOVERNANCE];
+        owner = Networks.contracts[block.chainid][Contract.RHEO_GOVERNANCE];
 
         users = new address[](2);
         users[0] = 0x87CDad83a779D785A729a91dBb9FE0DB8be14b3b;

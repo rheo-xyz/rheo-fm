@@ -9,30 +9,30 @@ import {WadRayMath} from "@aave/protocol/libraries/math/WadRayMath.sol";
 
 import {ERC4626Mock as ERC4626OpenZeppelin} from "@openzeppelin/contracts/mocks/token/ERC4626Mock.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
-import {Deploy} from "@script/Deploy.sol";
+import {Deploy} from "@rheo-fm/script/Deploy.sol";
 
 import {MockERC4626 as ERC4626Solmate} from "@solmate/src/test/utils/mocks/MockERC4626.sol";
 import {ERC20 as ERC20Solmate} from "@solmate/src/tokens/ERC20.sol";
 
-import {ISizeFactory} from "@src/factory/interfaces/ISizeFactory.sol";
+import {IRheoFactory} from "@rheo-fm/src/factory/interfaces/IRheoFactory.sol";
 import {
     AAVE_ADAPTER_ID,
     DEFAULT_VAULT,
     ERC4626_ADAPTER_ID
-} from "@src/market/token/NonTransferrableRebasingTokenVault.sol";
-import {NonTransferrableRebasingTokenVault} from "@src/market/token/NonTransferrableRebasingTokenVault.sol";
-import {AaveAdapter} from "@src/market/token/adapters/AaveAdapter.sol";
-import {ERC4626Adapter} from "@src/market/token/adapters/ERC4626Adapter.sol";
+} from "@rheo-fm/src/market/token/NonTransferrableRebasingTokenVault.sol";
+import {NonTransferrableRebasingTokenVault} from "@rheo-fm/src/market/token/NonTransferrableRebasingTokenVault.sol";
+import {AaveAdapter} from "@rheo-fm/src/market/token/adapters/AaveAdapter.sol";
+import {ERC4626Adapter} from "@rheo-fm/src/market/token/adapters/ERC4626Adapter.sol";
 
 import {HalmosNonTransferrableRebasingTokenVaultGhost} from
-    "@test/mocks/HalmosNonTransferrableRebasingTokenVaultGhost.sol";
-import {PoolMock} from "@test/mocks/PoolMock.sol";
-import {SizeFactoryMock} from "@test/mocks/SizeFactoryMock.sol";
-import {USDC} from "@test/mocks/USDC.sol";
+    "@rheo-fm/test/mocks/HalmosNonTransferrableRebasingTokenVaultGhost.sol";
+import {PoolMock} from "@rheo-fm/test/mocks/PoolMock.sol";
+import {RheoFactoryMock} from "@rheo-fm/test/mocks/RheoFactoryMock.sol";
+import {USDC} from "@rheo-fm/test/mocks/USDC.sol";
 
 import {PropertiesConstants} from "@crytic/properties/contracts/util/PropertiesConstants.sol";
 
-import {PropertiesSpecifications} from "@test/invariants/PropertiesSpecifications.sol";
+import {PropertiesSpecifications} from "@rheo-fm/test/invariants/PropertiesSpecifications.sol";
 
 /// @custom:halmos --early-exit --invariant-depth 4
 contract HalmosVaultsTester is Test, PropertiesConstants, PropertiesSpecifications {
@@ -41,7 +41,7 @@ contract HalmosVaultsTester is Test, PropertiesConstants, PropertiesSpecificatio
     NonTransferrableRebasingTokenVault private token;
     USDC private usdc;
     IPool private variablePool;
-    SizeFactoryMock private sizeFactory;
+    RheoFactoryMock private sizeFactory;
     address private vault;
 
     address[3] private users = [USER1, USER2, USER3];
@@ -51,15 +51,15 @@ contract HalmosVaultsTester is Test, PropertiesConstants, PropertiesSpecificatio
         variablePool = IPool(address(new PoolMock()));
         PoolMock(address(variablePool)).setLiquidityIndex(address(usdc), WadRayMath.RAY);
 
-        sizeFactory = new SizeFactoryMock(address(this));
+        sizeFactory = new RheoFactoryMock(address(this));
 
         token = new HalmosNonTransferrableRebasingTokenVaultGhost();
         token.initialize(
-            ISizeFactory(address(sizeFactory)),
+            IRheoFactory(address(sizeFactory)),
             variablePool,
             usdc,
             address(this),
-            string.concat("Size ", usdc.name(), " Vault"),
+            string.concat("Rheo ", usdc.name(), " Vault"),
             string.concat("sv", usdc.symbol()),
             usdc.decimals()
         );

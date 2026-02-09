@@ -3,14 +3,14 @@ pragma solidity 0.8.23;
 
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import {IWETH} from "@src/market/interfaces/IWETH.sol";
+import {IWETH} from "@rheo-fm/src/market/interfaces/IWETH.sol";
 
-import {State} from "@src/market/SizeStorage.sol";
+import {State} from "@rheo-fm/src/market/RheoStorage.sol";
 
-import {Action} from "@src/factory/libraries/Authorization.sol";
+import {Action} from "@rheo-fm/src/factory/libraries/Authorization.sol";
 
-import {Errors} from "@src/market/libraries/Errors.sol";
-import {Events} from "@src/market/libraries/Events.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
+import {Events} from "@rheo-fm/src/market/libraries/Events.sol";
 
 struct DepositParams {
     // The token to deposit
@@ -29,8 +29,8 @@ struct DepositOnBehalfOfParams {
 }
 
 /// @title Deposit
-/// @custom:security-contact security@size.credit
-/// @author Size (https://size.credit/)
+/// @custom:security-contact security@rheo.xyz
+/// @author Rheo (https://rheo.xyz/)
 /// @notice Contains the logic for depositing tokens into the protocol
 library Deposit {
     using SafeERC20 for IERC20Metadata;

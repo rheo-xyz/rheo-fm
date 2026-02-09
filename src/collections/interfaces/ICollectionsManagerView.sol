@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {ISize} from "@src/market/interfaces/ISize.sol";
-import {CopyLimitOrderConfig} from "@src/market/libraries/OfferLibrary.sol";
+import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
+import {CopyLimitOrderConfig} from "@rheo-fm/src/market/libraries/OfferLibrary.sol";
 
 /// @title ICollectionsManagerView
-/// @custom:security-contact security@size.credit
-/// @author Size (https://size.credit/)
+/// @custom:security-contact security@rheo.xyz
+/// @author Rheo (https://rheo.xyz/)
 interface ICollectionsManagerView {
     /*//////////////////////////////////////////////////////////////
                             ERRORS
@@ -37,13 +37,13 @@ interface ICollectionsManagerView {
     /// @param market The market to check
     /// @return True if the collection contains the market, false otherwise
     /// @dev Should not revert
-    function collectionContainsMarket(uint256 collectionId, ISize market) external view returns (bool);
+    function collectionContainsMarket(uint256 collectionId, IRheo market) external view returns (bool);
 
     /// @notice Get the rate providers for a collection market
     /// @param collectionId The collection ID to get the rate providers for
     /// @param market The market to get the rate providers for
     /// @return The rate providers for the collection market
-    function getCollectionMarketRateProviders(uint256 collectionId, ISize market)
+    function getCollectionMarketRateProviders(uint256 collectionId, IRheo market)
         external
         view
         returns (address[] memory);
@@ -58,7 +58,7 @@ interface ICollectionsManagerView {
     function isCopyingCollectionMarketRateProvider(
         address user,
         uint256 collectionId,
-        ISize market,
+        IRheo market,
         address rateProvider
     ) external view returns (bool);
 
@@ -76,7 +76,7 @@ interface ICollectionsManagerView {
     /// @param maturity The maturity to get the loan offer APR for
     /// @return apr The loan offer APR
     /// @dev If collectionId is RESERVED_ID, selects the user-defined offer
-    function getLoanOfferAPR(address user, uint256 collectionId, ISize market, address rateProvider, uint256 maturity)
+    function getLoanOfferAPR(address user, uint256 collectionId, IRheo market, address rateProvider, uint256 maturity)
         external
         view
         returns (uint256 apr);
@@ -89,7 +89,7 @@ interface ICollectionsManagerView {
     /// @param maturity The maturity to get the borrow offer APR for
     /// @return apr The borrow offer APR
     /// @dev If collectionId is RESERVED_ID, selects the user-defined offer
-    function getBorrowOfferAPR(address user, uint256 collectionId, ISize market, address rateProvider, uint256 maturity)
+    function getBorrowOfferAPR(address user, uint256 collectionId, IRheo market, address rateProvider, uint256 maturity)
         external
         view
         returns (uint256 apr);
@@ -102,7 +102,7 @@ interface ICollectionsManagerView {
     /// @return isLower True if the borrow APR is lower than the loan offer APRs, false otherwise
     /// @dev Perform this check in O(C * R + 1), where C is the number of subscribed collections, R is the number of rate providers, and 1 is for the user-defined APR check
     ///      Users should be aware that subscribing to too many collections / rate providers may result in market order reverts due to gas limits
-    function isBorrowAPRLowerThanLoanOfferAPRs(address user, uint256 borrowAPR, ISize market, uint256 maturity)
+    function isBorrowAPRLowerThanLoanOfferAPRs(address user, uint256 borrowAPR, IRheo market, uint256 maturity)
         external
         view
         returns (bool);
@@ -115,7 +115,7 @@ interface ICollectionsManagerView {
     /// @return isGreater True if the loan APR is greater than the borrow offer APRs, false otherwise
     /// @dev Perform this check in O(C * R + 1), where C is the number of subscribed collections, R is the number of rate providers, and 1 is for the user-defined APR check
     ///      Users should be aware that subscribing to too many collections / rate providers may result in market order reverts due to gas limits
-    function isLoanAPRGreaterThanBorrowOfferAPRs(address user, uint256 loanAPR, ISize market, uint256 maturity)
+    function isLoanAPRGreaterThanBorrowOfferAPRs(address user, uint256 loanAPR, IRheo market, uint256 maturity)
         external
         view
         returns (bool);
@@ -125,7 +125,7 @@ interface ICollectionsManagerView {
     /// @param market The market to get the copy loan offer config for
     /// @return config The copy loan offer config
     /// @dev deprecated in v1.8.1
-    // function getCollectionMarketCopyLoanOfferConfig(uint256 collectionId, ISize market)
+    // function getCollectionMarketCopyLoanOfferConfig(uint256 collectionId, IRheo market)
     //     external
     //     view
     //     returns (CopyLimitOrderConfig memory);
@@ -135,7 +135,7 @@ interface ICollectionsManagerView {
     /// @param market The market to get the copy borrow offer config for
     /// @return config The copy borrow offer config
     // @dev deprecated in v1.8.1
-    // function getCollectionMarketCopyBorrowOfferConfig(uint256 collectionId, ISize market)
+    // function getCollectionMarketCopyBorrowOfferConfig(uint256 collectionId, IRheo market)
     //     external
     //     view
     //     returns (CopyLimitOrderConfig memory);

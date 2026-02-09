@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {ISize} from "@src/market/interfaces/ISize.sol";
-import {Errors} from "@src/market/libraries/Errors.sol";
-import {Events} from "@src/market/libraries/Events.sol";
+import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
+import {Events} from "@rheo-fm/src/market/libraries/Events.sol";
 
 /// @notice User-defined value type for the actions bitmap
 /// @dev Used to avoid creating invalid bitmaps
@@ -32,8 +32,8 @@ enum Action {
 }
 
 /// @title Authorization
-/// @custom:security-contact security@size.credit
-/// @author Size (https://size.credit/)
+/// @custom:security-contact security@rheo.xyz
+/// @author Rheo (https://rheo.xyz/)
 /// @dev This library is used to manage the authorization of actions for an operator account to perform on behalf of the `onBehalfOf` account
 ///      The actions are stored in a bitmap, where each bit represents an action
 library Authorization {

@@ -3,14 +3,14 @@ pragma solidity 0.8.23;
 
 import {console} from "forge-std/Script.sol";
 
-import {BaseScript} from "@script/BaseScript.sol";
-import {Deploy} from "@script/Deploy.sol";
-import {Networks} from "@script/Networks.sol";
+import {BaseScript} from "@rheo-fm/script/BaseScript.sol";
+import {Deploy} from "@rheo-fm/script/Deploy.sol";
+import {Networks} from "@rheo-fm/script/Networks.sol";
 
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
-import {MainnetAddresses} from "@script/MainnetAddresses.s.sol";
-import {PriceFeedChainlinkOnly4xV2} from "@src/oracle/v1.8/PriceFeedChainlinkOnly4xV2.sol";
+import {MainnetAddresses} from "@rheo-fm/script/MainnetAddresses.s.sol";
+import {PriceFeedChainlinkOnly4xV2} from "@rheo-fm/src/oracle/v1.8/PriceFeedChainlinkOnly4xV2.sol";
 
 contract DeployPriceFeedChainlinkOracle4xV2Script is BaseScript, Networks, Deploy, MainnetAddresses {
     function setUp() public {}

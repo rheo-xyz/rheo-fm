@@ -4,10 +4,10 @@ pragma solidity 0.8.23;
 import {BaseSetup} from "@chimera/BaseSetup.sol";
 import "@crytic/properties/contracts/util/Hevm.sol";
 
-import {NonTransferrableRebasingTokenVault} from "@src/market/token/NonTransferrableRebasingTokenVault.sol";
-import {Helper} from "@test/invariants/Helper.sol";
+import {NonTransferrableRebasingTokenVault} from "@rheo-fm/src/market/token/NonTransferrableRebasingTokenVault.sol";
+import {Helper} from "@rheo-fm/test/invariants/Helper.sol";
 
-import {DEFAULT_VAULT, ERC4626_ADAPTER_ID} from "@src/market/token/NonTransferrableRebasingTokenVault.sol";
+import {DEFAULT_VAULT, ERC4626_ADAPTER_ID} from "@rheo-fm/src/market/token/NonTransferrableRebasingTokenVault.sol";
 
 abstract contract SetupLocal is Helper, BaseSetup {
     function setup() internal virtual override {

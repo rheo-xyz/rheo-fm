@@ -4,49 +4,49 @@ pragma solidity 0.8.23;
 import {ERC20Mock} from "@openzeppelin/contracts/mocks/token/ERC20Mock.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
-import {ISizeFactory} from "@src/factory/interfaces/ISizeFactory.sol";
-import {ISizeFactoryV1_7} from "@src/factory/interfaces/ISizeFactoryV1_7.sol";
-import {ISizeFactoryV1_8} from "@src/factory/interfaces/ISizeFactoryV1_8.sol";
-import {Action, Authorization} from "@src/factory/libraries/Authorization.sol";
-import {DataView} from "@src/market/SizeViewData.sol";
-import {ISize} from "@src/market/interfaces/ISize.sol";
-import {ISizeV1_7} from "@src/market/interfaces/v1.7/ISizeV1_7.sol";
-import {ISizeV1_8} from "@src/market/interfaces/v1.8/ISizeV1_8.sol";
+import {IRheoFactory} from "@rheo-fm/src/factory/interfaces/IRheoFactory.sol";
+import {IRheoFactoryV1_7} from "@rheo-fm/src/factory/interfaces/IRheoFactoryV1_7.sol";
+import {IRheoFactoryV1_8} from "@rheo-fm/src/factory/interfaces/IRheoFactoryV1_8.sol";
+import {Action, Authorization} from "@rheo-fm/src/factory/libraries/Authorization.sol";
+import {DataView} from "@rheo-fm/src/market/RheoViewData.sol";
+import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
+import {IRheoV1_7} from "@rheo-fm/src/market/interfaces/v1.7/IRheoV1_7.sol";
+import {IRheoV1_8} from "@rheo-fm/src/market/interfaces/v1.8/IRheoV1_8.sol";
 
-import {Errors} from "@src/market/libraries/Errors.sol";
-import {RESERVED_ID} from "@src/market/libraries/LoanLibrary.sol";
-import {ERC4626_ADAPTER_ID} from "@src/market/token/NonTransferrableRebasingTokenVault.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
+import {RESERVED_ID} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
+import {ERC4626_ADAPTER_ID} from "@rheo-fm/src/market/token/NonTransferrableRebasingTokenVault.sol";
 
-import {CopyLimitOrderConfig} from "@src/market/libraries/OfferLibrary.sol";
+import {CopyLimitOrderConfig} from "@rheo-fm/src/market/libraries/OfferLibrary.sol";
 
-import {DepositOnBehalfOfParams, DepositParams} from "@src/market/libraries/actions/Deposit.sol";
+import {DepositOnBehalfOfParams, DepositParams} from "@rheo-fm/src/market/libraries/actions/Deposit.sol";
 import {
     SetCopyLimitOrderConfigsOnBehalfOfParams,
     SetCopyLimitOrderConfigsParams
-} from "@src/market/libraries/actions/SetCopyLimitOrderConfigs.sol";
+} from "@rheo-fm/src/market/libraries/actions/SetCopyLimitOrderConfigs.sol";
 
 import {
     InitializeDataParams,
     InitializeFeeConfigParams,
     InitializeOracleParams,
     InitializeRiskConfigParams
-} from "@src/market/libraries/actions/Initialize.sol";
+} from "@rheo-fm/src/market/libraries/actions/Initialize.sol";
 import {
     SellCreditMarketOnBehalfOfParams,
     SellCreditMarketParams
-} from "@src/market/libraries/actions/SellCreditMarket.sol";
+} from "@rheo-fm/src/market/libraries/actions/SellCreditMarket.sol";
 import {
     SetUserConfigurationOnBehalfOfParams,
     SetUserConfigurationParams
-} from "@src/market/libraries/actions/SetUserConfiguration.sol";
-import {SetVaultOnBehalfOfParams, SetVaultParams} from "@src/market/libraries/actions/SetVault.sol";
-import {WithdrawOnBehalfOfParams, WithdrawParams} from "@src/market/libraries/actions/Withdraw.sol";
+} from "@rheo-fm/src/market/libraries/actions/SetUserConfiguration.sol";
+import {SetVaultOnBehalfOfParams, SetVaultParams} from "@rheo-fm/src/market/libraries/actions/SetVault.sol";
+import {WithdrawOnBehalfOfParams, WithdrawParams} from "@rheo-fm/src/market/libraries/actions/Withdraw.sol";
 
-import {BaseTest} from "@test/BaseTest.sol";
-import {FixedMaturityLimitOrderHelper} from "@test/helpers/libraries/FixedMaturityLimitOrderHelper.sol";
-import {PriceFeedMock} from "@test/mocks/PriceFeedMock.sol";
+import {BaseTest} from "@rheo-fm/test/BaseTest.sol";
+import {FixedMaturityLimitOrderHelper} from "@rheo-fm/test/helpers/libraries/FixedMaturityLimitOrderHelper.sol";
+import {PriceFeedMock} from "@rheo-fm/test/mocks/PriceFeedMock.sol";
 
-import {SizeMock} from "@test/mocks/SizeMock.sol";
+import {RheoMock} from "@rheo-fm/test/mocks/RheoMock.sol";
 
 contract CallMarketTest is BaseTest {
     CopyLimitOrderConfig fullCopy = CopyLimitOrderConfig({
@@ -59,7 +59,7 @@ contract CallMarketTest is BaseTest {
 
     function setUp() public override {
         super.setUp();
-        _deploySizeMarket2();
+        _deployRheoMarket2();
     }
 
     function test_CallMarket_can_borrow_from_multiple_markets() public {
@@ -91,14 +91,14 @@ contract CallMarketTest is BaseTest {
 
         bytes[] memory datas = new bytes[](7);
         datas[0] = abi.encodeCall(
-            ISizeFactoryV1_7.setAuthorization, (address(sizeFactory), Authorization.getActionsBitmap(actions))
+            IRheoFactoryV1_7.setAuthorization, (address(sizeFactory), Authorization.getActionsBitmap(actions))
         );
         datas[1] = abi.encodeCall(
-            ISizeFactoryV1_8.callMarket,
+            IRheoFactoryV1_8.callMarket,
             (
                 size1,
                 abi.encodeCall(
-                    ISizeV1_7.depositOnBehalfOf,
+                    IRheoV1_7.depositOnBehalfOf,
                     (
                         DepositOnBehalfOfParams({
                             params: DepositParams({token: address(weth), amount: wethAmount, to: bob}),
@@ -109,11 +109,11 @@ contract CallMarketTest is BaseTest {
             )
         );
         datas[2] = abi.encodeCall(
-            ISizeFactoryV1_8.callMarket,
+            IRheoFactoryV1_8.callMarket,
             (
                 size1,
                 abi.encodeCall(
-                    ISizeV1_7.sellCreditMarketOnBehalfOf,
+                    IRheoV1_7.sellCreditMarketOnBehalfOf,
                     (
                         SellCreditMarketOnBehalfOfParams({
                             params: SellCreditMarketParams({
@@ -135,11 +135,11 @@ contract CallMarketTest is BaseTest {
             )
         );
         datas[3] = abi.encodeCall(
-            ISizeFactoryV1_8.callMarket,
+            IRheoFactoryV1_8.callMarket,
             (
                 size2,
                 abi.encodeCall(
-                    ISizeV1_7.depositOnBehalfOf,
+                    IRheoV1_7.depositOnBehalfOf,
                     (
                         DepositOnBehalfOfParams({
                             params: DepositParams({token: address(collateral2), amount: collateral2Amount, to: bob}),
@@ -150,11 +150,11 @@ contract CallMarketTest is BaseTest {
             )
         );
         datas[4] = abi.encodeCall(
-            ISizeFactoryV1_8.callMarket,
+            IRheoFactoryV1_8.callMarket,
             (
                 size2,
                 abi.encodeCall(
-                    ISizeV1_7.sellCreditMarketOnBehalfOf,
+                    IRheoV1_7.sellCreditMarketOnBehalfOf,
                     (
                         SellCreditMarketOnBehalfOfParams({
                             params: SellCreditMarketParams({
@@ -176,11 +176,11 @@ contract CallMarketTest is BaseTest {
             )
         );
         datas[5] = abi.encodeCall(
-            ISizeFactoryV1_8.callMarket,
+            IRheoFactoryV1_8.callMarket,
             (
                 size1,
                 abi.encodeCall(
-                    ISizeV1_7.withdrawOnBehalfOf,
+                    IRheoV1_7.withdrawOnBehalfOf,
                     (
                         WithdrawOnBehalfOfParams({
                             params: WithdrawParams({token: address(usdc), amount: type(uint256).max, to: bob}),
@@ -191,7 +191,7 @@ contract CallMarketTest is BaseTest {
             )
         );
         datas[6] =
-            abi.encodeCall(ISizeFactoryV1_7.setAuthorization, (address(sizeFactory), Authorization.nullActionsBitmap()));
+            abi.encodeCall(IRheoFactoryV1_7.setAuthorization, (address(sizeFactory), Authorization.nullActionsBitmap()));
 
         vm.startPrank(bob);
         sizeFactory.multicall(datas);
@@ -203,8 +203,8 @@ contract CallMarketTest is BaseTest {
         vm.startPrank(bob);
         vm.expectRevert(abi.encodeWithSelector(Errors.INVALID_MARKET.selector, address(alice)));
         sizeFactory.callMarket(
-            ISize(address(alice)),
-            abi.encodeCall(ISize.withdraw, (WithdrawParams({token: address(usdc), amount: 100e6, to: bob})))
+            IRheo(address(alice)),
+            abi.encodeCall(IRheo.withdraw, (WithdrawParams({token: address(usdc), amount: 100e6, to: bob})))
         );
     }
 
@@ -227,15 +227,15 @@ contract CallMarketTest is BaseTest {
 
         bytes[] memory datas = new bytes[](5);
         datas[0] = abi.encodeCall(
-            ISizeFactoryV1_7.setAuthorization,
+            IRheoFactoryV1_7.setAuthorization,
             (address(sizeFactory), Authorization.getActionsBitmap(Action.SET_COPY_LIMIT_ORDER_CONFIGS))
         );
         datas[1] = abi.encodeCall(
-            ISizeFactoryV1_8.callMarket,
+            IRheoFactoryV1_8.callMarket,
             (
                 size1,
                 abi.encodeCall(
-                    ISizeV1_7.setCopyLimitOrderConfigsOnBehalfOf,
+                    IRheoV1_7.setCopyLimitOrderConfigsOnBehalfOf,
                     (
                         SetCopyLimitOrderConfigsOnBehalfOfParams({
                             params: SetCopyLimitOrderConfigsParams({
@@ -249,11 +249,11 @@ contract CallMarketTest is BaseTest {
             )
         );
         datas[2] = abi.encodeCall(
-            ISizeFactoryV1_8.callMarket,
+            IRheoFactoryV1_8.callMarket,
             (
                 size2,
                 abi.encodeCall(
-                    ISizeV1_7.setCopyLimitOrderConfigsOnBehalfOf,
+                    IRheoV1_7.setCopyLimitOrderConfigsOnBehalfOf,
                     (
                         SetCopyLimitOrderConfigsOnBehalfOfParams({
                             params: SetCopyLimitOrderConfigsParams({
@@ -267,8 +267,8 @@ contract CallMarketTest is BaseTest {
             )
         );
         datas[3] =
-            abi.encodeCall(ISizeFactoryV1_7.setAuthorization, (address(sizeFactory), Authorization.nullActionsBitmap()));
-        datas[4] = abi.encodeCall(ISizeFactoryV1_8.subscribeToCollections, (collectionIds));
+            abi.encodeCall(IRheoFactoryV1_7.setAuthorization, (address(sizeFactory), Authorization.nullActionsBitmap()));
+        datas[4] = abi.encodeCall(IRheoFactoryV1_8.subscribeToCollections, (collectionIds));
 
         vm.startPrank(bob);
         sizeFactory.multicall(datas);
@@ -309,14 +309,14 @@ contract CallMarketTest is BaseTest {
 
         bytes[] memory datas = new bytes[](5);
         datas[0] = abi.encodeCall(
-            ISizeFactoryV1_7.setAuthorization, (address(sizeFactory), Authorization.getActionsBitmap(actions))
+            IRheoFactoryV1_7.setAuthorization, (address(sizeFactory), Authorization.getActionsBitmap(actions))
         );
         datas[1] = abi.encodeCall(
-            ISizeFactoryV1_8.callMarket,
+            IRheoFactoryV1_8.callMarket,
             (
                 size1,
                 abi.encodeCall(
-                    ISizeV1_8.setVaultOnBehalfOf,
+                    IRheoV1_8.setVaultOnBehalfOf,
                     (
                         SetVaultOnBehalfOfParams({
                             params: SetVaultParams({vault: address(vaultOpenZeppelin), forfeitOldShares: false}),
@@ -327,11 +327,11 @@ contract CallMarketTest is BaseTest {
             )
         );
         datas[2] = abi.encodeCall(
-            ISizeFactoryV1_8.callMarket,
+            IRheoFactoryV1_8.callMarket,
             (
                 size1,
                 abi.encodeCall(
-                    ISizeV1_7.depositOnBehalfOf,
+                    IRheoV1_7.depositOnBehalfOf,
                     (
                         DepositOnBehalfOfParams({
                             params: DepositParams({token: address(usdc), amount: depositAmount, to: candy}),
@@ -341,9 +341,9 @@ contract CallMarketTest is BaseTest {
                 )
             )
         );
-        datas[3] = abi.encodeCall(ISizeFactoryV1_8.subscribeToCollections, (collectionIds));
+        datas[3] = abi.encodeCall(IRheoFactoryV1_8.subscribeToCollections, (collectionIds));
         datas[4] =
-            abi.encodeCall(ISizeFactoryV1_7.setAuthorization, (address(sizeFactory), Authorization.nullActionsBitmap()));
+            abi.encodeCall(IRheoFactoryV1_7.setAuthorization, (address(sizeFactory), Authorization.nullActionsBitmap()));
 
         vm.prank(candy);
         usdc.approve(address(size1), depositAmount);

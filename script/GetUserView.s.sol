@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {SizeView} from "@src/market/SizeView.sol";
+import {RheoView} from "@rheo-fm/src/market/RheoView.sol";
 
-import {Logger} from "@test/Logger.sol";
+import {Logger} from "@rheo-fm/test/Logger.sol";
 
 import {Script} from "forge-std/Script.sol";
 import {console2 as console} from "forge-std/console2.sol";
@@ -15,7 +15,7 @@ contract GetUserViewScript is Script, Logger {
         address sizeContractAddress = vm.envAddress("SIZE_CONTRACT_ADDRESS");
         address lender = vm.envAddress("LENDER");
 
-        SizeView size = SizeView(sizeContractAddress);
+        RheoView size = RheoView(sizeContractAddress);
 
         vm.startBroadcast();
         _log(size.getUserView(lender));

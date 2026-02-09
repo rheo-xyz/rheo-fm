@@ -4,18 +4,18 @@ pragma solidity 0.8.23;
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
 import {FixedPointMathLib} from "@solady/src/utils/FixedPointMathLib.sol";
-import {Errors} from "@src/market/libraries/Errors.sol";
 
-import {Math, PERCENT} from "@src/market/libraries/Math.sol";
-import {IPriceFeed} from "@src/oracle/IPriceFeed.sol";
+import {Math, PERCENT} from "@rheo-fm/src/market/libraries/Math.sol";
+import {IPriceFeed} from "@rheo-fm/src/oracle/IPriceFeed.sol";
 import {IUniswapV3Pool} from "@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol";
 import {OracleLibrary} from "@uniswap/v3-periphery/contracts/libraries/OracleLibrary.sol";
 import {PoolAddress} from "@uniswap/v3-periphery/contracts/libraries/PoolAddress.sol";
 
 /// @title UniswapV3PriceFeed
-/// @custom:security-contact security@size.credit
-/// @author Size (https://size.credit/)
+/// @custom:security-contact security@rheo.xyz
+/// @author Rheo (https://rheo.xyz/)
 /// @notice This contract returns the price of 1 `baseToken` in terms of `quoteToken` scaled to `decimals` using Uniswap V3 TWAPs
 /// @dev UniswapV3 TWAPs can be manipulated and, as such, this price feed should not be the primary oracle. See https://blog.uniswap.org/uniswap-v3-oracles
 ///      This contract increases the observation cardinality if it is less than the desired (see https://docs.uniswap.org/contracts/v3/reference/core/interfaces/pool/IUniswapV3PoolActions#increaseobservationcardinalitynext)

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {FixedMaturityLimitOrder} from "@src/market/libraries/OfferLibrary.sol";
+import {FixedMaturityLimitOrder} from "@rheo-fm/src/market/libraries/OfferLibrary.sol";
 
 library FixedMaturityLimitOrderHelper {
     function pointOffer(uint256 tenor, uint256 apr) public view returns (FixedMaturityLimitOrder memory) {

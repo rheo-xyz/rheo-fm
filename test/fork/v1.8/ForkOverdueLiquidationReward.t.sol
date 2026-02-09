@@ -4,16 +4,16 @@ pragma solidity 0.8.23;
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
-import {ProposeSafeTxUpgradeToV1_8_3Script} from "@script/ProposeSafeTxUpgradeToV1_8_3.s.sol";
-import {DataView} from "@src/market/SizeViewData.sol";
-import {ISize} from "@src/market/interfaces/ISize.sol";
-import {ISizeView} from "@src/market/interfaces/ISizeView.sol";
-import {Math} from "@src/market/libraries/Math.sol";
-import {InitializeFeeConfigParams} from "@src/market/libraries/actions/Initialize.sol";
-import {LiquidateParams} from "@src/market/libraries/actions/Liquidate.sol";
-import {UpdateConfigParams} from "@src/market/libraries/actions/UpdateConfig.sol";
-import {ForkTest} from "@test/fork/ForkTest.sol";
-import {SizeMock} from "@test/mocks/SizeMock.sol";
+import {ProposeSafeTxUpgradeToV1_8_3Script} from "@rheo-fm/script/ProposeSafeTxUpgradeToV1_8_3.s.sol";
+import {DataView} from "@rheo-fm/src/market/RheoViewData.sol";
+import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
+import {IRheoView} from "@rheo-fm/src/market/interfaces/IRheoView.sol";
+import {Math} from "@rheo-fm/src/market/libraries/Math.sol";
+import {InitializeFeeConfigParams} from "@rheo-fm/src/market/libraries/actions/Initialize.sol";
+import {LiquidateParams} from "@rheo-fm/src/market/libraries/actions/Liquidate.sol";
+import {UpdateConfigParams} from "@rheo-fm/src/market/libraries/actions/UpdateConfig.sol";
+import {ForkTest} from "@rheo-fm/test/fork/ForkTest.sol";
+import {RheoMock} from "@rheo-fm/test/mocks/RheoMock.sol";
 import {console} from "forge-std/console.sol";
 
 contract ForkOverdueLiquidationRewardTest is ForkTest {
@@ -128,9 +128,9 @@ contract ForkOverdueLiquidationRewardTest is ForkTest {
 
         uint256 borrowerPre = collateralTokenLocal.balanceOf(size.getDebtPosition(DEBT_POSITION_ID).borrower);
         uint256 liquidatorPre = collateralTokenLocal.balanceOf(TX_SENDER);
-        uint256 protocolPre = collateralTokenLocal.balanceOf(ISizeView(address(size)).feeConfig().feeRecipient);
+        uint256 protocolPre = collateralTokenLocal.balanceOf(IRheoView(address(size)).feeConfig().feeRecipient);
         uint256 futureValue = size.getDebtPosition(DEBT_POSITION_ID).futureValue;
-        uint256 futureValueCollateral = ISizeView(address(size)).debtTokenAmountToCollateralTokenAmount(futureValue);
+        uint256 futureValueCollateral = IRheoView(address(size)).debtTokenAmountToCollateralTokenAmount(futureValue);
         int256 futureValueUsd = _usdDelta(int256(futureValueCollateral), priceFeed.getPrice());
 
         (
@@ -167,7 +167,7 @@ contract ForkOverdueLiquidationRewardTest is ForkTest {
         vm.warp(TX_TIMESTAMP);
         liquidator = TX_SENDER;
         borrower = size.getDebtPosition(DEBT_POSITION_ID).borrower;
-        feeRecipient = ISizeView(address(size)).feeConfig().feeRecipient;
+        feeRecipient = IRheoView(address(size)).feeConfig().feeRecipient;
 
         // Use direct liquidation to keep the fork deltas deterministic.
         gasUsed = _liquidateDirect(liquidator);
@@ -207,17 +207,17 @@ contract ForkOverdueLiquidationRewardTest is ForkTest {
     function _resetFork() internal {
         vm.createSelectFork("base_archive", TX_BLOCK);
         vm.chainId(8453);
-        ISize isize;
+        IRheo isize;
         (isize, priceFeed, owner) = importDeployments("base-production-weth-usdc");
-        size = SizeMock(address(isize));
-        DataView memory dataView = ISizeView(address(isize)).data();
+        size = RheoMock(address(isize));
+        DataView memory dataView = IRheoView(address(isize)).data();
         collateralTokenLocal = IERC20(address(dataView.collateralToken));
         borrowTokenVaultLocal = IERC20(address(dataView.borrowTokenVault));
         if (size.getDebtPosition(DEBT_POSITION_ID).futureValue == 0) {
             vm.rollFork(TX_BLOCK - 1);
             (isize, priceFeed, owner) = importDeployments("base-production-weth-usdc");
-            size = SizeMock(address(isize));
-            dataView = ISizeView(address(isize)).data();
+            size = RheoMock(address(isize));
+            dataView = IRheoView(address(isize)).data();
             collateralTokenLocal = IERC20(address(dataView.collateralToken));
             borrowTokenVaultLocal = IERC20(address(dataView.borrowTokenVault));
         }

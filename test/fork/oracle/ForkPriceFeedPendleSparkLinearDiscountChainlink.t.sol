@@ -6,18 +6,18 @@ import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/Ag
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
 import {PendleSparkLinearDiscountOracle} from "@pendle/contracts/oracles/internal/PendleSparkLinearDiscountOracle.sol";
-import {ISize} from "@src/market/interfaces/ISize.sol";
-import {Errors} from "@src/market/libraries/Errors.sol";
-import {IPriceFeed} from "@src/oracle/IPriceFeed.sol";
+import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
+import {IPriceFeed} from "@rheo-fm/src/oracle/IPriceFeed.sol";
 import {PriceFeedPendleSparkLinearDiscountChainlink} from
-    "@src/oracle/v1.7.1/PriceFeedPendleSparkLinearDiscountChainlink.sol";
-import {BaseTest} from "@test/BaseTest.sol";
-import {ForkTest} from "@test/fork/ForkTest.sol";
+    "@rheo-fm/src/oracle/v1.7.1/PriceFeedPendleSparkLinearDiscountChainlink.sol";
+import {BaseTest} from "@rheo-fm/test/BaseTest.sol";
+import {ForkTest} from "@rheo-fm/test/fork/ForkTest.sol";
 
 import {Test} from "forge-std/Test.sol";
 import {console} from "forge-std/console.sol";
 
-import {Networks} from "@script/Networks.sol";
+import {Networks} from "@rheo-fm/script/Networks.sol";
 
 contract ForkPriceFeedPendleSparkLinearDiscountChainlinkTest is ForkTest, Networks {
     PriceFeedPendleSparkLinearDiscountChainlink public priceFeedPendleChainlink;

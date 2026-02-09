@@ -11,15 +11,16 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
 import {IERC20Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
-import {Errors} from "@src/market/libraries/Errors.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
 
-import {IAaveAdapter} from "@src/market/token/adapters/IAaveAdapter.sol";
-import {IAdapter} from "@src/market/token/adapters/IAdapter.sol";
+import {IAaveAdapter} from "@rheo-fm/src/market/token/adapters/IAaveAdapter.sol";
+import {IAdapter} from "@rheo-fm/src/market/token/adapters/IAdapter.sol";
 
-import {Math} from "@src/market/libraries/Math.sol";
+import {Math} from "@rheo-fm/src/market/libraries/Math.sol";
 import {
-    DEFAULT_VAULT, NonTransferrableRebasingTokenVault
-} from "@src/market/token/NonTransferrableRebasingTokenVault.sol";
+    DEFAULT_VAULT,
+    NonTransferrableRebasingTokenVault
+} from "@rheo-fm/src/market/token/NonTransferrableRebasingTokenVault.sol";
 
 contract AaveAdapter is Ownable, IAaveAdapter {
     using SafeERC20 for IERC20Metadata;

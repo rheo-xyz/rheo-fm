@@ -6,50 +6,54 @@ import {Properties} from "./Properties.sol";
 
 import "@crytic/properties/contracts/util/Hevm.sol";
 
-import {Math, PERCENT} from "@src/market/libraries/Math.sol";
+import {Math, PERCENT} from "@rheo-fm/src/market/libraries/Math.sol";
 
 import {WadRayMath} from "@aave/protocol/libraries/math/WadRayMath.sol";
-import {PoolMock} from "@test/mocks/PoolMock.sol";
+import {PoolMock} from "@rheo-fm/test/mocks/PoolMock.sol";
 
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
-import {PriceFeedMock} from "@test/mocks/PriceFeedMock.sol";
+import {PriceFeedMock} from "@rheo-fm/test/mocks/PriceFeedMock.sol";
 
-import {FixedMaturityLimitOrder} from "@src/market/libraries/OfferLibrary.sol";
+import {FixedMaturityLimitOrder} from "@rheo-fm/src/market/libraries/OfferLibrary.sol";
 
-import {LoanStatus} from "@src/market/libraries/LoanLibrary.sol";
-import {SellCreditLimitParams} from "@src/market/libraries/actions/SellCreditLimit.sol";
-import {SellCreditMarketParams} from "@src/market/libraries/actions/SellCreditMarket.sol";
+import {LoanStatus} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
+import {SellCreditLimitParams} from "@rheo-fm/src/market/libraries/actions/SellCreditLimit.sol";
+import {SellCreditMarketParams} from "@rheo-fm/src/market/libraries/actions/SellCreditMarket.sol";
 
-import {ClaimParams} from "@src/market/libraries/actions/Claim.sol";
+import {ClaimParams} from "@rheo-fm/src/market/libraries/actions/Claim.sol";
 
-import {CompensateParams} from "@src/market/libraries/actions/Compensate.sol";
+import {CompensateParams} from "@rheo-fm/src/market/libraries/actions/Compensate.sol";
 
-import {BuyCreditLimitParams} from "@src/market/libraries/actions/BuyCreditLimit.sol";
-import {BuyCreditMarketParams} from "@src/market/libraries/actions/BuyCreditMarket.sol";
+import {BuyCreditLimitParams} from "@rheo-fm/src/market/libraries/actions/BuyCreditLimit.sol";
+import {BuyCreditMarketParams} from "@rheo-fm/src/market/libraries/actions/BuyCreditMarket.sol";
 
-import {DepositParams} from "@src/market/libraries/actions/Deposit.sol";
-import {LiquidateParams} from "@src/market/libraries/actions/Liquidate.sol";
+import {DepositParams} from "@rheo-fm/src/market/libraries/actions/Deposit.sol";
+import {LiquidateParams} from "@rheo-fm/src/market/libraries/actions/Liquidate.sol";
 
-import {RepayParams} from "@src/market/libraries/actions/Repay.sol";
-import {SelfLiquidateParams} from "@src/market/libraries/actions/SelfLiquidate.sol";
-import {WithdrawParams} from "@src/market/libraries/actions/Withdraw.sol";
+import {RepayParams} from "@rheo-fm/src/market/libraries/actions/Repay.sol";
+import {SelfLiquidateParams} from "@rheo-fm/src/market/libraries/actions/SelfLiquidate.sol";
+import {WithdrawParams} from "@rheo-fm/src/market/libraries/actions/Withdraw.sol";
 
-import {SetUserConfigurationParams} from "@src/market/libraries/actions/SetUserConfiguration.sol";
+import {SetUserConfigurationParams} from "@rheo-fm/src/market/libraries/actions/SetUserConfiguration.sol";
 
-import {UpdateConfigParams} from "@src/market/libraries/actions/UpdateConfig.sol";
+import {UpdateConfigParams} from "@rheo-fm/src/market/libraries/actions/UpdateConfig.sol";
 
-import {ExpectedErrors} from "@test/invariants/ExpectedErrors.sol";
-import {ITargetFunctions} from "@test/invariants/interfaces/ITargetFunctions.sol";
+import {ExpectedErrors} from "@rheo-fm/test/invariants/ExpectedErrors.sol";
+import {ITargetFunctions} from "@rheo-fm/test/invariants/interfaces/ITargetFunctions.sol";
 
-import {CopyLimitOrderConfig} from "@src/market/libraries/OfferLibrary.sol";
+import {CopyLimitOrderConfig} from "@rheo-fm/src/market/libraries/OfferLibrary.sol";
 
-import {InitializeRiskConfigParams} from "@src/market/libraries/actions/Initialize.sol";
-import {PartialRepayParams} from "@src/market/libraries/actions/PartialRepay.sol";
-import {SetCopyLimitOrderConfigsParams} from "@src/market/libraries/actions/SetCopyLimitOrderConfigs.sol";
-import {SetVaultParams} from "@src/market/libraries/actions/SetVault.sol";
+import {InitializeRiskConfigParams} from "@rheo-fm/src/market/libraries/actions/Initialize.sol";
+import {PartialRepayParams} from "@rheo-fm/src/market/libraries/actions/PartialRepay.sol";
+import {SetCopyLimitOrderConfigsParams} from "@rheo-fm/src/market/libraries/actions/SetCopyLimitOrderConfigs.sol";
+import {SetVaultParams} from "@rheo-fm/src/market/libraries/actions/SetVault.sol";
 
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import {CREDIT_POSITION_ID_START, DEBT_POSITION_ID_START, RESERVED_ID} from "@src/market/libraries/LoanLibrary.sol";
+import {
+    CREDIT_POSITION_ID_START,
+    DEBT_POSITION_ID_START,
+    RESERVED_ID
+} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
 
 abstract contract TargetFunctions is Helper, ExpectedErrors, ITargetFunctions {
     using EnumerableSet for EnumerableSet.AddressSet;

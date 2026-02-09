@@ -5,12 +5,12 @@ import {console2 as console} from "forge-std/Script.sol";
 
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import {BaseScript} from "@script/BaseScript.sol";
-import {Contract, NetworkConfiguration, Networks} from "@script/Networks.sol";
+import {BaseScript} from "@rheo-fm/script/BaseScript.sol";
+import {Contract, NetworkConfiguration, Networks} from "@rheo-fm/script/Networks.sol";
 
-import {ICollectionsManager} from "@src/collections/interfaces/ICollectionsManager.sol";
-import {SizeFactory} from "@src/factory/SizeFactory.sol";
-import {ISize} from "@src/market/interfaces/ISize.sol";
+import {ICollectionsManager} from "@rheo-fm/src/collections/interfaces/ICollectionsManager.sol";
+import {RheoFactory} from "@rheo-fm/src/factory/RheoFactory.sol";
+import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
 
 contract CreateCollectionScript is BaseScript, Networks {
     address curator;
@@ -22,11 +22,11 @@ contract CreateCollectionScript is BaseScript, Networks {
     }
 
     function run() public broadcast {
-        SizeFactory sizeFactory = SizeFactory(contracts[block.chainid][Contract.SIZE_FACTORY]);
+        RheoFactory sizeFactory = RheoFactory(contracts[block.chainid][Contract.RHEO_FACTORY]);
         ICollectionsManager collectionsManager = sizeFactory.collectionsManager();
         uint256 collectionId = collectionsManager.createCollection();
-        ISize[] memory markets = sizeFactory.getMarkets();
-        ISize[] memory unpausedMarkets = new ISize[](markets.length);
+        IRheo[] memory markets = sizeFactory.getMarkets();
+        IRheo[] memory unpausedMarkets = new IRheo[](markets.length);
         uint256 j = 0;
         for (uint256 i = 0; i < markets.length; i++) {
             if (!PausableUpgradeable(address(markets[i])).paused()) {

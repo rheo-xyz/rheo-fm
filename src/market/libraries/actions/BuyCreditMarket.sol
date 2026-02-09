@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {State, User} from "@src/market/SizeStorage.sol";
+import {State, User} from "@rheo-fm/src/market/RheoStorage.sol";
 
-import {Action} from "@src/factory/libraries/Authorization.sol";
-import {AccountingLibrary} from "@src/market/libraries/AccountingLibrary.sol";
-import {Errors} from "@src/market/libraries/Errors.sol";
-import {Events} from "@src/market/libraries/Events.sol";
-import {CreditPosition, DebtPosition, LoanLibrary, RESERVED_ID} from "@src/market/libraries/LoanLibrary.sol";
-import {Math, PERCENT} from "@src/market/libraries/Math.sol";
-import {FixedMaturityLimitOrder, OfferLibrary} from "@src/market/libraries/OfferLibrary.sol";
-import {RiskLibrary} from "@src/market/libraries/RiskLibrary.sol";
+import {Action} from "@rheo-fm/src/factory/libraries/Authorization.sol";
+import {AccountingLibrary} from "@rheo-fm/src/market/libraries/AccountingLibrary.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
+import {Events} from "@rheo-fm/src/market/libraries/Events.sol";
+import {CreditPosition, DebtPosition, LoanLibrary, RESERVED_ID} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
+import {Math, PERCENT} from "@rheo-fm/src/market/libraries/Math.sol";
+import {FixedMaturityLimitOrder, OfferLibrary} from "@rheo-fm/src/market/libraries/OfferLibrary.sol";
+import {RiskLibrary} from "@rheo-fm/src/market/libraries/RiskLibrary.sol";
 
 struct BuyCreditMarketParams {
     // The borrower
@@ -48,8 +48,8 @@ struct BuyCreditMarketOnBehalfOfParams {
 }
 
 /// @title BuyCreditMarket
-/// @custom:security-contact security@size.credit
-/// @author Size (https://size.credit/)
+/// @custom:security-contact security@rheo.xyz
+/// @author Rheo (https://rheo.xyz/)
 /// @notice Contains the logic for buying credit (lending) as a market order
 library BuyCreditMarket {
     using OfferLibrary for FixedMaturityLimitOrder;

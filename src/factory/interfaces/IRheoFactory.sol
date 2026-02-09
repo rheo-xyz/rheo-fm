@@ -8,28 +8,28 @@ import {
     InitializeFeeConfigParams,
     InitializeOracleParams,
     InitializeRiskConfigParams
-} from "@src/market/libraries/actions/Initialize.sol";
+} from "@rheo-fm/src/market/libraries/actions/Initialize.sol";
 
-import {ISize} from "@src/market/interfaces/ISize.sol";
-import {NonTransferrableRebasingTokenVault} from "@src/market/token/NonTransferrableRebasingTokenVault.sol";
+import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
+import {NonTransferrableRebasingTokenVault} from "@rheo-fm/src/market/token/NonTransferrableRebasingTokenVault.sol";
 
-import {PriceFeed, PriceFeedParams} from "@src/oracle/v1.5.1/PriceFeed.sol";
+import {PriceFeed, PriceFeedParams} from "@rheo-fm/src/oracle/v1.5.1/PriceFeed.sol";
 
-import {ISizeFactoryOffchainGetters} from "@src/factory/interfaces/ISizeFactoryOffchainGetters.sol";
-import {ISizeFactoryV1_7} from "@src/factory/interfaces/ISizeFactoryV1_7.sol";
-import {ISizeFactoryV1_8} from "@src/factory/interfaces/ISizeFactoryV1_8.sol";
+import {IRheoFactoryOffchainGetters} from "@rheo-fm/src/factory/interfaces/IRheoFactoryOffchainGetters.sol";
+import {IRheoFactoryV1_7} from "@rheo-fm/src/factory/interfaces/IRheoFactoryV1_7.sol";
+import {IRheoFactoryV1_8} from "@rheo-fm/src/factory/interfaces/IRheoFactoryV1_8.sol";
 
 bytes32 constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
 bytes32 constant DEFAULT_ADMIN_ROLE = 0x00;
 
-/// @title ISizeFactory
-/// @custom:security-contact security@size.credit
-/// @author Size (https://size.credit/)
+/// @title IRheoFactory
+/// @custom:security-contact security@rheo.xyz
+/// @author Rheo (https://rheo.xyz/)
 /// @notice The interface for the size factory
-interface ISizeFactory is ISizeFactoryOffchainGetters, ISizeFactoryV1_7, ISizeFactoryV1_8 {
+interface IRheoFactory is IRheoFactoryOffchainGetters, IRheoFactoryV1_7, IRheoFactoryV1_8 {
     /// @notice Set the size implementation
     /// @param _sizeImplementation The new size implementation
-    function setSizeImplementation(address _sizeImplementation) external;
+    function setRheoImplementation(address _sizeImplementation) external;
 
     /// @notice Set the non-transferrable token vault implementation
     /// @param _nonTransferrableTokenVaultImplementation The new non-transferrable token vault implementation
@@ -43,7 +43,7 @@ interface ISizeFactory is ISizeFactoryOffchainGetters, ISizeFactoryV1_7, ISizeFa
         InitializeRiskConfigParams calldata riskConfigParams,
         InitializeOracleParams calldata oracleParams,
         InitializeDataParams calldata dataParams
-    ) external returns (ISize);
+    ) external returns (IRheo);
 
     /// @notice Creates a new borrow token vault
     /// @dev The contract owner is set as the owner of the borrow token vault

@@ -4,12 +4,12 @@ pragma solidity 0.8.23;
 import {IPool} from "@aave/interfaces/IPool.sol";
 import {SymTest} from "halmos-cheatcodes/SymTest.sol";
 
-import {NonTransferrableScaledTokenV1} from "@deprecated/token/NonTransferrableScaledTokenV1.sol";
-import {NonTransferrableScaledTokenV1_2} from "@deprecated/token/NonTransferrableScaledTokenV1_2.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/interfaces/IERC20Metadata.sol";
+import {NonTransferrableScaledTokenV1} from "@rheo-fm/deprecated/token/NonTransferrableScaledTokenV1.sol";
+import {NonTransferrableScaledTokenV1_2} from "@rheo-fm/deprecated/token/NonTransferrableScaledTokenV1_2.sol";
 
-import {SimplePool} from "@test/local/token/differential/mocks/SimplePool.sol";
-import {USDC} from "@test/mocks/USDC.sol";
+import {SimplePool} from "@rheo-fm/test/local/token/differential/mocks/SimplePool.sol";
+import {USDC} from "@rheo-fm/test/mocks/USDC.sol";
 
 import {Test} from "forge-std/Test.sol";
 

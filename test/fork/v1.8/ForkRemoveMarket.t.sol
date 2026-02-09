@@ -4,27 +4,27 @@ pragma solidity 0.8.23;
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
-import {Contract, Networks} from "@script/Networks.sol";
-import {ProposeSafeTxUpgradeSizeFactoryRemoveMarketScript} from
-    "@script/ProposeSafeTxUpgradeSizeFactoryRemoveMarket.s.sol";
-import {SizeFactory} from "@src/factory/SizeFactory.sol";
-import {ISize} from "@src/market/interfaces/ISize.sol";
-import {ISizeAdmin} from "@src/market/interfaces/ISizeAdmin.sol";
-import {Errors} from "@src/market/libraries/Errors.sol";
-import {DepositParams} from "@src/market/libraries/actions/Deposit.sol";
-import {WithdrawParams} from "@src/market/libraries/actions/Withdraw.sol";
-import {ForkTest} from "@test/fork/ForkTest.sol";
+import {Contract, Networks} from "@rheo-fm/script/Networks.sol";
+import {ProposeSafeTxUpgradeRheoFactoryRemoveMarketScript} from
+    "@rheo-fm/script/ProposeSafeTxUpgradeRheoFactoryRemoveMarket.s.sol";
+import {RheoFactory} from "@rheo-fm/src/factory/RheoFactory.sol";
+import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
+import {IRheoAdmin} from "@rheo-fm/src/market/interfaces/IRheoAdmin.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
+import {DepositParams} from "@rheo-fm/src/market/libraries/actions/Deposit.sol";
+import {WithdrawParams} from "@rheo-fm/src/market/libraries/actions/Withdraw.sol";
+import {ForkTest} from "@rheo-fm/test/fork/ForkTest.sol";
 import {console} from "forge-std/console.sol";
 
 contract ForkRemoveMarketTest is ForkTest, Networks {
-    SizeFactory private factory;
+    RheoFactory private factory;
     address private factoryOwner;
 
     function setUp() public override(ForkTest) {
         vm.createSelectFork("base_archive", 41515430);
 
-        factory = SizeFactory(contracts[BASE_MAINNET][Contract.SIZE_FACTORY]);
-        factoryOwner = contracts[BASE_MAINNET][Contract.SIZE_GOVERNANCE];
+        factory = RheoFactory(contracts[BASE_MAINNET][Contract.RHEO_FACTORY]);
+        factoryOwner = contracts[BASE_MAINNET][Contract.RHEO_GOVERNANCE];
 
         console.log("ForkRemoveMarketTest: factory", address(factory));
         console.log("ForkRemoveMarketTest: factoryOwner", factoryOwner);
@@ -37,7 +37,7 @@ contract ForkRemoveMarketTest is ForkTest, Networks {
         assertTrue(initialMarketsCount > 0, "Should have at least one market");
 
         // Get a non-paused market to remove so the upgrade doesn't remove it.
-        ISize marketToRemove = _findMarket(false);
+        IRheo marketToRemove = _findMarket(false);
         if (address(marketToRemove) == address(0)) {
             console.log("No active market found, skipping test");
             return;
@@ -49,7 +49,7 @@ contract ForkRemoveMarketTest is ForkTest, Networks {
         assertTrue(factory.isMarket(marketAddress), "Market should be registered before removal");
 
         // Perform the upgrade
-        _upgradeSizeFactory();
+        _upgradeRheoFactory();
 
         uint256 postUpgradeMarketsCount = factory.getMarketsCount();
         console.log("Post-upgrade markets count:", postUpgradeMarketsCount);
@@ -74,10 +74,10 @@ contract ForkRemoveMarketTest is ForkTest, Networks {
 
     function testFork_RemoveMarket_reverts_for_non_admin() public {
         // Perform the upgrade
-        _upgradeSizeFactory();
+        _upgradeRheoFactory();
 
         // Get a market to remove
-        ISize marketToRemove = factory.getMarket(0);
+        IRheo marketToRemove = factory.getMarket(0);
         address marketAddress = address(marketToRemove);
 
         // Try to remove market from non-admin account - should revert
@@ -89,7 +89,7 @@ contract ForkRemoveMarketTest is ForkTest, Networks {
 
     function testFork_RemoveMarket_reverts_for_invalid_market() public {
         // Perform the upgrade
-        _upgradeSizeFactory();
+        _upgradeRheoFactory();
 
         // Try to remove a non-existent market - should revert with INVALID_MARKET
         address invalidMarket = address(0xbeef);
@@ -100,7 +100,7 @@ contract ForkRemoveMarketTest is ForkTest, Networks {
 
     function testFork_RemoveMarket_withdraw_from_removed_market_reverts() public {
         // Find a paused market (expired PT market)
-        ISize pausedMarket = _findMarket(true);
+        IRheo pausedMarket = _findMarket(true);
         assertTrue(address(pausedMarket) != address(0), "Paused market should exist");
 
         address marketAddress = address(pausedMarket);
@@ -112,7 +112,7 @@ contract ForkRemoveMarketTest is ForkTest, Networks {
 
         // First, unpause the market temporarily to deposit funds
         vm.prank(factoryOwner);
-        ISizeAdmin(marketAddress).unpause();
+        IRheoAdmin(marketAddress).unpause();
         console.log("Market temporarily unpaused for deposit");
 
         // Deal tokens to test user and deposit into the market
@@ -133,11 +133,11 @@ contract ForkRemoveMarketTest is ForkTest, Networks {
 
         // Now pause the market again (simulating expired PT market state)
         vm.prank(factoryOwner);
-        ISizeAdmin(marketAddress).pause();
+        IRheoAdmin(marketAddress).pause();
         console.log("Market re-paused");
 
         // Upgrade removes paused markets from the factory
-        _upgradeSizeFactory();
+        _upgradeRheoFactory();
         console.log("Factory upgraded (paused markets removed)");
 
         // Verify market is no longer registered
@@ -145,7 +145,7 @@ contract ForkRemoveMarketTest is ForkTest, Networks {
 
         // Unpause the market (this is the scenario: admin unpauases removed market)
         vm.prank(factoryOwner);
-        ISizeAdmin(marketAddress).unpause();
+        IRheoAdmin(marketAddress).unpause();
         console.log("Market unpaused after removal");
 
         // Verify market is unpaused
@@ -163,10 +163,10 @@ contract ForkRemoveMarketTest is ForkTest, Networks {
         console.log("testFork_RemoveMarket_withdraw_from_removed_market_reverts: PASSED");
     }
 
-    function _upgradeSizeFactory() internal {
-        ProposeSafeTxUpgradeSizeFactoryRemoveMarketScript script =
-            new ProposeSafeTxUpgradeSizeFactoryRemoveMarketScript();
-        (address[] memory targets, bytes[] memory datas) = script.getUpgradeSizeFactoryData();
+    function _upgradeRheoFactory() internal {
+        ProposeSafeTxUpgradeRheoFactoryRemoveMarketScript script =
+            new ProposeSafeTxUpgradeRheoFactoryRemoveMarketScript();
+        (address[] memory targets, bytes[] memory datas) = script.getUpgradeRheoFactoryData();
 
         for (uint256 i = 0; i < targets.length; i++) {
             vm.prank(factoryOwner);
@@ -175,14 +175,14 @@ contract ForkRemoveMarketTest is ForkTest, Networks {
         }
     }
 
-    function _findMarket(bool paused) internal view returns (ISize) {
+    function _findMarket(bool paused) internal view returns (IRheo) {
         uint256 marketsCount = factory.getMarketsCount();
         for (uint256 i = 0; i < marketsCount; i++) {
-            ISize market = factory.getMarket(i);
+            IRheo market = factory.getMarket(i);
             if (PausableUpgradeable(address(market)).paused() == paused) {
                 return market;
             }
         }
-        return ISize(address(0));
+        return IRheo(address(0));
     }
 }

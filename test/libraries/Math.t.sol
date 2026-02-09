@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {Math} from "@src/market/libraries/Math.sol";
+import {Math} from "@rheo-fm/src/market/libraries/Math.sol";
 
-import {AssertsHelper} from "@test/helpers/AssertsHelper.sol";
+import {AssertsHelper} from "@rheo-fm/test/helpers/AssertsHelper.sol";
 import {Test} from "forge-std/Test.sol";
 
 contract MathTest is Test, AssertsHelper {

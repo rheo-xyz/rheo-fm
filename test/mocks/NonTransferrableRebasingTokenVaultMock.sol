@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.13;
 
-import {NonTransferrableRebasingTokenVault} from "@src/market/token/NonTransferrableRebasingTokenVault.sol";
+import {NonTransferrableRebasingTokenVault} from "@rheo-fm/src/market/token/NonTransferrableRebasingTokenVault.sol";
 import "halmos-helpers-lib/HalmosHelpers.sol";
 
 contract NonTransferrableRebasingTokenVaultMock is NonTransferrableRebasingTokenVault {

@@ -9,8 +9,8 @@ uint256 constant PERCENT = 1e18;
 uint256 constant YEAR = 365 days;
 
 /// @title Math
-/// @custom:security-contact security@size.credit
-/// @author Size (https://size.credit/)
+/// @custom:security-contact security@rheo.xyz
+/// @author Rheo (https://rheo.xyz/)
 library Math {
     function min(uint256 a, uint256 b) internal pure returns (uint256) {
         return FixedPointMathLib.min(a, b);

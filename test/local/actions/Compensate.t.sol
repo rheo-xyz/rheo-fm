@@ -1,28 +1,29 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {Size} from "@src/market/Size.sol";
+import {Rheo} from "@rheo-fm/src/market/Rheo.sol";
 
-import {FixedMaturityLimitOrder} from "@src/market/libraries/OfferLibrary.sol";
+import {FixedMaturityLimitOrder} from "@rheo-fm/src/market/libraries/OfferLibrary.sol";
 
-import {CREDIT_POSITION_ID_START, RESERVED_ID} from "@src/market/libraries/LoanLibrary.sol";
-import {SellCreditMarketParams} from "@src/market/libraries/actions/SellCreditMarket.sol";
+import {CREDIT_POSITION_ID_START, RESERVED_ID} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
+import {SellCreditMarketParams} from "@rheo-fm/src/market/libraries/actions/SellCreditMarket.sol";
 import {
-    SetUserConfiguration, SetUserConfigurationParams
-} from "@src/market/libraries/actions/SetUserConfiguration.sol";
+    SetUserConfiguration,
+    SetUserConfigurationParams
+} from "@rheo-fm/src/market/libraries/actions/SetUserConfiguration.sol";
 
 import {IERC20Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
-import {Math} from "@src/market/libraries/Math.sol";
-import {BuyCreditMarketParams} from "@src/market/libraries/actions/BuyCreditMarket.sol";
-import {CompensateParams} from "@src/market/libraries/actions/Compensate.sol";
-import {BaseTest} from "@test/BaseTest.sol";
-import {Vars} from "@test/BaseTest.sol";
-import {FixedMaturityLimitOrderHelper} from "@test/helpers/libraries/FixedMaturityLimitOrderHelper.sol";
+import {Math} from "@rheo-fm/src/market/libraries/Math.sol";
+import {BuyCreditMarketParams} from "@rheo-fm/src/market/libraries/actions/BuyCreditMarket.sol";
+import {CompensateParams} from "@rheo-fm/src/market/libraries/actions/Compensate.sol";
+import {BaseTest} from "@rheo-fm/test/BaseTest.sol";
+import {Vars} from "@rheo-fm/test/BaseTest.sol";
+import {FixedMaturityLimitOrderHelper} from "@rheo-fm/test/helpers/libraries/FixedMaturityLimitOrderHelper.sol";
 
-import {Errors} from "@src/market/libraries/Errors.sol";
-import {CreditPosition, DebtPosition, RESERVED_ID} from "@src/market/libraries/LoanLibrary.sol";
-import {BuyCreditLimitParams} from "@src/market/libraries/actions/BuyCreditLimit.sol";
-import {SellCreditLimitParams} from "@src/market/libraries/actions/SellCreditLimit.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
+import {CreditPosition, DebtPosition, RESERVED_ID} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
+import {BuyCreditLimitParams} from "@rheo-fm/src/market/libraries/actions/BuyCreditLimit.sol";
+import {SellCreditLimitParams} from "@rheo-fm/src/market/libraries/actions/SellCreditLimit.sol";
 
 contract CompensateTest is BaseTest {
     function test_Compensate_compensate_reduces_repaid_loan_debt_and_compensated_loan_credit() public {
@@ -136,7 +137,7 @@ contract CompensateTest is BaseTest {
             vm.prank(alice);
             (bool success, bytes memory err) = address(size).call(
                 abi.encodeCall(
-                    Size.compensate,
+                    Rheo.compensate,
                     CompensateParams({
                         creditPositionWithDebtToRepayId: creditPositionId,
                         creditPositionToCompensateId: creditPositionId2,

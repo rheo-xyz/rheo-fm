@@ -4,16 +4,16 @@ pragma solidity 0.8.23;
 import {Ghosts} from "./Ghosts.sol";
 import {EnumerableMap} from "@openzeppelin/contracts/utils/structs/EnumerableMap.sol";
 
-import {Math, PERCENT} from "@src/market/libraries/Math.sol";
+import {Math, PERCENT} from "@rheo-fm/src/market/libraries/Math.sol";
 
-import {PropertiesSpecifications} from "@test/invariants/PropertiesSpecifications.sol";
-import {ITargetFunctions} from "@test/invariants/interfaces/ITargetFunctions.sol";
+import {PropertiesSpecifications} from "@rheo-fm/test/invariants/PropertiesSpecifications.sol";
+import {ITargetFunctions} from "@rheo-fm/test/invariants/interfaces/ITargetFunctions.sol";
 
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
-import {DataView} from "@src/market/SizeViewData.sol";
-import {NonTransferrableRebasingTokenVault} from "@src/market/token/NonTransferrableRebasingTokenVault.sol";
+import {DataView} from "@rheo-fm/src/market/RheoViewData.sol";
+import {NonTransferrableRebasingTokenVault} from "@rheo-fm/src/market/token/NonTransferrableRebasingTokenVault.sol";
 
-import {UserView} from "@src/market/SizeView.sol";
+import {UserView} from "@rheo-fm/src/market/RheoView.sol";
 import {console} from "forge-std/console.sol";
 
 import {
@@ -23,7 +23,7 @@ import {
     DebtPosition,
     LoanLibrary,
     LoanStatus
-} from "@src/market/libraries/LoanLibrary.sol";
+} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
 
 abstract contract Properties is Ghosts, PropertiesSpecifications {
     bool internal success;

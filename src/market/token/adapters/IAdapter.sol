@@ -2,8 +2,8 @@
 pragma solidity 0.8.23;
 
 /// @title IAdapter
-/// @custom:security-contact security@size.credit
-/// @author Size (https://size.credit/)
+/// @custom:security-contact security@rheo.xyz
+/// @author Rheo (https://rheo.xyz/)
 /// @notice Interface for the adapter
 interface IAdapter {
     error InsufficientAssets(address vault, uint256 assets, uint256 amount);

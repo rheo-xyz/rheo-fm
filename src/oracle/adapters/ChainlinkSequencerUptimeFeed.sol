@@ -3,11 +3,11 @@ pragma solidity 0.8.23;
 
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
-import {Errors} from "@src/market/libraries/Errors.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
 
 /// @title ChainlinkSequencerUptimeFeed
-/// @custom:security-contact security@size.credit
-/// @author Size (https://size.credit/)
+/// @custom:security-contact security@rheo.xyz
+/// @author Rheo (https://rheo.xyz/)
 /// @dev See https://docs.chain.link/data-feeds/l2-sequencer-feeds
 ///      The sequencer is down if if `startedAt` is 0 (only on Arbitrum) or if `answer` is 1
 contract ChainlinkSequencerUptimeFeed {

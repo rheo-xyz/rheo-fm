@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {FoundryHandler} from "@test/invariants/foundry/FoundryHandler.sol";
+import {FoundryHandler} from "@rheo-fm/test/invariants/foundry/FoundryHandler.sol";
 
-import {PropertiesSpecifications} from "@test/invariants/PropertiesSpecifications.sol";
+import {PropertiesSpecifications} from "@rheo-fm/test/invariants/PropertiesSpecifications.sol";
 import {Test} from "forge-std/Test.sol";
 
 contract FoundryTester is Test, PropertiesSpecifications {

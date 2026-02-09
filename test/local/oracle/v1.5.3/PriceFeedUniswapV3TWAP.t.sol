@@ -8,9 +8,9 @@ import {MockV3Aggregator} from "@chainlink/contracts/src/v0.8/tests/MockV3Aggreg
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import {IUniswapV3Pool} from "@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol";
 
-import {PriceFeedParams} from "@src/oracle/v1.5.1/PriceFeed.sol";
-import {PriceFeedUniswapV3TWAP} from "@src/oracle/v1.5.3/PriceFeedUniswapV3TWAP.sol";
-import {AssertsHelper} from "@test/helpers/AssertsHelper.sol";
+import {PriceFeedParams} from "@rheo-fm/src/oracle/v1.5.1/PriceFeed.sol";
+import {PriceFeedUniswapV3TWAP} from "@rheo-fm/src/oracle/v1.5.3/PriceFeedUniswapV3TWAP.sol";
+import {AssertsHelper} from "@rheo-fm/test/helpers/AssertsHelper.sol";
 
 contract MockERC20 {
     string public symbol;

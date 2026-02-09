@@ -2,22 +2,22 @@
 pragma solidity 0.8.23;
 
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
-import {Math} from "@src/market/libraries/Math.sol";
+import {Math} from "@rheo-fm/src/market/libraries/Math.sol";
 
-import {IPriceFeed} from "@src/oracle/IPriceFeed.sol";
+import {IPriceFeed} from "@rheo-fm/src/oracle/IPriceFeed.sol";
 
-import {ChainlinkPriceFeed} from "@src/oracle/adapters/ChainlinkPriceFeed.sol";
-import {ChainlinkSequencerUptimeFeed} from "@src/oracle/adapters/ChainlinkSequencerUptimeFeed.sol";
-import {UniswapV3PriceFeed} from "@src/oracle/adapters/UniswapV3PriceFeed.sol";
-import {PriceFeedParams} from "@src/oracle/v1.5.1/PriceFeed.sol";
-import {IPriceFeedV1_5_2} from "@src/oracle/v1.5.2/IPriceFeedV1_5_2.sol";
+import {ChainlinkPriceFeed} from "@rheo-fm/src/oracle/adapters/ChainlinkPriceFeed.sol";
+import {ChainlinkSequencerUptimeFeed} from "@rheo-fm/src/oracle/adapters/ChainlinkSequencerUptimeFeed.sol";
+import {UniswapV3PriceFeed} from "@rheo-fm/src/oracle/adapters/UniswapV3PriceFeed.sol";
+import {PriceFeedParams} from "@rheo-fm/src/oracle/v1.5.1/PriceFeed.sol";
+import {IPriceFeedV1_5_2} from "@rheo-fm/src/oracle/v1.5.2/IPriceFeedV1_5_2.sol";
 
 /// @title PriceFeedChainlinkUniswapV3TWAPx2
-/// @custom:security-contact security@size.credit
-/// @author Size (https://size.credit/)
+/// @custom:security-contact security@rheo.xyz
+/// @author Rheo (https://rheo.xyz/)
 /// @notice A contract that provides the price of a `base` asset in terms of a `quote` asset, scaled to 18 decimals,
 ///           using Chainlink, with fallback using two Uniswap V3 TWAPs
-/// @dev `decimals` must be 18 to comply with Size contracts
+/// @dev `decimals` must be 18 to comply with Rheo contracts
 contract PriceFeedChainlinkUniswapV3TWAPx2 is IPriceFeedV1_5_2 {
     /* solhint-disable */
     uint256 public constant decimals = 18;

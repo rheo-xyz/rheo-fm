@@ -5,17 +5,17 @@ import {IPool} from "@aave/interfaces/IPool.sol";
 
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import {IWETH} from "@src/market/interfaces/IWETH.sol";
+import {IWETH} from "@rheo-fm/src/market/interfaces/IWETH.sol";
 
-import {CreditPosition, DebtPosition} from "@src/market/libraries/LoanLibrary.sol";
-import {CopyLimitOrderConfig, FixedMaturityLimitOrder} from "@src/market/libraries/OfferLibrary.sol";
+import {CreditPosition, DebtPosition} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
+import {CopyLimitOrderConfig, FixedMaturityLimitOrder} from "@rheo-fm/src/market/libraries/OfferLibrary.sol";
 
-import {IPriceFeed} from "@src/oracle/IPriceFeed.sol";
+import {IPriceFeed} from "@rheo-fm/src/oracle/IPriceFeed.sol";
 
-import {NonTransferrableRebasingTokenVault} from "@src/market/token/NonTransferrableRebasingTokenVault.sol";
-import {NonTransferrableToken} from "@src/market/token/NonTransferrableToken.sol";
+import {NonTransferrableRebasingTokenVault} from "@rheo-fm/src/market/token/NonTransferrableRebasingTokenVault.sol";
+import {NonTransferrableToken} from "@rheo-fm/src/market/token/NonTransferrableToken.sol";
 
-import {ISizeFactory} from "@src/factory/interfaces/ISizeFactory.sol";
+import {IRheoFactory} from "@rheo-fm/src/factory/interfaces/IRheoFactory.sol";
 
 struct User {
     // The user's loan offer
@@ -87,18 +87,18 @@ struct Data {
     IERC20Metadata underlyingCollateralToken;
     // the token lent from lenders to borrowers
     IERC20Metadata underlyingBorrowToken;
-    // Size deposit underlying collateral token
+    // Rheo deposit underlying collateral token
     NonTransferrableToken collateralToken;
-    // Size tokenized debt
+    // Rheo tokenized debt
     NonTransferrableToken debtToken;
     // Variable Pool (Aave v3)
     IPool variablePool;
-    // Size deposit underlying borrow token (upgraded in v1.8)
+    // Rheo deposit underlying borrow token (upgraded in v1.8)
     NonTransferrableRebasingTokenVault borrowTokenVault;
     // mapping of copy limit order configs (added in v1.6.1, updated in v1.8)
     mapping(address => UserCopyLimitOrderConfigs) usersCopyLimitOrderConfigs;
-    // Size Factory (added in v1.7)
-    ISizeFactory sizeFactory;
+    // Rheo Factory (added in v1.7)
+    IRheoFactory sizeFactory;
     // debtTokenCap (added in v1.8.2)
     uint256 debtTokenCap;
     // percent of the futureValue to be given to the liquidator for overdue liquidations (added in v1.8.3)
@@ -116,11 +116,11 @@ struct State {
     Data data;
 }
 
-/// @title SizeStorage
-/// @custom:security-contact security@size.credit
-/// @author Size (https://size.credit/)
-/// @notice Storage for the Size protocol
+/// @title RheoStorage
+/// @custom:security-contact security@rheo.xyz
+/// @author Rheo (https://rheo.xyz/)
+/// @notice Storage for the Rheo protocol
 /// @dev WARNING: Changing the order of the variables or inner structs in this contract may break the storage layout
-abstract contract SizeStorage {
+abstract contract RheoStorage {
     State internal state;
 }

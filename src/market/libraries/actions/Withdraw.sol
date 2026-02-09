@@ -1,18 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {State} from "@src/market/SizeStorage.sol";
+import {State} from "@rheo-fm/src/market/RheoStorage.sol";
 
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-import {Math} from "@src/market/libraries/Math.sol";
+import {Math} from "@rheo-fm/src/market/libraries/Math.sol";
 
-import {Errors} from "@src/market/libraries/Errors.sol";
-import {Events} from "@src/market/libraries/Events.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
+import {Events} from "@rheo-fm/src/market/libraries/Events.sol";
 
-import {Action} from "@src/factory/libraries/Authorization.sol";
-import {RiskLibrary} from "@src/market/libraries/RiskLibrary.sol";
+import {Action} from "@rheo-fm/src/factory/libraries/Authorization.sol";
+import {RiskLibrary} from "@rheo-fm/src/market/libraries/RiskLibrary.sol";
 
 struct WithdrawParams {
     // The token to withdraw
@@ -32,8 +32,8 @@ struct WithdrawOnBehalfOfParams {
 }
 
 /// @title Withdraw
-/// @custom:security-contact security@size.credit
-/// @author Size (https://size.credit/)
+/// @custom:security-contact security@rheo.xyz
+/// @author Rheo (https://rheo.xyz/)
 /// @notice Contains the logic for withdrawing tokens from the protocol
 library Withdraw {
     using SafeERC20 for IERC20Metadata;

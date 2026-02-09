@@ -2,8 +2,8 @@
 pragma solidity 0.8.23;
 
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import {Errors} from "@src/market/libraries/Errors.sol";
-import {FixedMaturityLimitOrder, OfferLibrary} from "@src/market/libraries/OfferLibrary.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
+import {FixedMaturityLimitOrder, OfferLibrary} from "@rheo-fm/src/market/libraries/OfferLibrary.sol";
 import {Test} from "forge-std/Test.sol";
 
 contract OfferLibraryTest is Test {

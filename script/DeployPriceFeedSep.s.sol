@@ -3,26 +3,26 @@ pragma solidity 0.8.23;
 
 import {console} from "forge-std/Script.sol";
 
-import {BaseScript} from "@script/BaseScript.sol";
-import {Deploy} from "@script/Deploy.sol";
-import {NetworkConfiguration, Networks} from "@script/Networks.sol";
+import {BaseScript} from "@rheo-fm/script/BaseScript.sol";
+import {Deploy} from "@rheo-fm/script/Deploy.sol";
+import {NetworkConfiguration, Networks} from "@rheo-fm/script/Networks.sol";
 
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
 import {PendleChainlinkOracle} from "@pendle/contracts/oracles/PtYtLpOracle/chainlink/PendleChainlinkOracle.sol";
 import {PendleSparkLinearDiscountOracle} from "@pendle/contracts/oracles/internal/PendleSparkLinearDiscountOracle.sol";
 
-import {MainnetAddresses} from "@script/MainnetAddresses.s.sol";
-import {IOracle} from "@src/oracle/adapters/morpho/IOracle.sol";
-import {MorphoPriceFeedV2} from "@src/oracle/adapters/morpho/MorphoPriceFeedV2.sol";
+import {MainnetAddresses} from "@rheo-fm/script/MainnetAddresses.s.sol";
+import {IOracle} from "@rheo-fm/src/oracle/adapters/morpho/IOracle.sol";
+import {MorphoPriceFeedV2} from "@rheo-fm/src/oracle/adapters/morpho/MorphoPriceFeedV2.sol";
 import {PriceFeedPendleSparkLinearDiscountChainlink} from
-    "@src/oracle/v1.7.1/PriceFeedPendleSparkLinearDiscountChainlink.sol";
-import {PriceFeedPendleTWAPChainlink} from "@src/oracle/v1.7.2/PriceFeedPendleTWAPChainlink.sol";
+    "@rheo-fm/src/oracle/v1.7.1/PriceFeedPendleSparkLinearDiscountChainlink.sol";
+import {PriceFeedPendleTWAPChainlink} from "@rheo-fm/src/oracle/v1.7.2/PriceFeedPendleTWAPChainlink.sol";
 
-import {PriceFeedChainlinkOnly4x} from "@deprecated/oracle/v1.8/PriceFeedChainlinkOnly4x.sol";
-import {ChainlinkPriceFeed} from "@src/oracle/adapters/ChainlinkPriceFeed.sol";
+import {PriceFeedChainlinkOnly4x} from "@rheo-fm/deprecated/oracle/v1.8/PriceFeedChainlinkOnly4x.sol";
+import {ChainlinkPriceFeed} from "@rheo-fm/src/oracle/adapters/ChainlinkPriceFeed.sol";
 
-import {PriceFeedIPriceFeed2x} from "@src/oracle/v1.8/PriceFeedIPriceFeed2x.sol";
+import {PriceFeedIPriceFeed2x} from "@rheo-fm/src/oracle/v1.8/PriceFeedIPriceFeed2x.sol";
 
 contract DeployPriceFeedSepScript is BaseScript, Networks, Deploy, MainnetAddresses {
     function setUp() public {}

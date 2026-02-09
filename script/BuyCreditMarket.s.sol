@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {Size} from "@src/market/Size.sol";
-import {Logger} from "@test/Logger.sol";
+import {Rheo} from "@rheo-fm/src/market/Rheo.sol";
+import {Logger} from "@rheo-fm/test/Logger.sol";
 
-import {RESERVED_ID} from "@src/market/libraries/LoanLibrary.sol";
-import {BuyCreditMarketParams} from "@src/market/libraries/actions/BuyCreditMarket.sol";
+import {RESERVED_ID} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
+import {BuyCreditMarketParams} from "@rheo-fm/src/market/libraries/actions/BuyCreditMarket.sol";
 import {Script} from "forge-std/Script.sol";
 import {console2 as console} from "forge-std/console2.sol";
 
@@ -13,7 +13,7 @@ contract BuyCreditMarketScript is Script, Logger {
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         address sizeContractAddress = vm.envAddress("SIZE_CONTRACT_ADDRESS");
-        Size size = Size(payable(sizeContractAddress));
+        Rheo size = Rheo(payable(sizeContractAddress));
 
         uint256 maturity = size.riskConfig().maturities[1];
 

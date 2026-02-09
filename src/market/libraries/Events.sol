@@ -2,8 +2,8 @@
 pragma solidity 0.8.23;
 
 /// @title Events
-/// @custom:security-contact security@size.credit
-/// @author Size (https://size.credit/)
+/// @custom:security-contact security@rheo.xyz
+/// @author Rheo (https://rheo.xyz/)
 library Events {
     // actions
 

@@ -4,11 +4,11 @@ pragma solidity 0.8.23;
 import {IAToken} from "@aave/interfaces/IAToken.sol";
 import {Asserts} from "@chimera/Asserts.sol";
 import {PropertiesConstants} from "@crytic/properties/contracts/util/PropertiesConstants.sol";
-import {UserView} from "@src/market/SizeView.sol";
-import {RESERVED_ID} from "@src/market/libraries/LoanLibrary.sol";
-import {CreditPosition, DebtPosition, LoanStatus} from "@src/market/libraries/LoanLibrary.sol";
+import {UserView} from "@rheo-fm/src/market/RheoView.sol";
+import {RESERVED_ID} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
+import {CreditPosition, DebtPosition, LoanStatus} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
 
-import {Deploy} from "@script/Deploy.sol";
+import {Deploy} from "@rheo-fm/script/Deploy.sol";
 
 abstract contract Ghosts is Deploy, Asserts, PropertiesConstants {
     struct Vars {

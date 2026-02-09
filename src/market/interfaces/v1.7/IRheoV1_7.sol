@@ -1,28 +1,29 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {BuyCreditLimitOnBehalfOfParams} from "@src/market/libraries/actions/BuyCreditLimit.sol";
+import {BuyCreditLimitOnBehalfOfParams} from "@rheo-fm/src/market/libraries/actions/BuyCreditLimit.sol";
 
-import {BuyCreditMarketOnBehalfOfParams} from "@src/market/libraries/actions/BuyCreditMarket.sol";
+import {BuyCreditMarketOnBehalfOfParams} from "@rheo-fm/src/market/libraries/actions/BuyCreditMarket.sol";
 
-import {CompensateOnBehalfOfParams} from "@src/market/libraries/actions/Compensate.sol";
-import {DepositOnBehalfOfParams} from "@src/market/libraries/actions/Deposit.sol";
-import {SelfLiquidateOnBehalfOfParams} from "@src/market/libraries/actions/SelfLiquidate.sol";
-import {SellCreditLimitOnBehalfOfParams} from "@src/market/libraries/actions/SellCreditLimit.sol";
-import {SellCreditMarketOnBehalfOfParams} from "@src/market/libraries/actions/SellCreditMarket.sol";
+import {CompensateOnBehalfOfParams} from "@rheo-fm/src/market/libraries/actions/Compensate.sol";
+import {DepositOnBehalfOfParams} from "@rheo-fm/src/market/libraries/actions/Deposit.sol";
+import {SelfLiquidateOnBehalfOfParams} from "@rheo-fm/src/market/libraries/actions/SelfLiquidate.sol";
+import {SellCreditLimitOnBehalfOfParams} from "@rheo-fm/src/market/libraries/actions/SellCreditLimit.sol";
+import {SellCreditMarketOnBehalfOfParams} from "@rheo-fm/src/market/libraries/actions/SellCreditMarket.sol";
 
-import {SetCopyLimitOrderConfigsOnBehalfOfParams} from "@src/market/libraries/actions/SetCopyLimitOrderConfigs.sol";
-import {SetUserConfigurationOnBehalfOfParams} from "@src/market/libraries/actions/SetUserConfiguration.sol";
-import {WithdrawOnBehalfOfParams} from "@src/market/libraries/actions/Withdraw.sol";
+import {SetCopyLimitOrderConfigsOnBehalfOfParams} from
+    "@rheo-fm/src/market/libraries/actions/SetCopyLimitOrderConfigs.sol";
+import {SetUserConfigurationOnBehalfOfParams} from "@rheo-fm/src/market/libraries/actions/SetUserConfiguration.sol";
+import {WithdrawOnBehalfOfParams} from "@rheo-fm/src/market/libraries/actions/Withdraw.sol";
 
-import {ISizeFactory} from "@src/factory/interfaces/ISizeFactory.sol";
+import {IRheoFactory} from "@rheo-fm/src/factory/interfaces/IRheoFactory.sol";
 
-/// @title ISizeV1_7
-/// @custom:security-contact security@size.credit
-/// @author Size (https://size.credit/)
-/// @notice The interface for the Size v1.7 authorization system
+/// @title IRheoV1_7
+/// @custom:security-contact security@rheo.xyz
+/// @author Rheo (https://rheo.xyz/)
+/// @notice The interface for the Rheo v1.7 authorization system
 /// @dev Modifiers are moved from bare functions (e.g. `deposit`) to OnBehalfOf functions (e.g. `depositOnBehalfOf`)
-interface ISizeV1_7 {
+interface IRheoV1_7 {
     /// @notice Same as `deposit` but `onBehalfOf`
     function depositOnBehalfOf(DepositOnBehalfOfParams memory params) external payable;
 

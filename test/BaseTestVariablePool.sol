@@ -7,7 +7,7 @@ import {IERC20Metadata} from "@openzeppelin/contracts/interfaces/IERC20Metadata.
 import {Test} from "forge-std/Test.sol";
 
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
-import {BaseTest} from "@test/BaseTest.sol";
+import {BaseTest} from "@rheo-fm/test/BaseTest.sol";
 
 abstract contract BaseTestVariablePool is Test, BaseTest {
     function _depositVariable(address user, IERC20Metadata token, uint256 amount) internal {

@@ -4,7 +4,7 @@ pragma solidity 0.8.23;
 import {FoundryForkHandler} from "./FoundryForkHandler.sol";
 import {console} from "forge-std/console.sol";
 
-import {PropertiesSpecifications} from "@test/invariants/PropertiesSpecifications.sol";
+import {PropertiesSpecifications} from "@rheo-fm/test/invariants/PropertiesSpecifications.sol";
 import {Test} from "forge-std/Test.sol";
 
 contract FoundryForkTester is Test, PropertiesSpecifications {

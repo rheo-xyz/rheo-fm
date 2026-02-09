@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {Action, ActionsBitmap} from "@src/factory/libraries/Authorization.sol";
+import {Action, ActionsBitmap} from "@rheo-fm/src/factory/libraries/Authorization.sol";
 
-/// @title ISizeFactoryV1_7
-/// @custom:security-contact security@size.credit
-/// @author Size (https://size.credit/)
+/// @title IRheoFactoryV1_7
+/// @custom:security-contact security@rheo.xyz
+/// @author Rheo (https://rheo.xyz/)
 /// @notice The interface for the size factory v1.7
-interface ISizeFactoryV1_7 {
+interface IRheoFactoryV1_7 {
     /// @notice Set the authorization for an action for an `operator` account to perform on behalf of the `msg.sender` account
     /// @param operator The operator account
     /// @param actionsBitmap The actions bitmap

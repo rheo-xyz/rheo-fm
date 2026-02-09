@@ -3,13 +3,13 @@ pragma solidity 0.8.23;
 
 import {console2 as console} from "forge-std/Script.sol";
 
-import {ISizeV1_5} from "@deprecated/interfaces/ISizeV1_5.sol";
-import {Size} from "@src/market/Size.sol";
-import {ISize} from "@src/market/interfaces/ISize.sol";
+import {IRheoV1_5} from "@rheo-fm/deprecated/interfaces/IRheoV1_5.sol";
+import {Rheo} from "@rheo-fm/src/market/Rheo.sol";
+import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
 
-import {BaseScript} from "@script/BaseScript.sol";
-import {Deploy} from "@script/Deploy.sol";
-import {Networks} from "@script/Networks.sol";
+import {BaseScript} from "@rheo-fm/script/BaseScript.sol";
+import {Deploy} from "@rheo-fm/script/Deploy.sol";
+import {Networks} from "@rheo-fm/script/Networks.sol";
 
 contract ReinitializeScript is BaseScript, Networks, Deploy {
     address deployer;
@@ -28,15 +28,15 @@ contract ReinitializeScript is BaseScript, Networks, Deploy {
     }
 
     function run() public parseEnv broadcast {
-        console.log("[Size v1.5] reinitializing...\n");
+        console.log("[Rheo v1.5] reinitializing...\n");
 
-        console.log("[Size v1.5] networkConfiguration", networkConfiguration);
-        console.log("[Size v1.5] deployer", deployer);
+        console.log("[Rheo v1.5] networkConfiguration", networkConfiguration);
+        console.log("[Rheo v1.5] deployer", deployer);
 
-        (ISize proxy,,) = importDeployments(networkConfiguration);
+        (IRheo proxy,,) = importDeployments(networkConfiguration);
 
-        ISizeV1_5(address(proxy)).reinitialize(borrowTokenVault, users);
+        IRheoV1_5(address(proxy)).reinitialize(borrowTokenVault, users);
 
-        console.log("[Size v1.5] done");
+        console.log("[Rheo v1.5] done");
     }
 }

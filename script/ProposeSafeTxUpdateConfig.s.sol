@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {BaseScript} from "@script/BaseScript.sol";
-import {IMultiSendCallOnly} from "@script/interfaces/IMultiSendCallOnly.sol";
-import {SizeFactory} from "@src/factory/SizeFactory.sol";
-import {ISizeFactory} from "@src/factory/interfaces/ISizeFactory.sol";
-import {UpdateConfigParams} from "@src/market/libraries/actions/UpdateConfig.sol";
+import {BaseScript} from "@rheo-fm/script/BaseScript.sol";
+import {IMultiSendCallOnly} from "@rheo-fm/script/interfaces/IMultiSendCallOnly.sol";
+import {RheoFactory} from "@rheo-fm/src/factory/RheoFactory.sol";
+import {IRheoFactory} from "@rheo-fm/src/factory/interfaces/IRheoFactory.sol";
+import {UpdateConfigParams} from "@rheo-fm/src/market/libraries/actions/UpdateConfig.sol";
 
-import {Size} from "@src/market/Size.sol";
-import {ISize} from "@src/market/interfaces/ISize.sol";
+import {Rheo} from "@rheo-fm/src/market/Rheo.sol";
+import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
 
-import {Contract, Networks} from "@script/Networks.sol";
+import {Contract, Networks} from "@rheo-fm/script/Networks.sol";
 import {console} from "forge-std/console.sol";
 
 import {Safe} from "@safe-utils/Safe.sol";
@@ -22,7 +22,7 @@ contract ProposeSafeTxUpdateConfigScript is BaseScript, Networks {
 
     address signer;
     string derivationPath;
-    ISizeFactory private sizeFactory;
+    IRheoFactory private sizeFactory;
 
     modifier parseEnv() {
         safe.initialize(vm.envAddress("OWNER"));
@@ -33,13 +33,13 @@ contract ProposeSafeTxUpdateConfigScript is BaseScript, Networks {
         );
         signer = vm.envAddress("SIGNER");
         derivationPath = vm.envString("LEDGER_PATH");
-        sizeFactory = ISizeFactory(vm.envAddress("SIZE_FACTORY"));
+        sizeFactory = IRheoFactory(vm.envAddress("RHEO_FACTORY"));
 
         _;
     }
 
     function run() public parseEnv broadcast {
-        ISize[] memory markets = sizeFactory.getMarkets();
+        IRheo[] memory markets = sizeFactory.getMarkets();
 
         string memory updateConfigKey = "swapFeeAPR";
         uint256 updateConfigValue = 0.005e18;
@@ -47,11 +47,11 @@ contract ProposeSafeTxUpdateConfigScript is BaseScript, Networks {
         address[] memory targets = new address[](markets.length);
         bytes[] memory datas = new bytes[](markets.length);
 
-        // Size.updateConfig(key, value) for all markets
+        // Rheo.updateConfig(key, value) for all markets
         for (uint256 i = 0; i < markets.length; i++) {
             targets[i] = address(markets[i]);
             datas[i] = abi.encodeCall(
-                Size.updateConfig, (UpdateConfigParams({key: updateConfigKey, value: updateConfigValue}))
+                Rheo.updateConfig, (UpdateConfigParams({key: updateConfigKey, value: updateConfigValue}))
             );
         }
 

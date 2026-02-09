@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {Errors} from "@src/market/libraries/Errors.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
 
-import {RESERVED_ID} from "@src/market/libraries/LoanLibrary.sol";
+import {RESERVED_ID} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
 
-import {CreditPosition, DebtPosition} from "@src/market/libraries/LoanLibrary.sol";
-import {BaseTest} from "@test/BaseTest.sol";
-import {FixedMaturityLimitOrderHelper} from "@test/helpers/libraries/FixedMaturityLimitOrderHelper.sol";
+import {CreditPosition, DebtPosition} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
+import {BaseTest} from "@rheo-fm/test/BaseTest.sol";
+import {FixedMaturityLimitOrderHelper} from "@rheo-fm/test/helpers/libraries/FixedMaturityLimitOrderHelper.sol";
 
 contract SetUserConfigurationTest is BaseTest {
     function test_SetUserConfiguration_setCreditForSale_disable_all() public {

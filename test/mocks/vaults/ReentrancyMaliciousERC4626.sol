@@ -2,15 +2,15 @@
 pragma solidity 0.8.23;
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {ISize} from "@src/market/interfaces/ISize.sol";
-import {SetVaultOnBehalfOfParams, SetVaultParams} from "@src/market/libraries/actions/SetVault.sol";
+import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
+import {SetVaultOnBehalfOfParams, SetVaultParams} from "@rheo-fm/src/market/libraries/actions/SetVault.sol";
 
 contract ReentrancyMaliciousERC4626 is Ownable {
     address public immutable asset;
-    ISize public immutable size;
+    IRheo public immutable size;
     uint256 public counter;
 
-    constructor(address _asset, ISize _size, address _owner) Ownable(_owner) {
+    constructor(address _asset, IRheo _size, address _owner) Ownable(_owner) {
         asset = _asset;
         size = _size;
     }

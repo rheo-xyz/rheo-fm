@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {SetVaultParams} from "@src/market/libraries/actions/SetVault.sol";
-import {SetVaultOnBehalfOfParams} from "@src/market/libraries/actions/SetVault.sol";
+import {SetVaultParams} from "@rheo-fm/src/market/libraries/actions/SetVault.sol";
+import {SetVaultOnBehalfOfParams} from "@rheo-fm/src/market/libraries/actions/SetVault.sol";
 
-/// @title ISizeV1_8
-/// @custom:security-contact security@size.credit
-/// @author Size (https://size.credit/)
-/// @notice The interface for the Size v1.8 view methods
-interface ISizeV1_8 {
+/// @title IRheoV1_8
+/// @custom:security-contact security@rheo.xyz
+/// @author Rheo (https://rheo.xyz/)
+/// @notice The interface for the Rheo v1.8 view methods
+interface IRheoV1_8 {
     // /// @notice Reinitialize the contract
     // function reinitialize() external;
 

@@ -11,20 +11,20 @@ import {IPPrincipalToken} from "@pendle/contracts/interfaces/IPPrincipalToken.so
 import {IStandardizedYield} from "@pendle/contracts/interfaces/IStandardizedYield.sol";
 
 import {PendleChainlinkOracle} from "@pendle/contracts/oracles/PtYtLpOracle/chainlink/PendleChainlinkOracle.sol";
-import {Errors} from "@src/market/libraries/Errors.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
 
-import {Math} from "@src/market/libraries/Math.sol";
-import {IPriceFeed} from "@src/oracle/IPriceFeed.sol";
-import {ChainlinkPriceFeed} from "@src/oracle/adapters/ChainlinkPriceFeed.sol";
-import {IPriceFeedV1_7_2} from "@src/oracle/v1.7.2/IPriceFeedV1_7_2.sol";
+import {Math} from "@rheo-fm/src/market/libraries/Math.sol";
+import {IPriceFeed} from "@rheo-fm/src/oracle/IPriceFeed.sol";
+import {ChainlinkPriceFeed} from "@rheo-fm/src/oracle/adapters/ChainlinkPriceFeed.sol";
+import {IPriceFeedV1_7_2} from "@rheo-fm/src/oracle/v1.7.2/IPriceFeedV1_7_2.sol";
 
 /// @title PriceFeedPendleTWAPChainlink
-/// @custom:security-contact security@size.credit
-/// @author Size (https://size.credit/)
+/// @custom:security-contact security@rheo.xyz
+/// @author Rheo (https://rheo.xyz/)
 /// @notice A contract that provides the price of a `base` PT asset in terms of a `quote` asset, scaled to 18 decimals,
 ///           using a Pendle oracle for the `base` to `underlying` asset and a ChainlinkPriceFeed for the `underlying` to `quote` asset
 ///         Note: this price feed is supposed to be only used on mainnet
-/// @dev `decimals` must be 18 to comply with Size contracts
+/// @dev `decimals` must be 18 to comply with Rheo contracts
 contract PriceFeedPendleTWAPChainlink is IPriceFeedV1_7_2 {
     /* solhint-disable */
     // slither-disable-start uninitialized-state

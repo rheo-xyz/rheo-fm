@@ -6,7 +6,7 @@ import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/acce
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
-import {RESERVED_ID} from "@src/market/libraries/LoanLibrary.sol";
+import {RESERVED_ID} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
 
 import {
     Initialize,
@@ -14,83 +14,87 @@ import {
     InitializeFeeConfigParams,
     InitializeOracleParams,
     InitializeRiskConfigParams
-} from "@src/market/libraries/actions/Initialize.sol";
+} from "@rheo-fm/src/market/libraries/actions/Initialize.sol";
 
-import {MarketShutdown, MarketShutdownParams} from "@src/market/libraries/actions/MarketShutdown.sol";
-import {UpdateConfig, UpdateConfigParams} from "@src/market/libraries/actions/UpdateConfig.sol";
+import {MarketShutdown, MarketShutdownParams} from "@rheo-fm/src/market/libraries/actions/MarketShutdown.sol";
+import {UpdateConfig, UpdateConfigParams} from "@rheo-fm/src/market/libraries/actions/UpdateConfig.sol";
 
 import {
     SellCreditLimit,
     SellCreditLimitOnBehalfOfParams,
     SellCreditLimitParams
-} from "@src/market/libraries/actions/SellCreditLimit.sol";
+} from "@rheo-fm/src/market/libraries/actions/SellCreditLimit.sol";
 import {
     SellCreditMarket,
     SellCreditMarketOnBehalfOfParams,
     SellCreditMarketParams
-} from "@src/market/libraries/actions/SellCreditMarket.sol";
+} from "@rheo-fm/src/market/libraries/actions/SellCreditMarket.sol";
 
 import {
     BuyCreditMarket,
     BuyCreditMarketOnBehalfOfParams,
     BuyCreditMarketParams
-} from "@src/market/libraries/actions/BuyCreditMarket.sol";
-import {Claim, ClaimParams} from "@src/market/libraries/actions/Claim.sol";
-import {Deposit, DepositOnBehalfOfParams, DepositParams} from "@src/market/libraries/actions/Deposit.sol";
+} from "@rheo-fm/src/market/libraries/actions/BuyCreditMarket.sol";
+import {Claim, ClaimParams} from "@rheo-fm/src/market/libraries/actions/Claim.sol";
+import {Deposit, DepositOnBehalfOfParams, DepositParams} from "@rheo-fm/src/market/libraries/actions/Deposit.sol";
 import {
     SetUserConfiguration,
     SetUserConfigurationOnBehalfOfParams,
     SetUserConfigurationParams
-} from "@src/market/libraries/actions/SetUserConfiguration.sol";
-import {SetVault, SetVaultOnBehalfOfParams, SetVaultParams} from "@src/market/libraries/actions/SetVault.sol";
-import {Withdraw, WithdrawOnBehalfOfParams, WithdrawParams} from "@src/market/libraries/actions/Withdraw.sol";
+} from "@rheo-fm/src/market/libraries/actions/SetUserConfiguration.sol";
+import {SetVault, SetVaultOnBehalfOfParams, SetVaultParams} from "@rheo-fm/src/market/libraries/actions/SetVault.sol";
+import {Withdraw, WithdrawOnBehalfOfParams, WithdrawParams} from "@rheo-fm/src/market/libraries/actions/Withdraw.sol";
 
 import {
     BuyCreditLimit,
     BuyCreditLimitOnBehalfOfParams,
     BuyCreditLimitParams
-} from "@src/market/libraries/actions/BuyCreditLimit.sol";
-import {Liquidate, LiquidateParams} from "@src/market/libraries/actions/Liquidate.sol";
+} from "@rheo-fm/src/market/libraries/actions/BuyCreditLimit.sol";
+import {Liquidate, LiquidateParams} from "@rheo-fm/src/market/libraries/actions/Liquidate.sol";
 
-import {State} from "@src/market/SizeStorage.sol";
-import {Multicall} from "@src/market/libraries/Multicall.sol";
-import {Compensate, CompensateOnBehalfOfParams, CompensateParams} from "@src/market/libraries/actions/Compensate.sol";
-import {PartialRepay, PartialRepayParams} from "@src/market/libraries/actions/PartialRepay.sol";
+import {State} from "@rheo-fm/src/market/RheoStorage.sol";
+import {Multicall} from "@rheo-fm/src/market/libraries/Multicall.sol";
+import {
+    Compensate,
+    CompensateOnBehalfOfParams,
+    CompensateParams
+} from "@rheo-fm/src/market/libraries/actions/Compensate.sol";
+import {PartialRepay, PartialRepayParams} from "@rheo-fm/src/market/libraries/actions/PartialRepay.sol";
 
-import {Repay, RepayParams} from "@src/market/libraries/actions/Repay.sol";
+import {Repay, RepayParams} from "@rheo-fm/src/market/libraries/actions/Repay.sol";
 import {
     SelfLiquidate,
     SelfLiquidateOnBehalfOfParams,
     SelfLiquidateParams
-} from "@src/market/libraries/actions/SelfLiquidate.sol";
+} from "@rheo-fm/src/market/libraries/actions/SelfLiquidate.sol";
 import {
     SetCopyLimitOrderConfigs,
     SetCopyLimitOrderConfigsOnBehalfOfParams,
     SetCopyLimitOrderConfigsParams
-} from "@src/market/libraries/actions/SetCopyLimitOrderConfigs.sol";
+} from "@rheo-fm/src/market/libraries/actions/SetCopyLimitOrderConfigs.sol";
 
-import {RiskLibrary} from "@src/market/libraries/RiskLibrary.sol";
+import {RiskLibrary} from "@rheo-fm/src/market/libraries/RiskLibrary.sol";
 
-import {SizeView} from "@src/market/SizeView.sol";
-import {Events} from "@src/market/libraries/Events.sol";
+import {RheoView} from "@rheo-fm/src/market/RheoView.sol";
+import {Events} from "@rheo-fm/src/market/libraries/Events.sol";
 
-import {IMulticall} from "@src/market/interfaces/IMulticall.sol";
-import {ISize} from "@src/market/interfaces/ISize.sol";
-import {ISizeAdmin} from "@src/market/interfaces/ISizeAdmin.sol";
-import {ISizeV1_7} from "@src/market/interfaces/v1.7/ISizeV1_7.sol";
-import {ISizeV1_8} from "@src/market/interfaces/v1.8/ISizeV1_8.sol";
-import {Errors} from "@src/market/libraries/Errors.sol";
+import {IMulticall} from "@rheo-fm/src/market/interfaces/IMulticall.sol";
+import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
+import {IRheoAdmin} from "@rheo-fm/src/market/interfaces/IRheoAdmin.sol";
+import {IRheoV1_7} from "@rheo-fm/src/market/interfaces/v1.7/IRheoV1_7.sol";
+import {IRheoV1_8} from "@rheo-fm/src/market/interfaces/v1.8/IRheoV1_8.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
 
-import {PAUSER_ROLE} from "@src/factory/interfaces/ISizeFactory.sol";
+import {PAUSER_ROLE} from "@rheo-fm/src/factory/interfaces/IRheoFactory.sol";
 
-import {UserView} from "@src/market/SizeViewData.sol";
-import {ISizeView} from "@src/market/interfaces/ISizeView.sol";
+import {UserView} from "@rheo-fm/src/market/RheoViewData.sol";
+import {IRheoView} from "@rheo-fm/src/market/interfaces/IRheoView.sol";
 
-/// @title Size
-/// @custom:security-contact security@size.credit
-/// @author Size (https://size.credit/)
-/// @notice See the documentation in {ISize}.
-contract Size is ISize, SizeView, AccessControlUpgradeable, PausableUpgradeable, UUPSUpgradeable {
+/// @title Rheo
+/// @custom:security-contact security@rheo.xyz
+/// @author Rheo (https://rheo.xyz/)
+/// @notice See the documentation in {IRheo}.
+contract Rheo is IRheo, RheoView, AccessControlUpgradeable, PausableUpgradeable, UUPSUpgradeable {
     using Initialize for State;
     using UpdateConfig for State;
     using MarketShutdown for State;
@@ -144,7 +148,7 @@ contract Size is ISize, SizeView, AccessControlUpgradeable, PausableUpgradeable,
         }
     }
 
-    modifier onlyRoleOrSizeFactoryHasRole(bytes32 role) {
+    modifier onlyRoleOrRheoFactoryHasRole(bytes32 role) {
         if (!_hasRole(role, msg.sender)) {
             revert AccessControlUnauthorizedAccount(msg.sender, role);
         }
@@ -154,36 +158,36 @@ contract Size is ISize, SizeView, AccessControlUpgradeable, PausableUpgradeable,
     function _authorizeUpgrade(address newImplementation)
         internal
         override
-        onlyRoleOrSizeFactoryHasRole(DEFAULT_ADMIN_ROLE)
+        onlyRoleOrRheoFactoryHasRole(DEFAULT_ADMIN_ROLE)
     {}
 
-    /// @inheritdoc ISizeAdmin
+    /// @inheritdoc IRheoAdmin
     function marketShutdown(MarketShutdownParams calldata params)
         external
-        override(ISizeAdmin)
-        onlyRoleOrSizeFactoryHasRole(DEFAULT_ADMIN_ROLE)
+        override(IRheoAdmin)
+        onlyRoleOrRheoFactoryHasRole(DEFAULT_ADMIN_ROLE)
     {
         // state.validateMarketShutdown(params); // no-op
         state.executeMarketShutdown(params);
     }
 
-    /// @inheritdoc ISizeAdmin
+    /// @inheritdoc IRheoAdmin
     function updateConfig(UpdateConfigParams calldata params)
         external
-        override(ISizeAdmin)
-        onlyRoleOrSizeFactoryHasRole(DEFAULT_ADMIN_ROLE)
+        override(IRheoAdmin)
+        onlyRoleOrRheoFactoryHasRole(DEFAULT_ADMIN_ROLE)
     {
         // state.validateUpdateConfig(params); // no-op
         state.executeUpdateConfig(params);
     }
 
-    /// @inheritdoc ISizeAdmin
-    function pause() public override(ISizeAdmin) onlyRoleOrSizeFactoryHasRole(PAUSER_ROLE) {
+    /// @inheritdoc IRheoAdmin
+    function pause() public override(IRheoAdmin) onlyRoleOrRheoFactoryHasRole(PAUSER_ROLE) {
         _pause();
     }
 
-    /// @inheritdoc ISizeAdmin
-    function unpause() public override(ISizeAdmin) onlyRoleOrSizeFactoryHasRole(PAUSER_ROLE) {
+    /// @inheritdoc IRheoAdmin
+    function unpause() public override(IRheoAdmin) onlyRoleOrRheoFactoryHasRole(PAUSER_ROLE) {
         _unpause();
     }
 
@@ -192,16 +196,16 @@ contract Size is ISize, SizeView, AccessControlUpgradeable, PausableUpgradeable,
         results = state.multicall(_data);
     }
 
-    /// @inheritdoc ISize
-    function deposit(DepositParams calldata params) public payable override(ISize) {
+    /// @inheritdoc IRheo
+    function deposit(DepositParams calldata params) public payable override(IRheo) {
         depositOnBehalfOf(DepositOnBehalfOfParams({params: params, onBehalfOf: msg.sender}));
     }
 
-    /// @inheritdoc ISizeV1_7
+    /// @inheritdoc IRheoV1_7
     function depositOnBehalfOf(DepositOnBehalfOfParams memory params)
         public
         payable
-        override(ISizeV1_7)
+        override(IRheoV1_7)
         nonReentrant
         whenNotPaused
     {
@@ -209,16 +213,16 @@ contract Size is ISize, SizeView, AccessControlUpgradeable, PausableUpgradeable,
         state.executeDeposit(params);
     }
 
-    /// @inheritdoc ISize
-    function withdraw(WithdrawParams calldata params) external payable override(ISize) {
+    /// @inheritdoc IRheo
+    function withdraw(WithdrawParams calldata params) external payable override(IRheo) {
         withdrawOnBehalfOf(WithdrawOnBehalfOfParams({params: params, onBehalfOf: msg.sender}));
     }
 
-    /// @inheritdoc ISizeV1_7
+    /// @inheritdoc IRheoV1_7
     function withdrawOnBehalfOf(WithdrawOnBehalfOfParams memory externalParams)
         public
         payable
-        override(ISizeV1_7)
+        override(IRheoV1_7)
         nonReentrant
         whenNotPaused
     {
@@ -226,16 +230,16 @@ contract Size is ISize, SizeView, AccessControlUpgradeable, PausableUpgradeable,
         state.executeWithdraw(externalParams);
     }
 
-    /// @inheritdoc ISize
-    function buyCreditLimit(BuyCreditLimitParams calldata params) external payable override(ISize) {
+    /// @inheritdoc IRheo
+    function buyCreditLimit(BuyCreditLimitParams calldata params) external payable override(IRheo) {
         buyCreditLimitOnBehalfOf(BuyCreditLimitOnBehalfOfParams({params: params, onBehalfOf: msg.sender}));
     }
 
-    /// @inheritdoc ISizeV1_7
+    /// @inheritdoc IRheoV1_7
     function buyCreditLimitOnBehalfOf(BuyCreditLimitOnBehalfOfParams memory externalParams)
         public
         payable
-        override(ISizeV1_7)
+        override(IRheoV1_7)
         nonReentrant
         whenNotPaused
     {
@@ -243,16 +247,16 @@ contract Size is ISize, SizeView, AccessControlUpgradeable, PausableUpgradeable,
         state.executeBuyCreditLimit(externalParams);
     }
 
-    /// @inheritdoc ISize
-    function sellCreditLimit(SellCreditLimitParams calldata params) external payable override(ISize) {
+    /// @inheritdoc IRheo
+    function sellCreditLimit(SellCreditLimitParams calldata params) external payable override(IRheo) {
         sellCreditLimitOnBehalfOf(SellCreditLimitOnBehalfOfParams({params: params, onBehalfOf: msg.sender}));
     }
 
-    /// @inheritdoc ISizeV1_7
+    /// @inheritdoc IRheoV1_7
     function sellCreditLimitOnBehalfOf(SellCreditLimitOnBehalfOfParams memory externalParams)
         public
         payable
-        override(ISizeV1_7)
+        override(IRheoV1_7)
         nonReentrant
         whenNotPaused
     {
@@ -260,18 +264,18 @@ contract Size is ISize, SizeView, AccessControlUpgradeable, PausableUpgradeable,
         state.executeSellCreditLimit(externalParams);
     }
 
-    /// @inheritdoc ISize
-    function buyCreditMarket(BuyCreditMarketParams calldata params) external payable override(ISize) {
+    /// @inheritdoc IRheo
+    function buyCreditMarket(BuyCreditMarketParams calldata params) external payable override(IRheo) {
         buyCreditMarketOnBehalfOf(
             BuyCreditMarketOnBehalfOfParams({params: params, onBehalfOf: msg.sender, recipient: msg.sender})
         );
     }
 
-    /// @inheritdoc ISizeV1_7
+    /// @inheritdoc IRheoV1_7
     function buyCreditMarketOnBehalfOf(BuyCreditMarketOnBehalfOfParams memory externalParams)
         public
         payable
-        override(ISizeV1_7)
+        override(IRheoV1_7)
         nonReentrant
         whenNotPaused
     {
@@ -282,18 +286,18 @@ contract Size is ISize, SizeView, AccessControlUpgradeable, PausableUpgradeable,
         }
     }
 
-    /// @inheritdoc ISize
-    function sellCreditMarket(SellCreditMarketParams memory params) external payable override(ISize) {
+    /// @inheritdoc IRheo
+    function sellCreditMarket(SellCreditMarketParams memory params) external payable override(IRheo) {
         sellCreditMarketOnBehalfOf(
             SellCreditMarketOnBehalfOfParams({params: params, onBehalfOf: msg.sender, recipient: msg.sender})
         );
     }
 
-    /// @inheritdoc ISizeV1_7
+    /// @inheritdoc IRheoV1_7
     function sellCreditMarketOnBehalfOf(SellCreditMarketOnBehalfOfParams memory externalParams)
         public
         payable
-        override(ISizeV1_7)
+        override(IRheoV1_7)
         nonReentrant
         whenNotPaused
     {
@@ -304,23 +308,23 @@ contract Size is ISize, SizeView, AccessControlUpgradeable, PausableUpgradeable,
         }
     }
 
-    /// @inheritdoc ISize
-    function repay(RepayParams calldata params) external payable override(ISize) nonReentrant whenNotPaused {
+    /// @inheritdoc IRheo
+    function repay(RepayParams calldata params) external payable override(IRheo) nonReentrant whenNotPaused {
         state.validateRepay(params);
         state.executeRepay(params);
     }
 
-    /// @inheritdoc ISize
-    function claim(ClaimParams calldata params) external payable override(ISize) nonReentrant whenNotPaused {
+    /// @inheritdoc IRheo
+    function claim(ClaimParams calldata params) external payable override(IRheo) nonReentrant whenNotPaused {
         state.validateClaim(params);
         state.executeClaim(params);
     }
 
-    /// @inheritdoc ISize
+    /// @inheritdoc IRheo
     function liquidate(LiquidateParams calldata params)
         external
         payable
-        override(ISize)
+        override(IRheo)
         nonReentrant
         whenNotPaused
         returns (uint256 liquidatorProfitCollateralToken)
@@ -330,18 +334,18 @@ contract Size is ISize, SizeView, AccessControlUpgradeable, PausableUpgradeable,
         state.validateMinimumCollateralProfit(params, liquidatorProfitCollateralToken);
     }
 
-    /// @inheritdoc ISize
-    function selfLiquidate(SelfLiquidateParams calldata params) external payable override(ISize) {
+    /// @inheritdoc IRheo
+    function selfLiquidate(SelfLiquidateParams calldata params) external payable override(IRheo) {
         selfLiquidateOnBehalfOf(
             SelfLiquidateOnBehalfOfParams({params: params, onBehalfOf: msg.sender, recipient: msg.sender})
         );
     }
 
-    /// @inheritdoc ISizeV1_7
+    /// @inheritdoc IRheoV1_7
     function selfLiquidateOnBehalfOf(SelfLiquidateOnBehalfOfParams memory externalParams)
         public
         payable
-        override(ISizeV1_7)
+        override(IRheoV1_7)
         nonReentrant
         whenNotPaused
     {
@@ -349,16 +353,16 @@ contract Size is ISize, SizeView, AccessControlUpgradeable, PausableUpgradeable,
         state.executeSelfLiquidate(externalParams);
     }
 
-    /// @inheritdoc ISize
-    function compensate(CompensateParams calldata params) external payable override(ISize) {
+    /// @inheritdoc IRheo
+    function compensate(CompensateParams calldata params) external payable override(IRheo) {
         compensateOnBehalfOf(CompensateOnBehalfOfParams({params: params, onBehalfOf: msg.sender}));
     }
 
-    /// @inheritdoc ISizeV1_7
+    /// @inheritdoc IRheoV1_7
     function compensateOnBehalfOf(CompensateOnBehalfOfParams memory externalParams)
         public
         payable
-        override(ISizeV1_7)
+        override(IRheoV1_7)
         nonReentrant
         whenNotPaused
     {
@@ -375,11 +379,11 @@ contract Size is ISize, SizeView, AccessControlUpgradeable, PausableUpgradeable,
         }
     }
 
-    /// @inheritdoc ISize
+    /// @inheritdoc IRheo
     function partialRepay(PartialRepayParams calldata params)
         external
         payable
-        override(ISize)
+        override(IRheo)
         nonReentrant
         whenNotPaused
     {
@@ -387,16 +391,16 @@ contract Size is ISize, SizeView, AccessControlUpgradeable, PausableUpgradeable,
         state.executePartialRepay(params);
     }
 
-    /// @inheritdoc ISize
-    function setUserConfiguration(SetUserConfigurationParams calldata params) external payable override(ISize) {
+    /// @inheritdoc IRheo
+    function setUserConfiguration(SetUserConfigurationParams calldata params) external payable override(IRheo) {
         setUserConfigurationOnBehalfOf(SetUserConfigurationOnBehalfOfParams({params: params, onBehalfOf: msg.sender}));
     }
 
-    /// @inheritdoc ISizeV1_7
+    /// @inheritdoc IRheoV1_7
     function setUserConfigurationOnBehalfOf(SetUserConfigurationOnBehalfOfParams memory externalParams)
         public
         payable
-        override(ISizeV1_7)
+        override(IRheoV1_7)
         nonReentrant
         whenNotPaused
     {
@@ -404,22 +408,22 @@ contract Size is ISize, SizeView, AccessControlUpgradeable, PausableUpgradeable,
         state.executeSetUserConfiguration(externalParams);
     }
 
-    /// @inheritdoc ISize
+    /// @inheritdoc IRheo
     function setCopyLimitOrderConfigs(SetCopyLimitOrderConfigsParams calldata params)
         external
         payable
-        override(ISize)
+        override(IRheo)
     {
         setCopyLimitOrderConfigsOnBehalfOf(
             SetCopyLimitOrderConfigsOnBehalfOfParams({params: params, onBehalfOf: msg.sender})
         );
     }
 
-    /// @inheritdoc ISizeV1_7
+    /// @inheritdoc IRheoV1_7
     function setCopyLimitOrderConfigsOnBehalfOf(SetCopyLimitOrderConfigsOnBehalfOfParams memory externalParams)
         public
         payable
-        override(ISizeV1_7)
+        override(IRheoV1_7)
         nonReentrant
         whenNotPaused
     {
@@ -427,16 +431,16 @@ contract Size is ISize, SizeView, AccessControlUpgradeable, PausableUpgradeable,
         state.executeSetCopyLimitOrderConfigs(externalParams);
     }
 
-    /// @inheritdoc ISizeV1_8
-    function setVault(SetVaultParams calldata params) external payable override(ISizeV1_8) {
+    /// @inheritdoc IRheoV1_8
+    function setVault(SetVaultParams calldata params) external payable override(IRheoV1_8) {
         setVaultOnBehalfOf(SetVaultOnBehalfOfParams({params: params, onBehalfOf: msg.sender}));
     }
 
-    /// @inheritdoc ISizeV1_8
+    /// @inheritdoc IRheoV1_8
     function setVaultOnBehalfOf(SetVaultOnBehalfOfParams memory externalParams)
         public
         payable
-        override(ISizeV1_8)
+        override(IRheoV1_8)
         nonReentrant
         whenNotPaused
     {

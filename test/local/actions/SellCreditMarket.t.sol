@@ -1,21 +1,24 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {Errors} from "@src/market/libraries/Errors.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
 
-import {RESERVED_ID} from "@src/market/libraries/LoanLibrary.sol";
+import {RESERVED_ID} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
 
 import {
-    CREDIT_POSITION_ID_START, CreditPosition, DebtPosition, LoanStatus
-} from "@src/market/libraries/LoanLibrary.sol";
-import {PERCENT, YEAR} from "@src/market/libraries/Math.sol";
-import {FixedMaturityLimitOrder, OfferLibrary} from "@src/market/libraries/OfferLibrary.sol";
-import {SellCreditMarket, SellCreditMarketParams} from "@src/market/libraries/actions/SellCreditMarket.sol";
-import {BaseTest} from "@test/BaseTest.sol";
-import {Vars} from "@test/BaseTest.sol";
-import {FixedMaturityLimitOrderHelper} from "@test/helpers/libraries/FixedMaturityLimitOrderHelper.sol";
+    CREDIT_POSITION_ID_START,
+    CreditPosition,
+    DebtPosition,
+    LoanStatus
+} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
+import {PERCENT, YEAR} from "@rheo-fm/src/market/libraries/Math.sol";
+import {FixedMaturityLimitOrder, OfferLibrary} from "@rheo-fm/src/market/libraries/OfferLibrary.sol";
+import {SellCreditMarket, SellCreditMarketParams} from "@rheo-fm/src/market/libraries/actions/SellCreditMarket.sol";
+import {BaseTest} from "@rheo-fm/test/BaseTest.sol";
+import {Vars} from "@rheo-fm/test/BaseTest.sol";
+import {FixedMaturityLimitOrderHelper} from "@rheo-fm/test/helpers/libraries/FixedMaturityLimitOrderHelper.sol";
 
-import {Math} from "@src/market/libraries/Math.sol";
+import {Math} from "@rheo-fm/src/market/libraries/Math.sol";
 
 contract SellCreditMarketTest is BaseTest {
     using OfferLibrary for FixedMaturityLimitOrder;

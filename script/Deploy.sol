@@ -2,7 +2,7 @@
 pragma solidity 0.8.23;
 
 import {IPool} from "@aave/interfaces/IPool.sol";
-import {DataView} from "@src/market/SizeViewData.sol";
+import {DataView} from "@rheo-fm/src/market/RheoViewData.sol";
 
 import {WadRayMath} from "@aave/protocol/libraries/math/WadRayMath.sol";
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
@@ -12,44 +12,45 @@ import "@crytic/properties/contracts/util/Hevm.sol";
 import {IERC4626} from "@openzeppelin/contracts/interfaces/IERC4626.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
+
+import {Math} from "@rheo-fm/src/market/libraries/Math.sol";
+import {PoolMock} from "@rheo-fm/test/mocks/PoolMock.sol";
 import {MockERC20} from "@solady/test/utils/mocks/MockERC20.sol";
-import {Math} from "@src/market/libraries/Math.sol";
-import {PoolMock} from "@test/mocks/PoolMock.sol";
 
-import {IPriceFeed} from "@src/oracle/IPriceFeed.sol";
+import {IPriceFeed} from "@rheo-fm/src/oracle/IPriceFeed.sol";
 
-import {PriceFeed, PriceFeedParams} from "@src/oracle/v1.5.1/PriceFeed.sol";
+import {PriceFeed, PriceFeedParams} from "@rheo-fm/src/oracle/v1.5.1/PriceFeed.sol";
 
-import {PriceFeedMock} from "@test/mocks/PriceFeedMock.sol";
+import {PriceFeedMock} from "@rheo-fm/test/mocks/PriceFeedMock.sol";
 
-import {Size} from "@src/market/Size.sol";
-import {ISize} from "@src/market/interfaces/ISize.sol";
+import {Rheo} from "@rheo-fm/src/market/Rheo.sol";
+import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
 
 import {
     AAVE_ADAPTER_ID,
     DEFAULT_VAULT,
     ERC4626_ADAPTER_ID
-} from "@src/market/token/NonTransferrableRebasingTokenVault.sol";
-import {AaveAdapter} from "@src/market/token/adapters/AaveAdapter.sol";
-import {ERC4626Adapter} from "@src/market/token/adapters/ERC4626Adapter.sol";
+} from "@rheo-fm/src/market/token/NonTransferrableRebasingTokenVault.sol";
+import {AaveAdapter} from "@rheo-fm/src/market/token/adapters/AaveAdapter.sol";
+import {ERC4626Adapter} from "@rheo-fm/src/market/token/adapters/ERC4626Adapter.sol";
 
-import {NetworkConfiguration} from "@script/Networks.sol";
+import {NetworkConfiguration} from "@rheo-fm/script/Networks.sol";
 import {
     Initialize,
     InitializeDataParams,
     InitializeFeeConfigParams,
     InitializeOracleParams,
     InitializeRiskConfigParams
-} from "@src/market/libraries/actions/Initialize.sol";
+} from "@rheo-fm/src/market/libraries/actions/Initialize.sol";
 
-import {SizeMock} from "@test/mocks/SizeMock.sol";
-import {USDC} from "@test/mocks/USDC.sol";
-import {WETH} from "@test/mocks/WETH.sol";
+import {RheoMock} from "@rheo-fm/test/mocks/RheoMock.sol";
+import {USDC} from "@rheo-fm/test/mocks/USDC.sol";
+import {WETH} from "@rheo-fm/test/mocks/WETH.sol";
 
-import {SizeFactory} from "@src/factory/SizeFactory.sol";
-import {ISizeFactory} from "@src/factory/interfaces/ISizeFactory.sol";
-import {NonTransferrableRebasingTokenVault} from "@src/market/token/NonTransferrableRebasingTokenVault.sol";
-import {NonTransferrableRebasingTokenVaultGhost} from "@test/mocks/NonTransferrableRebasingTokenVaultGhost.sol";
+import {RheoFactory} from "@rheo-fm/src/factory/RheoFactory.sol";
+import {IRheoFactory} from "@rheo-fm/src/factory/interfaces/IRheoFactory.sol";
+import {NonTransferrableRebasingTokenVault} from "@rheo-fm/src/market/token/NonTransferrableRebasingTokenVault.sol";
+import {NonTransferrableRebasingTokenVaultGhost} from "@rheo-fm/test/mocks/NonTransferrableRebasingTokenVaultGhost.sol";
 
 import {ERC20Mock} from "@openzeppelin/contracts/mocks/token/ERC20Mock.sol";
 
@@ -62,20 +63,20 @@ import {ControlledAsyncDeposit} from "@ERC-7540-Reference/src/ControlledAsyncDep
 import {ControlledAsyncRedeem} from "@ERC-7540-Reference/src/ControlledAsyncRedeem.sol";
 import {FullyAsyncVault} from "@ERC-7540-Reference/src/FullyAsyncVault.sol";
 
-import {FeeOnEntryExitERC4626} from "@test/mocks/vaults/FeeOnEntryExitERC4626.sol";
-import {FeeOnTransferERC4626} from "@test/mocks/vaults/FeeOnTransferERC4626.sol";
-import {LimitsERC4626} from "@test/mocks/vaults/LimitsERC4626.sol";
+import {FeeOnEntryExitERC4626} from "@rheo-fm/test/mocks/vaults/FeeOnEntryExitERC4626.sol";
+import {FeeOnTransferERC4626} from "@rheo-fm/test/mocks/vaults/FeeOnTransferERC4626.sol";
+import {LimitsERC4626} from "@rheo-fm/test/mocks/vaults/LimitsERC4626.sol";
 
-import {MaliciousERC4626Reentrancy} from "@test/mocks/vaults/MaliciousERC4626Reentrancy.sol";
-import {MaliciousERC4626ReentrancyGeneric} from "@test/mocks/vaults/MaliciousERC4626ReentrancyGeneric.sol";
-import {MaliciousERC4626WithdrawNotAllowed} from "@test/mocks/vaults/MaliciousERC4626WithdrawNotAllowed.sol";
+import {MaliciousERC4626Reentrancy} from "@rheo-fm/test/mocks/vaults/MaliciousERC4626Reentrancy.sol";
+import {MaliciousERC4626ReentrancyGeneric} from "@rheo-fm/test/mocks/vaults/MaliciousERC4626ReentrancyGeneric.sol";
+import {MaliciousERC4626WithdrawNotAllowed} from "@rheo-fm/test/mocks/vaults/MaliciousERC4626WithdrawNotAllowed.sol";
 
-import {CollectionsManager} from "@src/collections/CollectionsManager.sol";
+import {CollectionsManager} from "@rheo-fm/src/collections/CollectionsManager.sol";
 
 abstract contract Deploy {
     address internal implementation;
     ERC1967Proxy internal proxy;
-    SizeMock internal size;
+    RheoMock internal size;
     IPriceFeed internal priceFeed;
     WETH internal weth;
     USDC internal usdc;
@@ -88,10 +89,10 @@ abstract contract Deploy {
     IERC20Metadata internal collateralToken;
     IERC20Metadata internal borrowToken;
 
-    SizeFactory internal sizeFactory;
+    RheoFactory internal sizeFactory;
     CollectionsManager internal collectionsManager;
 
-    bool internal shouldDeploySizeFactory = true;
+    bool internal shouldDeployRheoFactory = true;
 
     IERC4626 internal vaultSolady;
     IERC4626 internal vaultOpenZeppelin;
@@ -108,8 +109,8 @@ abstract contract Deploy {
     IERC4626 internal vaultERC7540ControlledAsyncRedeem;
     IERC4626 internal vaultInvalidUnderlying;
 
-    SizeMock internal size1;
-    SizeMock internal size2;
+    RheoMock internal size1;
+    RheoMock internal size2;
     PriceFeedMock internal priceFeed2;
     IERC20Metadata internal collateral2;
 
@@ -132,16 +133,16 @@ abstract contract Deploy {
         PoolMock(address(variablePool)).setLiquidityIndex(address(weth), WadRayMath.RAY);
         PoolMock(address(variablePool)).setLiquidityIndex(address(usdc), WadRayMath.RAY);
 
-        if (shouldDeploySizeFactory) {
-            sizeFactory = SizeFactory(
-                address(new ERC1967Proxy(address(new SizeFactory()), abi.encodeCall(SizeFactory.initialize, (owner))))
+        if (shouldDeployRheoFactory) {
+            sizeFactory = RheoFactory(
+                address(new ERC1967Proxy(address(new RheoFactory()), abi.encodeCall(RheoFactory.initialize, (owner))))
             );
 
             collectionsManager = CollectionsManager(
                 address(
                     new ERC1967Proxy(
                         address(new CollectionsManager()),
-                        abi.encodeCall(CollectionsManager.initialize, ISizeFactory(address(sizeFactory)))
+                        abi.encodeCall(CollectionsManager.initialize, IRheoFactory(address(sizeFactory)))
                     )
                 )
             );
@@ -195,13 +196,13 @@ abstract contract Deploy {
             sizeFactory: address(sizeFactory)
         });
 
-        implementation = address(new SizeMock());
+        implementation = address(new RheoMock());
         hevm.prank(owner);
-        sizeFactory.setSizeImplementation(implementation);
+        sizeFactory.setRheoImplementation(implementation);
 
         hevm.prank(owner);
         proxy = ERC1967Proxy(payable(address(sizeFactory.createMarket(f, r, o, d))));
-        size = SizeMock(payable(proxy));
+        size = RheoMock(payable(proxy));
 
         hevm.prank(owner);
         PriceFeedMock(address(priceFeed)).setPrice(1337e18);
@@ -234,16 +235,16 @@ abstract contract Deploy {
         variablePool = IPool(address(new PoolMock()));
         PoolMock(address(variablePool)).setLiquidityIndex(address(borrowToken), 1.234567e27);
 
-        if (shouldDeploySizeFactory) {
-            sizeFactory = SizeFactory(
-                address(new ERC1967Proxy(address(new SizeFactory()), abi.encodeCall(SizeFactory.initialize, (owner))))
+        if (shouldDeployRheoFactory) {
+            sizeFactory = RheoFactory(
+                address(new ERC1967Proxy(address(new RheoFactory()), abi.encodeCall(RheoFactory.initialize, (owner))))
             );
 
             collectionsManager = CollectionsManager(
                 address(
                     new ERC1967Proxy(
                         address(new CollectionsManager()),
-                        abi.encodeCall(CollectionsManager.initialize, ISizeFactory(address(sizeFactory)))
+                        abi.encodeCall(CollectionsManager.initialize, IRheoFactory(address(sizeFactory)))
                     )
                 )
             );
@@ -300,13 +301,13 @@ abstract contract Deploy {
             sizeFactory: address(sizeFactory)
         });
 
-        implementation = address(new SizeMock());
+        implementation = address(new RheoMock());
         hevm.prank(owner);
-        sizeFactory.setSizeImplementation(implementation);
+        sizeFactory.setRheoImplementation(implementation);
 
         hevm.prank(owner);
         proxy = ERC1967Proxy(payable(address(sizeFactory.createMarket(f, r, o, d))));
-        size = SizeMock(payable(proxy));
+        size = RheoMock(payable(proxy));
 
         hevm.prank(owner);
         PriceFeedMock(address(priceFeed)).setPrice(price);
@@ -315,7 +316,7 @@ abstract contract Deploy {
     function setupFork(address _size, address _priceFeed, address _variablePool, address _weth, address _usdc)
         internal
     {
-        size = SizeMock(_size);
+        size = RheoMock(_size);
         priceFeed = IPriceFeed(_priceFeed);
         variablePool = IPool(_variablePool);
         weth = WETH(payable(_weth));
@@ -364,12 +365,12 @@ abstract contract Deploy {
         );
     }
 
-    function _deploySizeMarket2() internal {
+    function _deployRheoMarket2() internal {
         collateral2 = IERC20Metadata(address(new ERC20Mock()));
         priceFeed2 = new PriceFeedMock(address(this));
         priceFeed2.setPrice(1e18);
 
-        ISize market = sizeFactory.getMarket(0);
+        IRheo market = sizeFactory.getMarket(0);
         InitializeFeeConfigParams memory feeConfigParams = market.feeConfig();
 
         InitializeRiskConfigParams memory riskConfigParams = market.riskConfig();
@@ -388,10 +389,10 @@ abstract contract Deploy {
             borrowTokenVault: address(dataView.borrowTokenVault),
             sizeFactory: address(sizeFactory)
         });
-        size2 = SizeMock(address(sizeFactory.createMarket(feeConfigParams, riskConfigParams, oracleParams, dataParams)));
+        size2 = RheoMock(address(sizeFactory.createMarket(feeConfigParams, riskConfigParams, oracleParams, dataParams)));
         size1 = size;
 
-        hevm.label(address(size1), "Size1");
-        hevm.label(address(size2), "Size2");
+        hevm.label(address(size1), "Rheo1");
+        hevm.label(address(size2), "Rheo2");
     }
 }

@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {BaseTest} from "@test/BaseTest.sol";
-import {Vars} from "@test/BaseTest.sol";
+import {BaseTest} from "@rheo-fm/test/BaseTest.sol";
+import {Vars} from "@rheo-fm/test/BaseTest.sol";
 
-import {Errors} from "@src/market/libraries/Errors.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
 
-import {LoanStatus, RESERVED_ID} from "@src/market/libraries/LoanLibrary.sol";
-import {FixedMaturityLimitOrder} from "@src/market/libraries/OfferLibrary.sol";
-import {RepayParams} from "@src/market/libraries/actions/Repay.sol";
-import {FixedMaturityLimitOrderHelper} from "@test/helpers/libraries/FixedMaturityLimitOrderHelper.sol";
+import {LoanStatus, RESERVED_ID} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
+import {FixedMaturityLimitOrder} from "@rheo-fm/src/market/libraries/OfferLibrary.sol";
+import {RepayParams} from "@rheo-fm/src/market/libraries/actions/Repay.sol";
+import {FixedMaturityLimitOrderHelper} from "@rheo-fm/test/helpers/libraries/FixedMaturityLimitOrderHelper.sol";
 
 contract RepayTest is BaseTest {
     function test_Repay_repay_full_DebtPosition() public {

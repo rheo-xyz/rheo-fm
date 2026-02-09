@@ -2,12 +2,12 @@
 pragma solidity 0.8.23;
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {ISize} from "@src/market/interfaces/ISize.sol";
-import {SetVaultOnBehalfOfParams, SetVaultParams} from "@src/market/libraries/actions/SetVault.sol";
+import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
+import {SetVaultOnBehalfOfParams, SetVaultParams} from "@rheo-fm/src/market/libraries/actions/SetVault.sol";
 
 contract MaliciousERC4626Reentrancy is Ownable {
     address public immutable asset;
-    ISize public size;
+    IRheo public size;
     address public onBehalfOf;
     uint256 public counter;
 
@@ -15,7 +15,7 @@ contract MaliciousERC4626Reentrancy is Ownable {
         asset = _asset;
     }
 
-    function setSize(ISize _size) external onlyOwner {
+    function setRheo(IRheo _size) external onlyOwner {
         size = _size;
     }
 

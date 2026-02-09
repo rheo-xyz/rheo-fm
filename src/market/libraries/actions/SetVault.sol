@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {State} from "@src/market/SizeStorage.sol";
+import {State} from "@rheo-fm/src/market/RheoStorage.sol";
 
-import {Action} from "@src/factory/libraries/Authorization.sol";
+import {Action} from "@rheo-fm/src/factory/libraries/Authorization.sol";
 
-import {Errors} from "@src/market/libraries/Errors.sol";
-import {Events} from "@src/market/libraries/Events.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
+import {Events} from "@rheo-fm/src/market/libraries/Events.sol";
 
 struct SetVaultParams {
     // the user vault to deposit borrow tokens into
@@ -23,8 +23,8 @@ struct SetVaultOnBehalfOfParams {
 }
 
 /// @title SetVault
-/// @custom:security-contact security@size.credit
-/// @author Size (https://size.credit/)
+/// @custom:security-contact security@rheo.xyz
+/// @author Rheo (https://rheo.xyz/)
 library SetVault {
     /// @notice Validates the input parameters for setting vault
     /// @param state The state

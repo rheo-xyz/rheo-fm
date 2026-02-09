@@ -2,13 +2,13 @@
 pragma solidity 0.8.23;
 
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {ISize} from "@src/market/interfaces/ISize.sol";
-import {RESERVED_ID} from "@src/market/libraries/actions/SellCreditMarket.sol";
+import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
+import {RESERVED_ID} from "@rheo-fm/src/market/libraries/actions/SellCreditMarket.sol";
 
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
-import {BuyCreditLimitParams} from "@src/market/libraries/actions/BuyCreditLimit.sol";
-import {DepositParams} from "@src/market/libraries/actions/Deposit.sol";
-import {SellCreditMarketParams} from "@src/market/libraries/actions/SellCreditMarket.sol";
+import {BuyCreditLimitParams} from "@rheo-fm/src/market/libraries/actions/BuyCreditLimit.sol";
+import {DepositParams} from "@rheo-fm/src/market/libraries/actions/Deposit.sol";
+import {SellCreditMarketParams} from "@rheo-fm/src/market/libraries/actions/SellCreditMarket.sol";
 import {Tenderly} from "@tenderly-utils/Tenderly.sol";
 
 import {Script} from "forge-std/Script.sol";
@@ -41,7 +41,7 @@ contract GetCalldataScript is Script {
         Tenderly.VirtualTestnet memory vnet =
             tenderly.createVirtualTestnet(string.concat("vnet-", vm.toString(block.chainid)), 1_000_000 + block.chainid);
 
-        IERC20Metadata underlyingBorrowToken = ISize(size).data().underlyingBorrowToken;
+        IERC20Metadata underlyingBorrowToken = IRheo(size).data().underlyingBorrowToken;
 
         tenderly.sendTransaction(
             vnet.id, borrower, address(underlyingBorrowToken), abi.encodeCall(IERC20.approve, (address(size), 2000e18))
@@ -51,10 +51,10 @@ contract GetCalldataScript is Script {
             borrower,
             address(size),
             abi.encodeCall(
-                ISize.deposit, (DepositParams({token: address(underlyingBorrowToken), amount: 2000e18, to: borrower}))
+                IRheo.deposit, (DepositParams({token: address(underlyingBorrowToken), amount: 2000e18, to: borrower}))
             )
         );
-        ISize sizeContract = ISize(size);
+        IRheo sizeContract = IRheo(size);
         uint256 maturity = sizeContract.riskConfig().maturities[1];
         uint256[] memory maturities = new uint256[](1);
         maturities[0] = maturity;
@@ -64,14 +64,14 @@ contract GetCalldataScript is Script {
             vnet.id,
             lender,
             address(size),
-            abi.encodeCall(ISize.buyCreditLimit, (BuyCreditLimitParams({maturities: maturities, aprs: aprs})))
+            abi.encodeCall(IRheo.buyCreditLimit, (BuyCreditLimitParams({maturities: maturities, aprs: aprs})))
         );
         tenderly.sendTransaction(
             vnet.id,
             lender,
             address(size),
             abi.encodeCall(
-                ISize.sellCreditMarket,
+                IRheo.sellCreditMarket,
                 (
                     SellCreditMarketParams({
                         lender: lender,

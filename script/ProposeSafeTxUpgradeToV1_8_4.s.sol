@@ -2,14 +2,14 @@
 pragma solidity 0.8.23;
 
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import {BaseScript} from "@script/BaseScript.sol";
-import {SizeFactory} from "@src/factory/SizeFactory.sol";
+import {BaseScript} from "@rheo-fm/script/BaseScript.sol";
+import {RheoFactory} from "@rheo-fm/src/factory/RheoFactory.sol";
 
-import {Contract, Networks} from "@script/Networks.sol";
+import {Contract, Networks} from "@rheo-fm/script/Networks.sol";
 
-import {Size} from "@src/market/Size.sol";
+import {Rheo} from "@rheo-fm/src/market/Rheo.sol";
 
-import {ISize} from "@src/market/interfaces/ISize.sol";
+import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
 
 import {console} from "forge-std/console.sol";
 
@@ -22,7 +22,7 @@ contract ProposeSafeTxUpgradeToV1_8_4Script is BaseScript, Networks {
     string derivationPath;
 
     modifier parseEnv() {
-        safe.initialize(contracts[block.chainid][Contract.SIZE_GOVERNANCE]);
+        safe.initialize(contracts[block.chainid][Contract.RHEO_GOVERNANCE]);
         signer = vm.envAddress("SIGNER");
         derivationPath = vm.envString("LEDGER_PATH");
 
@@ -44,21 +44,21 @@ contract ProposeSafeTxUpgradeToV1_8_4Script is BaseScript, Networks {
     }
 
     function getUpgradeToV1_8_4Data() public returns (address[] memory targets, bytes[] memory datas) {
-        SizeFactory sizeFactory = SizeFactory(contracts[block.chainid][Contract.SIZE_FACTORY]);
+        RheoFactory sizeFactory = RheoFactory(contracts[block.chainid][Contract.RHEO_FACTORY]);
 
-        ISize[] memory unpausedMarkets = getUnpausedMarkets(sizeFactory);
+        IRheo[] memory unpausedMarkets = getUnpausedMarkets(sizeFactory);
 
-        Size newSizeImplementation = new Size();
-        console.log("ProposeSafeTxUpgradeToV1_8_4Script: newSizeImplementation", address(newSizeImplementation));
+        Rheo newRheoImplementation = new Rheo();
+        console.log("ProposeSafeTxUpgradeToV1_8_4Script: newRheoImplementation", address(newRheoImplementation));
 
         targets = new address[](unpausedMarkets.length + 1);
         datas = new bytes[](unpausedMarkets.length + 1);
         for (uint256 i = 0; i < unpausedMarkets.length; i++) {
             targets[i] = address(unpausedMarkets[i]);
-            datas[i] = abi.encodeCall(UUPSUpgradeable.upgradeToAndCall, (address(newSizeImplementation), ""));
+            datas[i] = abi.encodeCall(UUPSUpgradeable.upgradeToAndCall, (address(newRheoImplementation), ""));
         }
         targets[unpausedMarkets.length] = address(sizeFactory);
         datas[unpausedMarkets.length] =
-            abi.encodeCall(SizeFactory.setSizeImplementation, (address(newSizeImplementation)));
+            abi.encodeCall(RheoFactory.setRheoImplementation, (address(newRheoImplementation)));
     }
 }

@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {State, User} from "@src/market/SizeStorage.sol";
+import {State, User} from "@rheo-fm/src/market/RheoStorage.sol";
 
-import {CreditPosition, LoanLibrary, LoanStatus} from "@src/market/libraries/LoanLibrary.sol";
+import {CreditPosition, LoanLibrary, LoanStatus} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
 
-import {Action} from "@src/factory/libraries/Authorization.sol";
+import {Action} from "@rheo-fm/src/factory/libraries/Authorization.sol";
 
-import {Errors} from "@src/market/libraries/Errors.sol";
-import {Events} from "@src/market/libraries/Events.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
+import {Events} from "@rheo-fm/src/market/libraries/Events.sol";
 
 import {IERC4626} from "@openzeppelin/contracts/interfaces/IERC4626.sol";
 
@@ -31,8 +31,8 @@ struct SetUserConfigurationOnBehalfOfParams {
 }
 
 /// @title SetUserConfiguration
-/// @custom:security-contact security@size.credit
-/// @author Size (https://size.credit/)
+/// @custom:security-contact security@rheo.xyz
+/// @author Rheo (https://rheo.xyz/)
 library SetUserConfiguration {
     using LoanLibrary for State;
 

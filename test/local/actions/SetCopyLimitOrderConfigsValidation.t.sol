@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {Errors} from "@src/market/libraries/Errors.sol";
-import {CopyLimitOrderConfig} from "@src/market/libraries/OfferLibrary.sol";
-import {OfferLibrary} from "@src/market/libraries/OfferLibrary.sol";
-import {SetCopyLimitOrderConfigsParams} from "@src/market/libraries/actions/SetCopyLimitOrderConfigs.sol";
-import {BaseTest} from "@test/BaseTest.sol";
-import {FixedMaturityLimitOrderHelper} from "@test/helpers/libraries/FixedMaturityLimitOrderHelper.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
+import {CopyLimitOrderConfig} from "@rheo-fm/src/market/libraries/OfferLibrary.sol";
+import {OfferLibrary} from "@rheo-fm/src/market/libraries/OfferLibrary.sol";
+import {SetCopyLimitOrderConfigsParams} from "@rheo-fm/src/market/libraries/actions/SetCopyLimitOrderConfigs.sol";
+import {BaseTest} from "@rheo-fm/test/BaseTest.sol";
+import {FixedMaturityLimitOrderHelper} from "@rheo-fm/test/helpers/libraries/FixedMaturityLimitOrderHelper.sol";
 
 contract SetCopyLimitOrderConfigsValidationTest is BaseTest {
     CopyLimitOrderConfig private nullCopy;

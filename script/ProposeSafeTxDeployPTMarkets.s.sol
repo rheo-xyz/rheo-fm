@@ -4,22 +4,23 @@ pragma solidity 0.8.23;
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
-import {Safe} from "@safe-utils/Safe.sol";
-import {BaseScript} from "@script/BaseScript.sol";
-import {Contract, Networks} from "@script/Networks.sol";
-import {ISizeFactory} from "@src/factory/interfaces/ISizeFactory.sol";
-import {DataView} from "@src/market/SizeViewData.sol";
-import {ISize} from "@src/market/interfaces/ISize.sol";
+
+import {BaseScript} from "@rheo-fm/script/BaseScript.sol";
+import {Contract, Networks} from "@rheo-fm/script/Networks.sol";
+import {IRheoFactory} from "@rheo-fm/src/factory/interfaces/IRheoFactory.sol";
+import {DataView} from "@rheo-fm/src/market/RheoViewData.sol";
+import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
 import {
     InitializeDataParams,
     InitializeFeeConfigParams,
     InitializeOracleParams,
     InitializeRiskConfigParams
-} from "@src/market/libraries/actions/Initialize.sol";
+} from "@rheo-fm/src/market/libraries/actions/Initialize.sol";
+import {Safe} from "@safe-utils/Safe.sol";
 
-import {IPriceFeed} from "@src/oracle/IPriceFeed.sol";
-import {IMorphoChainlinkOracleV2} from "@src/oracle/adapters/morpho/IMorphoChainlinkOracleV2.sol";
-import {PriceFeedMorphoChainlinkOracleV2} from "@src/oracle/v1.7.1/PriceFeedMorphoChainlinkOracleV2.sol";
+import {IPriceFeed} from "@rheo-fm/src/oracle/IPriceFeed.sol";
+import {IMorphoChainlinkOracleV2} from "@rheo-fm/src/oracle/adapters/morpho/IMorphoChainlinkOracleV2.sol";
+import {PriceFeedMorphoChainlinkOracleV2} from "@rheo-fm/src/oracle/v1.7.1/PriceFeedMorphoChainlinkOracleV2.sol";
 import {Tenderly} from "@tenderly-utils/Tenderly.sol";
 
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
@@ -29,8 +30,8 @@ import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IER
 import {PendleChainlinkOracle} from "@pendle/contracts/oracles/PtYtLpOracle/chainlink/PendleChainlinkOracle.sol";
 import {PendleSparkLinearDiscountOracle} from "@pendle/contracts/oracles/internal/PendleSparkLinearDiscountOracle.sol";
 import {PriceFeedPendleSparkLinearDiscountChainlink} from
-    "@src/oracle/v1.7.1/PriceFeedPendleSparkLinearDiscountChainlink.sol";
-import {PriceFeedPendleTWAPChainlink} from "@src/oracle/v1.7.2/PriceFeedPendleTWAPChainlink.sol";
+    "@rheo-fm/src/oracle/v1.7.1/PriceFeedPendleSparkLinearDiscountChainlink.sol";
+import {PriceFeedPendleTWAPChainlink} from "@rheo-fm/src/oracle/v1.7.2/PriceFeedPendleTWAPChainlink.sol";
 
 import {console} from "forge-std/console.sol";
 
@@ -41,13 +42,13 @@ contract ProposeSafeTxDeployPTMarketsScript is BaseScript, Networks {
     address signer;
     string derivationPath;
 
-    ISizeFactory private sizeFactory;
+    IRheoFactory private sizeFactory;
     address private safeAddress;
 
     modifier parseEnv() {
         signer = vm.envAddress("SIGNER");
         derivationPath = vm.envString("LEDGER_PATH");
-        sizeFactory = ISizeFactory(contracts[block.chainid][Contract.SIZE_FACTORY]);
+        sizeFactory = IRheoFactory(contracts[block.chainid][Contract.RHEO_FACTORY]);
 
         string memory accountSlug = vm.envString("TENDERLY_ACCOUNT_NAME");
         string memory projectSlug = vm.envString("TENDERLY_PROJECT_NAME");
@@ -106,7 +107,7 @@ contract ProposeSafeTxDeployPTMarketsScript is BaseScript, Networks {
 
         vm.stopBroadcast();
 
-        ISize market = sizeFactory.getMarket(0);
+        IRheo market = sizeFactory.getMarket(0);
         InitializeFeeConfigParams memory feeConfigParams = market.feeConfig();
 
         InitializeRiskConfigParams memory riskConfigParams = market.riskConfig(); // crOpening, crLiquidation replaced below
@@ -128,11 +129,11 @@ contract ProposeSafeTxDeployPTMarketsScript is BaseScript, Networks {
         oracleParams.priceFeed = address(ptSusde30July2025UsdcPriceFeed);
         dataParams.underlyingCollateralToken = address(baseToken);
         datas[0] =
-            abi.encodeCall(ISizeFactory.createMarket, (feeConfigParams, riskConfigParams, oracleParams, dataParams));
+            abi.encodeCall(IRheoFactory.createMarket, (feeConfigParams, riskConfigParams, oracleParams, dataParams));
         oracleParams.priceFeed = address(wstusrUsdc24Sep2025PriceFeed);
         dataParams.underlyingCollateralToken = address(baseToken2);
         datas[1] =
-            abi.encodeCall(ISizeFactory.createMarket, (feeConfigParams, riskConfigParams, oracleParams, dataParams));
+            abi.encodeCall(IRheoFactory.createMarket, (feeConfigParams, riskConfigParams, oracleParams, dataParams));
         address[] memory targets = new address[](2);
         targets[0] = address(sizeFactory);
         targets[1] = address(sizeFactory);

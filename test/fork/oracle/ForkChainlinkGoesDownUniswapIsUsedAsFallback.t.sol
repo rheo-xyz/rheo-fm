@@ -3,15 +3,15 @@ pragma solidity 0.8.23;
 
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
-import {PriceFeedV1_5} from "@deprecated/oracle/PriceFeedV1_5.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
-import {ISize} from "@src/market/interfaces/ISize.sol";
-import {Errors} from "@src/market/libraries/Errors.sol";
-import {UpdateConfigParams} from "@src/market/libraries/actions/UpdateConfig.sol";
-import {IPriceFeed} from "@src/oracle/IPriceFeed.sol";
-import {PriceFeed, PriceFeedParams} from "@src/oracle/v1.5.1/PriceFeed.sol";
-import {BaseTest} from "@test/BaseTest.sol";
-import {ForkTest} from "@test/fork/ForkTest.sol";
+import {PriceFeedV1_5} from "@rheo-fm/deprecated/oracle/PriceFeedV1_5.sol";
+import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
+import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
+import {UpdateConfigParams} from "@rheo-fm/src/market/libraries/actions/UpdateConfig.sol";
+import {IPriceFeed} from "@rheo-fm/src/oracle/IPriceFeed.sol";
+import {PriceFeed, PriceFeedParams} from "@rheo-fm/src/oracle/v1.5.1/PriceFeed.sol";
+import {BaseTest} from "@rheo-fm/test/BaseTest.sol";
+import {ForkTest} from "@rheo-fm/test/fork/ForkTest.sol";
 
 import {IUniswapV3Pool} from "@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol";
 import {Test} from "forge-std/Test.sol";
@@ -28,7 +28,7 @@ contract ForkChainlinkGoesDownUniswapIsUsedAsFallbackTest is ForkTest {
 
     uint256 updatedAt;
 
-    ISize sizeCbBtcUsdc;
+    IRheo sizeCbBtcUsdc;
     address sizeCbBtcUsdcOwner;
 
     function setUp() public override(ForkTest) {

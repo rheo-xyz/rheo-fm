@@ -1,52 +1,52 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {SellCreditLimitParams} from "@src/market/libraries/actions/SellCreditLimit.sol";
-import {SellCreditMarketParams} from "@src/market/libraries/actions/SellCreditMarket.sol";
+import {SellCreditLimitParams} from "@rheo-fm/src/market/libraries/actions/SellCreditLimit.sol";
+import {SellCreditMarketParams} from "@rheo-fm/src/market/libraries/actions/SellCreditMarket.sol";
 
-import {ClaimParams} from "@src/market/libraries/actions/Claim.sol";
+import {ClaimParams} from "@rheo-fm/src/market/libraries/actions/Claim.sol";
 
-import {BuyCreditLimitParams} from "@src/market/libraries/actions/BuyCreditLimit.sol";
-import {LiquidateParams} from "@src/market/libraries/actions/Liquidate.sol";
+import {BuyCreditLimitParams} from "@rheo-fm/src/market/libraries/actions/BuyCreditLimit.sol";
+import {LiquidateParams} from "@rheo-fm/src/market/libraries/actions/Liquidate.sol";
 
-import {DepositParams} from "@src/market/libraries/actions/Deposit.sol";
-import {WithdrawParams} from "@src/market/libraries/actions/Withdraw.sol";
+import {DepositParams} from "@rheo-fm/src/market/libraries/actions/Deposit.sol";
+import {WithdrawParams} from "@rheo-fm/src/market/libraries/actions/Withdraw.sol";
 
-import {RepayParams} from "@src/market/libraries/actions/Repay.sol";
-import {SelfLiquidateParams} from "@src/market/libraries/actions/SelfLiquidate.sol";
+import {RepayParams} from "@rheo-fm/src/market/libraries/actions/Repay.sol";
+import {SelfLiquidateParams} from "@rheo-fm/src/market/libraries/actions/SelfLiquidate.sol";
 
-import {CompensateParams} from "@src/market/libraries/actions/Compensate.sol";
+import {CompensateParams} from "@rheo-fm/src/market/libraries/actions/Compensate.sol";
 
 import {
     InitializeFeeConfigParams,
     InitializeOracleParams,
     InitializeRiskConfigParams
-} from "@src/market/libraries/actions/Initialize.sol";
-import {PartialRepayParams} from "@src/market/libraries/actions/PartialRepay.sol";
+} from "@rheo-fm/src/market/libraries/actions/Initialize.sol";
+import {PartialRepayParams} from "@rheo-fm/src/market/libraries/actions/PartialRepay.sol";
 
-import {IMulticall} from "@src/market/interfaces/IMulticall.sol";
-import {ISizeView} from "@src/market/interfaces/ISizeView.sol";
-import {BuyCreditMarketParams} from "@src/market/libraries/actions/BuyCreditMarket.sol";
+import {IMulticall} from "@rheo-fm/src/market/interfaces/IMulticall.sol";
+import {IRheoView} from "@rheo-fm/src/market/interfaces/IRheoView.sol";
+import {BuyCreditMarketParams} from "@rheo-fm/src/market/libraries/actions/BuyCreditMarket.sol";
 
-import {SetCopyLimitOrderConfigsParams} from "@src/market/libraries/actions/SetCopyLimitOrderConfigs.sol";
-import {SetUserConfigurationParams} from "@src/market/libraries/actions/SetUserConfiguration.sol";
+import {SetCopyLimitOrderConfigsParams} from "@rheo-fm/src/market/libraries/actions/SetCopyLimitOrderConfigs.sol";
+import {SetUserConfigurationParams} from "@rheo-fm/src/market/libraries/actions/SetUserConfiguration.sol";
 
-import {ISizeAdmin} from "@src/market/interfaces/ISizeAdmin.sol";
-import {ISizeV1_7} from "@src/market/interfaces/v1.7/ISizeV1_7.sol";
-import {ISizeV1_8} from "@src/market/interfaces/v1.8/ISizeV1_8.sol";
+import {IRheoAdmin} from "@rheo-fm/src/market/interfaces/IRheoAdmin.sol";
+import {IRheoV1_7} from "@rheo-fm/src/market/interfaces/v1.7/IRheoV1_7.sol";
+import {IRheoV1_8} from "@rheo-fm/src/market/interfaces/v1.8/IRheoV1_8.sol";
 
-string constant VERSION = "v1.8.4";
+string constant VERSION = "v1.9";
 
-/// @title ISize
-/// @custom:security-contact security@size.credit
-/// @author Size (https://size.credit/)
-/// @notice This interface is the main interface for all user-facing methods of the Size protocol
+/// @title IRheo
+/// @custom:security-contact security@rheo.xyz
+/// @author Rheo (https://rheo.xyz/)
+/// @notice This interface is the main interface for all user-facing methods of the Rheo protocol
 /// @dev All functions are `payable` to allow for ETH deposits in a `multicall` pattern.
 ///      See `Multicall.sol`
-interface ISize is ISizeView, ISizeAdmin, IMulticall, ISizeV1_7, ISizeV1_8 {
+interface IRheo is IRheoView, IRheoAdmin, IMulticall, IRheoV1_7, IRheoV1_8 {
     /// @notice Deposit underlying borrow/collateral tokens to the protocol (e.g. USDC, WETH)
     ///         Borrow tokens are always deposited into the Aave Variable Pool or User Vault
-    ///         Collateral tokens are deposited into the Size contract
+    ///         Collateral tokens are deposited into the Rheo contract
     /// @dev The caller must approve the transfer of the token to the protocol.
     ///      This function mints 1:1 Deposit Tokens (e.g. szaUSDC, szETH) in exchange of the deposited tokens
     /// @param params DepositParams struct containing the following fields:
@@ -57,7 +57,7 @@ interface ISize is ISizeView, ISizeAdmin, IMulticall, ISizeV1_7, ISizeV1_8 {
 
     /// @notice Withdraw underlying borrow/collateral tokens from the protocol (e.g. USDC, WETH)
     ///         Borrow tokens are always withdrawn from the Aave Variable Pool or User Vault
-    ///         Collateral tokens are withdrawn from the Size contract
+    ///         Collateral tokens are withdrawn from the Rheo contract
     /// @dev This function burns 1:1 Deposit Tokens (e.g. szaUSDC, szETH) in exchange of the withdrawn tokens
     /// @param params WithdrawParams struct containing the following fields:
     ///     - address token: The address of the token to withdraw
