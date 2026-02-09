@@ -15,10 +15,8 @@ import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
 abstract contract RheoFactoryStorage {
     // the markets
     EnumerableSet.AddressSet markets;
-    // deprecated in v1.7
-    EnumerableSet.AddressSet ___unused_01;
-    // deprecated in v1.7
-    EnumerableSet.AddressSet ___unused_02;
+    // deprecated in v1.7 (kept as a gap to preserve storage layout)
+    uint256[4] private ___deprecatedStorageGapV1_7;
     // the size implementation (used as implementation for proxy contracts, added in v1.6)
     address public sizeImplementation;
     // the non-transferrable token vault implementation (upgraded in v1.8)
