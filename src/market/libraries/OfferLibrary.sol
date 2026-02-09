@@ -70,14 +70,16 @@ library OfferLibrary {
             revert Errors.NULL_ARRAY();
         }
 
+        uint256 firstMaturity = self.maturities[0];
+        if (firstMaturity <= block.timestamp) {
+            revert Errors.PAST_MATURITY(firstMaturity);
+        }
+
         uint256 lastMaturity = 0;
         for (uint256 i = 0; i < self.maturities.length; i++) {
             uint256 maturity = self.maturities[i];
             if (maturity <= lastMaturity) {
                 revert Errors.MATURITIES_NOT_STRICTLY_INCREASING();
-            }
-            if (maturity <= block.timestamp) {
-                revert Errors.PAST_MATURITY(maturity);
             }
             uint256 tenor = maturity - block.timestamp;
             if (tenor < minTenor || tenor > maxTenor) {
