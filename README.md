@@ -14,6 +14,7 @@ Networks:
 
 | Date | Version | Auditor | Report |
 |------|---------|----------|---------|
+| 2026-02-02 | v1.9 | Cantina | TBD |
 | 2025-06-23 | v1.8 | Omniscia | [Report](./audits/2025-06-23-Omniscia.pdf) |
 | 2025-06-23 | v1.8 | Hashlock | [Report](./audits/2025-06-23-Cantina.pdf) |
 | 2025-06-14 | v1.8-rc | Cantina | [Report](./audits/2025-06-14-Cantina.pdf) |
