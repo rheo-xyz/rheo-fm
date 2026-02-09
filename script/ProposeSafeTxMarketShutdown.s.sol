@@ -38,8 +38,6 @@ contract ProposeSafeTxMarketShutdownScript is BaseScript, Networks {
     }
 
     function run() external parseEnv {
-        vm.createSelectFork("mainnet");
-
         (address[] memory targets, bytes[] memory datas) = getMarketShutdownData();
 
         safe.proposeTransactions(targets, datas, signer, derivationPath);
