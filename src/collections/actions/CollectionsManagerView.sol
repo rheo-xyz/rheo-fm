@@ -136,14 +136,11 @@ abstract contract CollectionsManagerView is ICollectionsManagerView, Collections
             if (maturity <= block.timestamp) {
                 revert Errors.PAST_MATURITY(maturity);
             }
-            uint256 baseAPR = _getUserDefinedLimitOrderAPR(rateProvider, market, maturity, isLoanOffer);
-            if (maturity <= block.timestamp) {
-                revert InvalidMaturity(maturity, copyLimitOrder.minTenor, copyLimitOrder.maxTenor);
-            }
             uint256 tenor = maturity - block.timestamp;
             if (tenor < copyLimitOrder.minTenor || tenor > copyLimitOrder.maxTenor) {
                 revert InvalidMaturity(maturity, copyLimitOrder.minTenor, copyLimitOrder.maxTenor);
             } else {
+                uint256 baseAPR = _getUserDefinedLimitOrderAPR(rateProvider, market, maturity, isLoanOffer);
                 // apply offset APR
                 apr = SafeCast.toUint256(SafeCast.toInt256(baseAPR) + copyLimitOrder.offsetAPR);
                 // validate min/max APR
