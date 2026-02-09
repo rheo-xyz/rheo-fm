@@ -42,6 +42,10 @@ High-level goals:
   pricing/validation. This is the same behavior as Rheo core.
 - Exiting existing positions must still validate `debtPosition.dueDate` against the allowlist;
   if a maturity is removed, market exits must revert.
+- Exiting existing positions also applies the current `minTenor`/`maxTenor` bounds to the
+  remaining tenor (`debtPosition.dueDate - block.timestamp`). This means secondary market
+  exits can become unavailable over time (as positions approach maturity) or after governance
+  updates to `minTenor`/`maxTenor`, even if the position was valid at origination.
 - Tenor is used only for pricing/fees (computed from maturity).
 - Known limitation: `BuyCreditMarket`/`SellCreditMarket` events intentionally emit
   caller-supplied maturity/borrower inputs even when exits use the position's effective
