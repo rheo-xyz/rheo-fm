@@ -7,7 +7,7 @@ import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {RheoFactory} from "@rheo-fm/src/factory/RheoFactory.sol";
 import {console2 as console} from "forge-std/Script.sol";
 
-import {BaseScript, Deployment, Parameter} from "@rheo-fm/script/BaseScript.sol";
+import {BaseScript} from "@rheo-fm/script/BaseScript.sol";
 import {Deploy} from "@rheo-fm/script/Deploy.sol";
 import {NetworkConfiguration, Networks} from "@rheo-fm/script/Networks.sol";
 

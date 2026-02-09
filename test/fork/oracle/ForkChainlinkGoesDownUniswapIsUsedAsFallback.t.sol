@@ -10,15 +10,16 @@ import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
 import {UpdateConfigParams} from "@rheo-fm/src/market/libraries/actions/UpdateConfig.sol";
 import {IPriceFeed} from "@rheo-fm/src/oracle/IPriceFeed.sol";
 import {PriceFeed, PriceFeedParams} from "@rheo-fm/src/oracle/v1.5.1/PriceFeed.sol";
-import {BaseTest} from "@rheo-fm/test/BaseTest.sol";
 import {ForkTest} from "@rheo-fm/test/fork/ForkTest.sol";
 
+import {Contract, NetworkConfiguration, Networks} from "@rheo-fm/script/Networks.sol";
+import {RheoFactory} from "@rheo-fm/src/factory/RheoFactory.sol";
+
 import {IUniswapV3Pool} from "@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol";
-import {Test} from "forge-std/Test.sol";
 import {console} from "forge-std/console.sol";
 
 // On Oct-18-2024, Chainlink cbBTC/USD price feed went down for over 6h
-contract ForkChainlinkGoesDownUniswapIsUsedAsFallbackTest is ForkTest {
+contract ForkChainlinkGoesDownUniswapIsUsedAsFallbackTest is ForkTest, Networks {
     // https://basescan.org/tx/0x2797a77761aa4eda81640b54faa9fe19608c563e146eb566b3fdadea5941070e (aggregatorRoundId 397 executed at Oct-18-2024 03:37:21 PM +UTC)
     uint256 blockNumberChainlinkAggregatorRoundId397 = 21238247;
     // https://basescan.org/tx/0x5861fd0da0cdc07265494e4e7f80608f00f4e2e4211735ee06918f8330569786 (aggregatorRoundId 398 executed at Oct-18-2024 10:05:33 PM +UTC)
@@ -34,7 +35,10 @@ contract ForkChainlinkGoesDownUniswapIsUsedAsFallbackTest is ForkTest {
     function setUp() public override(ForkTest) {
         super.setUp();
         vm.createSelectFork("base_archive");
-        (sizeCbBtcUsdc,, sizeCbBtcUsdcOwner) = importDeployments("base-production-cbbtc-usdc");
+        sizeCbBtcUsdcOwner = contracts[block.chainid][Contract.RHEO_GOVERNANCE];
+        sizeCbBtcUsdc = _findMarketByNetworkConfiguration(
+            RheoFactory(contracts[block.chainid][Contract.RHEO_FACTORY]), "base-production-cbbtc-usdc"
+        );
 
         vm.rollFork(blockNumberChainlinkAggregatorRoundId397);
         (,,, updatedAt,) =
@@ -123,5 +127,23 @@ contract ForkChainlinkGoesDownUniswapIsUsedAsFallbackTest is ForkTest {
         uint256 chainlinkPrice = v1_5_1PriceFeed.getPrice();
         assertGt(chainlinkPrice, 0);
         assertTrue(uniswapPrice != chainlinkPrice);
+    }
+
+    function _findMarketByNetworkConfiguration(RheoFactory factory, string memory networkConfiguration)
+        internal
+        view
+        returns (IRheo)
+    {
+        NetworkConfiguration memory cfg = params(networkConfiguration);
+        IRheo[] memory markets = factory.getMarkets();
+        for (uint256 i = 0; i < markets.length; i++) {
+            if (
+                address(markets[i].data().underlyingCollateralToken) == cfg.underlyingCollateralToken
+                    && address(markets[i].data().underlyingBorrowToken) == cfg.underlyingBorrowToken
+            ) {
+                return markets[i];
+            }
+        }
+        revert("Market not found");
     }
 }

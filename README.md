@@ -5,10 +5,11 @@
 Rheo is a credit marketplace with unified liquidity across maturities.
 This repo implements fixed-maturity (FM) markets; see [SPECS.md](./SPECS.md).
 
-Networks:
+Deployments:
 
-- [Ethereum mainnet](./deployments/mainnet-rheo-factory.json)
-- [Base](./deployments/base-production-rheo-factory.json)
+- This repository does not include deployment artifacts yet (this is a fork intended to be deployed from scratch).
+- Canonical Rheo deployments live in `rheo-solidity`.
+- Chain-specific addresses used by scripts/tests live in `script/Networks.sol`.
 
 ## Audits
 

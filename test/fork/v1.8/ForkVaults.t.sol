@@ -37,7 +37,7 @@ contract ForkVaultsTest is ForkTest, Networks {
         // 2025-10-21 13h00 UTC
         vm.rollFork(23626090);
 
-        sizeFactory = importRheoFactory("mainnet-rheo-factory");
+        sizeFactory = RheoFactory(contracts[block.chainid][Contract.RHEO_FACTORY]);
         size = RheoMock(address(sizeFactory.getMarket(0)));
         usdc = USDC(address(size.data().underlyingBorrowToken));
         weth = WETH(payable(address(size.data().underlyingCollateralToken)));

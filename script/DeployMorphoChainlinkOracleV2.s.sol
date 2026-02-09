@@ -3,7 +3,7 @@ pragma solidity 0.8.23;
 
 import {console} from "forge-std/Script.sol";
 
-import {BaseScript, Deployment, Parameter} from "@rheo-fm/script/BaseScript.sol";
+import {BaseScript} from "@rheo-fm/script/BaseScript.sol";
 import {Deploy} from "@rheo-fm/script/Deploy.sol";
 import {Contract, NetworkConfiguration, Networks} from "@rheo-fm/script/Networks.sol";
 
