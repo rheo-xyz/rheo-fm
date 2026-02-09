@@ -30,32 +30,32 @@ contract GetCalldataScript is Script {
     function run() external {
         console.log("GetCalldata...");
 
-        address size = vm.envAddress("SIZE_ADDRESS");
+        address rheo = vm.envAddress("RHEO_ADDRESS");
         address borrower = vm.envAddress("BORROWER");
         address lender = vm.envAddress("LENDER");
 
-        console.log("size", size);
+        console.log("rheo", rheo);
         console.log("borrower", borrower);
         console.log("lender", lender);
 
         Tenderly.VirtualTestnet memory vnet =
             tenderly.createVirtualTestnet(string.concat("vnet-", vm.toString(block.chainid)), 1_000_000 + block.chainid);
 
-        IERC20Metadata underlyingBorrowToken = IRheo(size).data().underlyingBorrowToken;
+        IERC20Metadata underlyingBorrowToken = IRheo(rheo).data().underlyingBorrowToken;
 
         tenderly.sendTransaction(
-            vnet.id, borrower, address(underlyingBorrowToken), abi.encodeCall(IERC20.approve, (address(size), 2000e18))
+            vnet.id, borrower, address(underlyingBorrowToken), abi.encodeCall(IERC20.approve, (rheo, 2000e18))
         );
         tenderly.sendTransaction(
             vnet.id,
             borrower,
-            address(size),
+            rheo,
             abi.encodeCall(
                 IRheo.deposit, (DepositParams({token: address(underlyingBorrowToken), amount: 2000e18, to: borrower}))
             )
         );
-        IRheo sizeContract = IRheo(size);
-        uint256 maturity = sizeContract.riskConfig().maturities[1];
+        IRheo rheoContract = IRheo(rheo);
+        uint256 maturity = rheoContract.riskConfig().maturities[1];
         uint256[] memory maturities = new uint256[](1);
         maturities[0] = maturity;
         uint256[] memory aprs = new uint256[](1);
@@ -63,13 +63,13 @@ contract GetCalldataScript is Script {
         tenderly.sendTransaction(
             vnet.id,
             lender,
-            address(size),
+            rheo,
             abi.encodeCall(IRheo.buyCreditLimit, (BuyCreditLimitParams({maturities: maturities, aprs: aprs})))
         );
         tenderly.sendTransaction(
             vnet.id,
             lender,
-            address(size),
+            rheo,
             abi.encodeCall(
                 IRheo.sellCreditMarket,
                 (

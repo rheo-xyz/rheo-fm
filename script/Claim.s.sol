@@ -11,14 +11,14 @@ contract ClaimScript is Script {
         console.log("Claim...");
 
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-        address sizeContractAddress = vm.envAddress("SIZE_CONTRACT_ADDRESS");
+        address rheoContractAddress = vm.envAddress("RHEO_CONTRACT_ADDRESS");
 
-        Rheo size = Rheo(payable(sizeContractAddress));
+        Rheo rheo = Rheo(payable(rheoContractAddress));
 
         ClaimParams memory params = ClaimParams({creditPositionId: 1});
 
         vm.startBroadcast(deployerPrivateKey);
-        size.claim(params);
+        rheo.claim(params);
         vm.stopBroadcast();
     }
 }

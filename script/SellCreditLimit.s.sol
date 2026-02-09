@@ -14,11 +14,11 @@ contract SellCreditLimitScript is Script, Logger {
         console.log("SellCreditLimit...");
 
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-        address sizeContractAddress = vm.envAddress("SIZE_CONTRACT_ADDRESS");
+        address rheoContractAddress = vm.envAddress("RHEO_CONTRACT_ADDRESS");
 
-        Rheo size = Rheo(payable(sizeContractAddress));
+        Rheo rheo = Rheo(payable(rheoContractAddress));
 
-        InitializeRiskConfigParams memory riskConfig = size.riskConfig();
+        InitializeRiskConfigParams memory riskConfig = rheo.riskConfig();
         if (riskConfig.maturities.length < 3) {
             revert("NOT_ENOUGH_MATURITIES");
         }
@@ -33,7 +33,7 @@ contract SellCreditLimitScript is Script, Logger {
         SellCreditLimitParams memory params = SellCreditLimitParams({maturities: maturities, aprs: aprs});
 
         vm.startBroadcast(deployerPrivateKey);
-        size.sellCreditLimit(params);
+        rheo.sellCreditLimit(params);
         vm.stopBroadcast();
     }
 }

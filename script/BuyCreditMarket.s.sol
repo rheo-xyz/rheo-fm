@@ -12,10 +12,10 @@ import {console2 as console} from "forge-std/console2.sol";
 contract BuyCreditMarketScript is Script, Logger {
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-        address sizeContractAddress = vm.envAddress("SIZE_CONTRACT_ADDRESS");
-        Rheo size = Rheo(payable(sizeContractAddress));
+        address rheoContractAddress = vm.envAddress("RHEO_CONTRACT_ADDRESS");
+        Rheo rheo = Rheo(payable(rheoContractAddress));
 
-        uint256 maturity = size.riskConfig().maturities[1];
+        uint256 maturity = rheo.riskConfig().maturities[1];
 
         address lender = vm.envAddress("LENDER");
         address borrower = vm.envAddress("BORROWER");
@@ -25,7 +25,7 @@ contract BuyCreditMarketScript is Script, Logger {
 
         uint256 amount = 6e6;
 
-        uint256 apr = size.getUserDefinedBorrowOfferAPR(borrower, maturity);
+        uint256 apr = rheo.getUserDefinedBorrowOfferAPR(borrower, maturity);
 
         BuyCreditMarketParams memory params = BuyCreditMarketParams({
             borrower: borrower,
@@ -38,9 +38,9 @@ contract BuyCreditMarketScript is Script, Logger {
             collectionId: RESERVED_ID,
             rateProvider: address(0)
         });
-        console.log("lender USDC", size.getUserView(lender).borrowTokenBalance);
+        console.log("lender USDC", rheo.getUserView(lender).borrowTokenBalance);
         vm.startBroadcast(deployerPrivateKey);
-        size.buyCreditMarket(params);
+        rheo.buyCreditMarket(params);
         vm.stopBroadcast();
     }
 }

@@ -12,15 +12,15 @@ contract LiquidateScript is Script, Logger {
         console.log("Liquidating...");
 
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-        address sizeContractAddress = vm.envAddress("SIZE_CONTRACT_ADDRESS");
+        address rheoContractAddress = vm.envAddress("RHEO_CONTRACT_ADDRESS");
 
-        Rheo size = Rheo(payable(sizeContractAddress));
+        Rheo rheo = Rheo(payable(rheoContractAddress));
 
         LiquidateParams memory params =
             LiquidateParams({debtPositionId: 0, minimumCollateralProfit: 0, deadline: block.timestamp});
 
         vm.startBroadcast(deployerPrivateKey);
-        size.liquidate(params);
+        rheo.liquidate(params);
         vm.stopBroadcast();
     }
 }

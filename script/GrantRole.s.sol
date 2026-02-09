@@ -9,14 +9,14 @@ contract GrantRoleScript is Script {
     function run() external {
         console.log("GrantRole...");
 
-        address sizeContractAddress = vm.envAddress("SIZE_CONTRACT_ADDRESS");
+        address rheoContractAddress = vm.envAddress("RHEO_CONTRACT_ADDRESS");
         address account = vm.envAddress("ACCOUNT");
         bytes32 role = keccak256(abi.encodePacked(vm.envString("ROLE")));
 
-        Rheo size = Rheo(payable(sizeContractAddress));
+        Rheo rheo = Rheo(payable(rheoContractAddress));
 
         vm.startBroadcast();
-        size.grantRole(role, account);
+        rheo.grantRole(role, account);
         vm.stopBroadcast();
     }
 }

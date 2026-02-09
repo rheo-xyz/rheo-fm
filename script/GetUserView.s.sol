@@ -12,13 +12,13 @@ contract GetUserViewScript is Script, Logger {
     function run() external {
         console.log("GetUserView...");
 
-        address sizeContractAddress = vm.envAddress("SIZE_CONTRACT_ADDRESS");
+        address rheoContractAddress = vm.envAddress("RHEO_CONTRACT_ADDRESS");
         address lender = vm.envAddress("LENDER");
 
-        RheoView size = RheoView(sizeContractAddress);
+        RheoView rheo = RheoView(rheoContractAddress);
 
         vm.startBroadcast();
-        _log(size.getUserView(lender));
+        _log(rheo.getUserView(lender));
         vm.stopBroadcast();
     }
 }

@@ -9,12 +9,12 @@ contract FrontendScript is Script {
     function run() external {
         console.log("Frontend...");
 
-        Rheo size = Rheo(payable(vm.envAddress("SIZE_ADDRESS")));
+        Rheo rheo = Rheo(payable(vm.envAddress("RHEO_ADDRESS")));
         address user = vm.envAddress("USER_ADDRESS");
         bytes memory data = vm.envBytes("DATA");
 
         vm.prank(user);
-        (bool success,) = address(size).call(data);
+        (bool success,) = address(rheo).call(data);
         console.log("success", success);
     }
 }

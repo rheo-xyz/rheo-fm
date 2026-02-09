@@ -12,14 +12,14 @@ contract RepayScript is Script, Logger {
         console.log("Repay...");
 
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-        address sizeContractAddress = vm.envAddress("SIZE_CONTRACT_ADDRESS");
+        address rheoContractAddress = vm.envAddress("RHEO_CONTRACT_ADDRESS");
         address borrower = vm.envAddress("BORROWER");
-        Rheo size = Rheo(payable(sizeContractAddress));
+        Rheo rheo = Rheo(payable(rheoContractAddress));
 
         RepayParams memory params = RepayParams({debtPositionId: 0, borrower: borrower});
 
         vm.startBroadcast(deployerPrivateKey);
-        size.repay(params);
+        rheo.repay(params);
         vm.stopBroadcast();
     }
 }

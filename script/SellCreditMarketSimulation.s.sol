@@ -13,13 +13,13 @@ import {console2 as console} from "forge-std/console2.sol";
 
 contract SellCreditMarketSimulationScript is Script, Logger {
     function run() external {
-        Rheo size = Rheo(payable(vm.envAddress("SIZE_ADDRESS")));
+        Rheo rheo = Rheo(payable(vm.envAddress("RHEO_ADDRESS")));
 
-        uint256 maturity = size.riskConfig().maturities[1];
+        uint256 maturity = rheo.riskConfig().maturities[1];
         address lender = address(vm.envAddress("LENDER"));
         address borrower = address(vm.envAddress("BORROWER"));
         uint256 amount = 100e6;
-        uint256 apr = size.getUserDefinedLoanOfferAPR(lender, maturity);
+        uint256 apr = rheo.getUserDefinedLoanOfferAPR(lender, maturity);
 
         SellCreditMarketParams memory params = SellCreditMarketParams({
             lender: lender,
@@ -36,7 +36,7 @@ contract SellCreditMarketSimulationScript is Script, Logger {
         vm.recordLogs();
 
         vm.prank(borrower);
-        size.sellCreditMarket(params);
+        rheo.sellCreditMarket(params);
 
         Vm.Log[] memory entries = vm.getRecordedLogs();
         Vm.Log memory swapData;

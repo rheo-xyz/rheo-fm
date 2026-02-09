@@ -10,7 +10,7 @@ import {console2 as console} from "forge-std/console2.sol";
 contract CompensateScript is Script, Logger {
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-        address sizeContractAddress = vm.envAddress("SIZE_CONTRACT_ADDRESS");
+        address rheoContractAddress = vm.envAddress("RHEO_CONTRACT_ADDRESS");
         address lender = vm.envAddress("LENDER");
         address borrower = vm.envAddress("BORROWER");
 
@@ -18,12 +18,12 @@ contract CompensateScript is Script, Logger {
         console.log("borrower", borrower);
 
         address currentAddress = vm.addr(deployerPrivateKey);
-        Rheo size = Rheo(payable(sizeContractAddress));
+        Rheo rheo = Rheo(payable(rheoContractAddress));
 
         console.log(currentAddress);
 
-        uint256 balance = size.getUserView(currentAddress).collateralTokenBalance;
-        uint256 debt = size.getUserView(currentAddress).debtBalance;
+        uint256 balance = rheo.getUserView(currentAddress).collateralTokenBalance;
+        uint256 debt = rheo.getUserView(currentAddress).debtBalance;
 
         console.log("balance", balance);
         console.log("debt", debt);
@@ -32,7 +32,7 @@ contract CompensateScript is Script, Logger {
             CompensateParams({creditPositionWithDebtToRepayId: 111, creditPositionToCompensateId: 123, amount: debt});
 
         vm.startBroadcast(deployerPrivateKey);
-        size.compensate(params);
+        rheo.compensate(params);
         vm.stopBroadcast();
     }
 }

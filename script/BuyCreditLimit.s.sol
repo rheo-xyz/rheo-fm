@@ -11,12 +11,12 @@ import {console2 as console} from "forge-std/console2.sol";
 contract BuyCreditLimitScript is Script {
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-        address sizeContractAddress = vm.envAddress("SIZE_CONTRACT_ADDRESS");
-        Rheo size = Rheo(payable(sizeContractAddress));
+        address rheoContractAddress = vm.envAddress("RHEO_CONTRACT_ADDRESS");
+        Rheo rheo = Rheo(payable(rheoContractAddress));
 
         console.log("Current Timestamp:", block.timestamp);
 
-        InitializeRiskConfigParams memory riskConfig = size.riskConfig();
+        InitializeRiskConfigParams memory riskConfig = rheo.riskConfig();
         if (riskConfig.maturities.length < 3) {
             revert("NOT_ENOUGH_MATURITIES");
         }
@@ -31,7 +31,7 @@ contract BuyCreditLimitScript is Script {
         BuyCreditLimitParams memory params = BuyCreditLimitParams({maturities: maturities, aprs: aprs});
 
         vm.startBroadcast(deployerPrivateKey);
-        size.buyCreditLimit(params);
+        rheo.buyCreditLimit(params);
         vm.stopBroadcast();
     }
 }

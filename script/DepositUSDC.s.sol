@@ -12,7 +12,7 @@ contract DepositUSDCScript is Script {
         console.log("Deposit USDC...");
 
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-        address sizeContractAddress = vm.envAddress("SIZE_CONTRACT_ADDRESS");
+        address rheoContractAddress = vm.envAddress("RHEO_CONTRACT_ADDRESS");
         address usdcAddress = vm.envAddress("TOKEN_ADDRESS");
         address lender = vm.envAddress("LENDER");
         address borrower = vm.envAddress("BORROWER");
@@ -22,13 +22,13 @@ contract DepositUSDCScript is Script {
 
         uint256 amount = 100e6; // USDC has 6 decimals
 
-        Rheo size = Rheo(payable(sizeContractAddress));
+        Rheo rheo = Rheo(payable(rheoContractAddress));
 
         /// DepositParams struct
         DepositParams memory params = DepositParams({token: usdcAddress, amount: amount, to: lender});
 
         vm.startBroadcast(deployerPrivateKey);
-        size.deposit(params);
+        rheo.deposit(params);
         vm.stopBroadcast();
     }
 }

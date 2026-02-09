@@ -38,7 +38,7 @@ contract CollectionsManager is
     }
 
     function initialize(IRheoFactory _sizeFactory) external initializer {
-        __ERC721_init("Rheo Collections", "SIZE_COLLECTIONS");
+        __ERC721_init("Rheo Collections", "RHEO_COLLECTIONS");
         __ERC721Enumerable_init();
         __Multicall_init();
         __UUPSUpgradeable_init();
