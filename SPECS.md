@@ -29,6 +29,12 @@ High-level goals:
 - Keep relative bounds: `minTenor`/`maxTenor` remain and are applied via
   `tenor = maturity - block.timestamp` for validation and fee math.
 - `addMaturity` validates non-past and min/max tenor at update time.
+- Because tenor is relative (remaining time-to-maturity), allowlisted maturities can drift
+  out of range over time, and governance updates to `minTenor`/`maxTenor` can also make some
+  allowlisted maturities immediately untradeable (reverting with `MATURITY_OUT_OF_RANGE`)
+  without removing them from the allowlist. This is an intentional trade-off; governance
+  should pre-check the allowlist before updating bounds and use explicit `removeMaturity`
+  when deprecating maturities for transparency.
 - Error semantics:
   - Use `INVALID_MATURITY` when a maturity is in-range but not on the governance allowlist.
   - Use `MATURITY_OUT_OF_RANGE` for bounds violations (min/max tenor checks).
