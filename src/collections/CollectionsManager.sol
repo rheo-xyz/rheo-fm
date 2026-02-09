@@ -6,6 +6,7 @@ import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/U
 import {ERC721EnumerableUpgradeable} from
     "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 import {MulticallUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/MulticallUpgradeable.sol";
+import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
 import {CollectionsManagerBase} from "@rheo-fm/src/collections/CollectionsManagerBase.sol";
 import {CollectionsManagerCuratorActions} from "@rheo-fm/src/collections/actions/CollectionsManagerCuratorActions.sol";
@@ -52,6 +53,6 @@ contract CollectionsManager is
     {}
 
     function _baseURI() internal view virtual override returns (string memory) {
-        return "https://api.rheo.xyz/collections/fm/";
+        return string.concat("https://api.rheo.xyz/collections/fm/", Strings.toString(block.chainid), "/");
     }
 }

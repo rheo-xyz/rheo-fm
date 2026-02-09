@@ -16,7 +16,7 @@ contract CollectionsManagerCuratorActionsTest is BaseTest {
         uint256 collectionId = _createCollection(alice);
         assertEq(collectionsManager.isValidCollectionId(collectionId), true);
         assertEq(collectionsManager.ownerOf(collectionId), alice);
-        assertEq(collectionsManager.tokenURI(collectionId), "https://api.rheo.xyz/collections/fm/0");
+        assertEq(collectionsManager.tokenURI(collectionId), "https://api.rheo.xyz/collections/fm/31337/0");
     }
 
     function test_CollectionsManagerCuratorActions_transfer_collection() public {
