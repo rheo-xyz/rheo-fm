@@ -3,9 +3,9 @@ pragma solidity 0.8.23;
 
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
-import {Safe} from "@safe-utils/Safe.sol";
 import {BaseScript} from "@rheo-fm/script/BaseScript.sol";
 import {Contract, Networks} from "@rheo-fm/script/Networks.sol";
+import {Safe} from "@safe-utils/Safe.sol";
 
 import {CollectionsManager} from "@rheo-fm/src/collections/CollectionsManager.sol";
 import {ICollectionsManager} from "@rheo-fm/src/collections/interfaces/ICollectionsManager.sol";
