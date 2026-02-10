@@ -27,10 +27,13 @@ contract GetMarketShutdownCalldataScript is BaseScript, Networks {
     mapping(IRheo market => EnumerableSet.UintSet) private creditPositionIdsByMarket;
     mapping(IRheo market => uint256) private sumFutureValueByMarket;
 
+    address[2] private extraUsersWithCollateral =
+        [0x83eCCb05386B2d10D05e1BaEa8aC89b5B7EA8290, 0x12328eA44AB6D7B18aa9Cc030714763734b625dB];
+
     function run() public pure {}
 
     function getMarketShutdownCalldata(IRheo market) public returns (bytes memory calldata_) {
-        MarketShutdownParams memory shutdownParams = _collectPositions(market, type(uint256).max, type(uint256).max);
+        MarketShutdownParams memory shutdownParams = collectPositions(market);
         calldata_ = abi.encodeCall(IRheoAdmin.marketShutdown, (shutdownParams));
     }
 
@@ -60,6 +63,10 @@ contract GetMarketShutdownCalldataScript is BaseScript, Networks {
 
     function getSumFutureValue(IRheo market) external view returns (uint256) {
         return sumFutureValueByMarket[market];
+    }
+
+    function collectPositions(IRheo market) public returns (MarketShutdownParams memory params) {
+        return _collectPositions(market, type(uint256).max, type(uint256).max);
     }
 
     function _collectPositions(IRheo market, uint256 maxDebtIds, uint256 maxCreditIds)
@@ -116,6 +123,9 @@ contract GetMarketShutdownCalldataScript is BaseScript, Networks {
 
         borrowers.add(marketView.feeConfig().feeRecipient);
         borrowers.add(contracts[block.chainid][Contract.RHEO_GOVERNANCE]);
+        for (uint256 i = 0; i < extraUsersWithCollateral.length; i++) {
+            borrowers.add(extraUsersWithCollateral[i]);
+        }
 
         params = MarketShutdownParams({
             debtPositionIdsToForceLiquidate: debtPositionIds.values(),

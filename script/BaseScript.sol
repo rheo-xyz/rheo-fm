@@ -3,6 +3,8 @@ pragma solidity 0.8.23;
 
 import {Script} from "forge-std/Script.sol";
 
+import {IRheoFactory} from "@rheo-fm/src/factory/interfaces/IRheoFactory.sol";
+import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
 import {IPriceFeed} from "@rheo-fm/src/oracle/IPriceFeed.sol";
 
 import {Safe} from "@safe-utils/Safe.sol";
@@ -101,5 +103,24 @@ abstract contract BaseScript is Script {
         }
 
         return result;
+    }
+
+    function _getMarket(
+        IRheoFactory sizeFactory,
+        string memory underlyingCollateralTokenSymbol,
+        string memory underlyingBorrowTokenSymbol
+    ) internal view returns (IRheo market) {
+        IRheo[] memory markets = sizeFactory.getMarkets();
+        bytes32 collateralHash = keccak256(bytes(underlyingCollateralTokenSymbol));
+        bytes32 borrowHash = keccak256(bytes(underlyingBorrowTokenSymbol));
+        for (uint256 i = 0; i < markets.length; i++) {
+            if (
+                keccak256(bytes(markets[i].data().underlyingCollateralToken.symbol())) == collateralHash
+                    && keccak256(bytes(markets[i].data().underlyingBorrowToken.symbol())) == borrowHash
+            ) {
+                return markets[i];
+            }
+        }
+        revert("market not found");
     }
 }

@@ -34,8 +34,8 @@
   },
   "lib/safe-utils": {
     "tag": {
-      "name": "v0.0.16",
-      "rev": "506cf9f38efa42a76c9b56dba5cc446adb2582ca"
+      "name": "v0.0.19",
+      "rev": "5310d6cd9c9d3146decfa3f8a17ac3edbeb40ca4"
     }
   },
   "lib/solady": {
