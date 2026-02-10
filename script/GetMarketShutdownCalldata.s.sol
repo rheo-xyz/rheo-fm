@@ -69,10 +69,6 @@ contract GetMarketShutdownCalldataScript is BaseScript, Networks {
         return sumFutureValueByMarket[market];
     }
 
-    function collectPositions(IRheo market) public returns (MarketShutdownParams memory params) {
-        return _collectPositions(market, type(uint256).max, type(uint256).max);
-    }
-
     function _collectPositions(IRheo market, uint256 maxDebtIds, uint256 maxCreditIds)
         private
         returns (MarketShutdownParams memory params)
