@@ -45,6 +45,10 @@ contract GetMarketShutdownCalldataScript is BaseScript, Networks {
         calldata_ = abi.encodeCall(IRheoAdmin.marketShutdown, (shutdownParams));
     }
 
+    function collectPositions(IRheo market) public returns (MarketShutdownParams memory params) {
+        params = _collectPositions(market, type(uint256).max, type(uint256).max);
+    }
+
     function getBorrowers(IRheo market) external view returns (address[] memory) {
         return borrowersByMarket[market].values();
     }
@@ -63,10 +67,6 @@ contract GetMarketShutdownCalldataScript is BaseScript, Networks {
 
     function getSumFutureValue(IRheo market) external view returns (uint256) {
         return sumFutureValueByMarket[market];
-    }
-
-    function collectPositions(IRheo market) public returns (MarketShutdownParams memory params) {
-        return _collectPositions(market, type(uint256).max, type(uint256).max);
     }
 
     function _collectPositions(IRheo market, uint256 maxDebtIds, uint256 maxCreditIds)

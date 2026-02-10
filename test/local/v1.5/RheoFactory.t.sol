@@ -179,6 +179,35 @@ contract RheoFactoryTest is BaseTest {
         assertEq(sizeFactory.getMarketsCount(), 2);
     }
 
+    function test_RheoFactory_removeMarket() public {
+        vm.prank(owner);
+        address market = address(sizeFactory.createMarket(f, r, o, d));
+
+        assertEq(sizeFactory.getMarketsCount(), 2);
+        assertTrue(sizeFactory.isMarket(market));
+
+        vm.prank(owner);
+        sizeFactory.removeMarket(market);
+
+        assertEq(sizeFactory.getMarketsCount(), 1);
+        assertTrue(!sizeFactory.isMarket(market));
+    }
+
+    function test_RheoFactory_removeMarket_revert_on_unauthorized() public {
+        vm.prank(address(0x123));
+        vm.expectRevert(
+            abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, address(0x123), 0x00)
+        );
+        sizeFactory.removeMarket(address(size));
+    }
+
+    function test_RheoFactory_removeMarket_revert_on_invalid_market() public {
+        address invalidMarket = address(0x123);
+        vm.prank(owner);
+        vm.expectRevert(abi.encodeWithSelector(Errors.INVALID_MARKET.selector, invalidMarket));
+        sizeFactory.removeMarket(invalidMarket);
+    }
+
     function test_RheoFactory_createMarket_revert_on_unauthorized() public {
         vm.prank(address(0x123));
         vm.expectRevert(
