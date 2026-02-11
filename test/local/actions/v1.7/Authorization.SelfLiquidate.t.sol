@@ -9,9 +9,9 @@ import {
     SelfLiquidateOnBehalfOfParams, SelfLiquidateParams
 } from "@rheo-fm/src/market/libraries/actions/SelfLiquidate.sol";
 
-import {Action, Authorization} from "@rheo-fm/src/factory/libraries/Authorization.sol";
 import {BaseTest, Vars} from "@rheo-fm/test/BaseTest.sol";
 import {FixedMaturityLimitOrderHelper} from "@rheo-fm/test/helpers/libraries/FixedMaturityLimitOrderHelper.sol";
+import {Action, Authorization} from "@rheo-solidity/src/factory/libraries/Authorization.sol";
 
 contract AuthorizationSelfLiquidateTest is BaseTest {
     function test_AuthorizationSelfLiquidate_selfLiquidateOnBehalfOf() public {

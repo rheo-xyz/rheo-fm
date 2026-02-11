@@ -5,6 +5,7 @@
 @rheo-fm/test/=test/
 @rheo-fm/deprecated/=deprecated/
 @rheo-fm/script/=script/
+@rheo-solidity/src/=lib/rheo-solidity/src/
 @solady=lib/solady
 @chimera=lib/chimera/src
 @crytic/properties=lib/properties

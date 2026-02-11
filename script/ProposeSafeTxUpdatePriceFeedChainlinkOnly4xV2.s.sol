@@ -11,12 +11,13 @@ import {PriceFeedChainlinkMul} from "@rheo-fm/src/oracle/v1.8/PriceFeedChainlink
 import {PriceFeedChainlinkOnly4xV2} from "@rheo-fm/src/oracle/v1.8/PriceFeedChainlinkOnly4xV2.sol";
 
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
-import {IRheoFactory} from "@rheo-fm/src/factory/interfaces/IRheoFactory.sol";
+
 import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
 import {IRheoAdmin} from "@rheo-fm/src/market/interfaces/IRheoAdmin.sol";
 import {UpdateConfigParams} from "@rheo-fm/src/market/libraries/actions/UpdateConfig.sol";
 import {IPriceFeed} from "@rheo-fm/src/oracle/IPriceFeed.sol";
 import {PriceFeedParams} from "@rheo-fm/src/oracle/v1.5.1/PriceFeed.sol";
+import {ISizeFactory} from "@rheo-solidity/src/factory/interfaces/ISizeFactory.sol";
 
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import {console} from "forge-std/console.sol";
@@ -27,14 +28,14 @@ contract ProposeSafeTxUpdatePriceFeedChainlinkOnly4xV2Script is BaseScript, Netw
 
     address signer;
     string derivationPath;
-    IRheoFactory private sizeFactory;
+    ISizeFactory private sizeFactory;
     EnumerableSet.AddressSet private legacyCollaterals;
 
     modifier parseEnv() {
         safe.initialize(contracts[block.chainid][Contract.RHEO_GOVERNANCE]);
         signer = vm.envAddress("SIGNER");
         derivationPath = vm.envString("LEDGER_PATH");
-        sizeFactory = IRheoFactory(contracts[block.chainid][Contract.RHEO_FACTORY]);
+        sizeFactory = ISizeFactory(contracts[block.chainid][Contract.RHEO_FACTORY]);
         _;
     }
 
@@ -51,19 +52,20 @@ contract ProposeSafeTxUpdatePriceFeedChainlinkOnly4xV2Script is BaseScript, Netw
     }
 
     function getUpdatePriceFeedsCalldata() public returns (address[] memory targets, bytes[] memory datas) {
-        sizeFactory = IRheoFactory(contracts[block.chainid][Contract.RHEO_FACTORY]);
+        sizeFactory = ISizeFactory(contracts[block.chainid][Contract.RHEO_FACTORY]);
         _seedLegacyCollaterals();
 
         (PriceFeedParams memory susdeChainlinkParams, PriceFeedParams memory susdeUniswapBaseParams,) =
             priceFeedsUSDeToUsdcMainnet();
         address susde = address(susdeUniswapBaseParams.baseToken);
 
-        IRheo[] memory markets = sizeFactory.getMarkets();
+        address[] memory marketAddresses = sizeFactory.getMarkets();
         uint256 count;
 
-        for (uint256 i = 0; i < markets.length; i++) {
-            address underlyingCollateralToken = address(markets[i].data().underlyingCollateralToken);
-            address underlyingBorrowToken = address(markets[i].data().underlyingBorrowToken);
+        for (uint256 i = 0; i < marketAddresses.length; i++) {
+            IRheo market = IRheo(marketAddresses[i]);
+            address underlyingCollateralToken = address(market.data().underlyingCollateralToken);
+            address underlyingBorrowToken = address(market.data().underlyingBorrowToken);
             if (underlyingBorrowToken != USDC) {
                 continue;
             }
@@ -76,9 +78,10 @@ contract ProposeSafeTxUpdatePriceFeedChainlinkOnly4xV2Script is BaseScript, Netw
         datas = new bytes[](count);
         uint256 index;
 
-        for (uint256 i = 0; i < markets.length; i++) {
-            address underlyingCollateralToken = address(markets[i].data().underlyingCollateralToken);
-            address underlyingBorrowToken = address(markets[i].data().underlyingBorrowToken);
+        for (uint256 i = 0; i < marketAddresses.length; i++) {
+            IRheo market = IRheo(marketAddresses[i]);
+            address underlyingCollateralToken = address(market.data().underlyingCollateralToken);
+            address underlyingBorrowToken = address(market.data().underlyingBorrowToken);
             if (underlyingBorrowToken != USDC) {
                 continue;
             }
@@ -87,12 +90,12 @@ contract ProposeSafeTxUpdatePriceFeedChainlinkOnly4xV2Script is BaseScript, Netw
                 continue;
             }
 
-            IPriceFeed oldFeed = IPriceFeed(markets[i].oracle().priceFeed);
+            IPriceFeed oldFeed = IPriceFeed(market.oracle().priceFeed);
             PriceFeedChainlinkOnly4xV2 updated = underlyingCollateralToken == susde
                 ? _deploySusdeUsdcChainlinkOnly(susdeChainlinkParams)
                 : _deployV2FromLegacy(PriceFeedChainlinkOnly4x(address(oldFeed)));
 
-            targets[index] = address(markets[i]);
+            targets[index] = address(market);
             datas[index] = abi.encodeCall(
                 IRheoAdmin.updateConfig,
                 (UpdateConfigParams({key: "priceFeed", value: uint256(uint160(address(updated)))}))
@@ -101,7 +104,7 @@ contract ProposeSafeTxUpdatePriceFeedChainlinkOnly4xV2Script is BaseScript, Netw
             string memory logMessage = string.concat(
                 "market",
                 " ",
-                vm.toString(address(markets[i])),
+                vm.toString(address(market)),
                 " (",
                 IERC20Metadata(underlyingCollateralToken).symbol(),
                 "/",

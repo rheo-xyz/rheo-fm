@@ -9,8 +9,9 @@ import {PriceFeedChainlinkOnly4x} from "@rheo-fm/deprecated/oracle/v1.8/PriceFee
 
 import {MainnetAddresses} from "@rheo-fm/script/MainnetAddresses.s.sol";
 import {Contract, Networks} from "@rheo-fm/script/Networks.sol";
-import {RheoFactory} from "@rheo-fm/src/factory/RheoFactory.sol";
+
 import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
+import {ISizeFactory} from "@rheo-solidity/src/factory/interfaces/ISizeFactory.sol";
 
 import {Math} from "@rheo-fm/src/market/libraries/Math.sol";
 
@@ -22,6 +23,7 @@ import {IPriceFeed} from "@rheo-fm/src/oracle/IPriceFeed.sol";
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {ProposeSafeTxUpdatePriceFeedChainlinkOnly4xV2Script} from
     "@rheo-fm/script/ProposeSafeTxUpdatePriceFeedChainlinkOnly4xV2.s.sol";
+
 import {PriceFeedChainlinkMul} from "@rheo-fm/src/oracle/v1.8/PriceFeedChainlinkMul.sol";
 import {PriceFeedChainlinkOnly4xV2} from "@rheo-fm/src/oracle/v1.8/PriceFeedChainlinkOnly4xV2.sol";
 import {ForkTest} from "@rheo-fm/test/fork/ForkTest.sol";
@@ -38,7 +40,7 @@ contract ForkPriceFeedChainlinkOnly4xBugReportTest is ForkTest, MainnetAddresses
     function setUp() public override(ForkTest) {
         vm.createSelectFork("mainnet", 24_343_753);
 
-        sizeFactory = RheoFactory(Networks.contracts[block.chainid][Contract.RHEO_FACTORY]);
+        sizeFactory = ISizeFactory(Networks.contracts[block.chainid][Contract.RHEO_FACTORY]);
     }
 
     function testFork_PriceFeedChainlinkOnly4xBugReport_misprices_when_quote_is_non_pegged() public {
@@ -148,20 +150,21 @@ contract ForkPriceFeedChainlinkOnly4xBugReportTest is ForkTest, MainnetAddresses
         }
     }
 
-    function _findMarketBySymbols(RheoFactory sizeFactory, string memory collateralSymbol, string memory borrowSymbol)
+    function _findMarketBySymbols(ISizeFactory sizeFactory, string memory collateralSymbol, string memory borrowSymbol)
         internal
         view
         returns (IRheo)
     {
-        IRheo[] memory markets = sizeFactory.getMarkets();
-        for (uint256 i = 0; i < markets.length; i++) {
-            IERC20Metadata collateralToken = markets[i].data().underlyingCollateralToken;
-            IERC20Metadata borrowToken = markets[i].data().underlyingBorrowToken;
+        address[] memory marketAddresses = sizeFactory.getMarkets();
+        for (uint256 i = 0; i < marketAddresses.length; i++) {
+            IRheo market = IRheo(marketAddresses[i]);
+            IERC20Metadata collateralToken = market.data().underlyingCollateralToken;
+            IERC20Metadata borrowToken = market.data().underlyingBorrowToken;
             if (
                 Strings.equal(collateralToken.symbol(), collateralSymbol)
                     && Strings.equal(borrowToken.symbol(), borrowSymbol)
             ) {
-                return markets[i];
+                return market;
             }
         }
         revert("Market not found");

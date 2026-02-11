@@ -15,8 +15,6 @@ import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.s
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-import {RheoFactory} from "@rheo-fm/src/factory/RheoFactory.sol";
-import {IRheoFactory} from "@rheo-fm/src/factory/interfaces/IRheoFactory.sol";
 import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
 import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
 import {NonTransferrableRebasingTokenVault} from "@rheo-fm/src/market/token/NonTransferrableRebasingTokenVault.sol";
@@ -25,6 +23,7 @@ import {
     DEFAULT_VAULT,
     ERC4626_ADAPTER_ID
 } from "@rheo-fm/src/market/token/NonTransferrableRebasingTokenVault.sol";
+import {ISizeFactory} from "@rheo-solidity/src/factory/interfaces/ISizeFactory.sol";
 
 import {BaseTest} from "@rheo-fm/test/BaseTest.sol";
 import {PoolMock} from "@rheo-fm/test/mocks/PoolMock.sol";
@@ -65,7 +64,7 @@ contract NonTransferrableRebasingTokenVaultTest is BaseTest {
     }
 
     function test_NonTransferrableRebasingTokenVault_initialize() public view {
-        assertEq(token.name(), "Rheo USD Coin Vault");
+        assertEq(token.name(), "Size USD Coin Vault");
         assertEq(token.symbol(), "svUSDC");
         assertEq(token.decimals(), 6);
         assertEq(token.totalSupply(), 0);
@@ -84,7 +83,7 @@ contract NonTransferrableRebasingTokenVaultTest is BaseTest {
                     abi.encodeCall(
                         NonTransferrableRebasingTokenVault.initialize,
                         (
-                            IRheoFactory(address(0)),
+                            ISizeFactory(address(0)),
                             IPool(address(0)),
                             IERC20Metadata(address(0)),
                             owner,

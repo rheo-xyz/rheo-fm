@@ -3,9 +3,9 @@ pragma solidity 0.8.23;
 
 import {console2 as console} from "forge-std/Script.sol";
 
-import {IRheoFactory} from "@rheo-fm/src/factory/interfaces/IRheoFactory.sol";
 import {Rheo} from "@rheo-fm/src/market/Rheo.sol";
 import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
+import {ISizeFactory} from "@rheo-solidity/src/factory/interfaces/ISizeFactory.sol";
 
 import {BaseScript} from "@rheo-fm/script/BaseScript.sol";
 import {Deploy} from "@rheo-fm/script/Deploy.sol";
@@ -35,7 +35,7 @@ contract UpgradeScript is BaseScript, Networks, Deploy {
         console.log("[Rheo v1] new implementation", address(upgrade));
 
         if (shouldUpgrade) {
-            IRheoFactory factory = IRheoFactory(contracts[block.chainid][Contract.RHEO_FACTORY]);
+            ISizeFactory factory = ISizeFactory(contracts[block.chainid][Contract.RHEO_FACTORY]);
             IRheo market = findMarketByNetworkConfiguration(factory, networkConfiguration);
             Rheo(address(market)).upgradeToAndCall(address(upgrade), "");
             console.log("[Rheo v1] upgraded\n");

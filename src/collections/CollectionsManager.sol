@@ -15,8 +15,8 @@ import {CollectionsManagerView} from "@rheo-fm/src/collections/actions/Collectio
 
 import {ICollectionsManager} from "@rheo-fm/src/collections/interfaces/ICollectionsManager.sol";
 
-import {DEFAULT_ADMIN_ROLE, IRheoFactory} from "@rheo-fm/src/factory/interfaces/IRheoFactory.sol";
 import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
+import {DEFAULT_ADMIN_ROLE, ISizeFactory} from "@rheo-solidity/src/factory/interfaces/ISizeFactory.sol";
 
 /// @title CollectionsManager
 /// @custom:security-contact security@rheo.xyz
@@ -37,7 +37,7 @@ contract CollectionsManager is
         _disableInitializers();
     }
 
-    function initialize(IRheoFactory _sizeFactory) external initializer {
+    function initialize(ISizeFactory _sizeFactory) external initializer {
         __ERC721_init("Rheo Collections", "RHEO_COLLECTIONS");
         __ERC721Enumerable_init();
         __Multicall_init();

@@ -47,6 +47,7 @@ import {SetVaultParams} from "@rheo-fm/src/market/libraries/actions/SetVault.sol
 import {UserView} from "@rheo-fm/src/market/RheoView.sol";
 import {CopyLimitOrderConfig} from "@rheo-fm/src/market/libraries/OfferLibrary.sol";
 import {SetCopyLimitOrderConfigsParams} from "@rheo-fm/src/market/libraries/actions/SetCopyLimitOrderConfigs.sol";
+import {CopyLimitOrderConfig as CopyLimitOrderConfigSize} from "@rheo-solidity/src/market/libraries/OfferLibrary.sol";
 
 import {DataView} from "@rheo-fm/src/market/RheoViewData.sol";
 import {IRheoView} from "@rheo-fm/src/market/interfaces/IRheoView.sol";
@@ -55,7 +56,7 @@ import {UpdateConfigParams} from "@rheo-fm/src/market/libraries/actions/UpdateCo
 import {PoolMock} from "@rheo-fm/test/mocks/PoolMock.sol";
 import {PriceFeedMock} from "@rheo-fm/test/mocks/PriceFeedMock.sol";
 
-import {ActionsBitmap} from "@rheo-fm/src/factory/libraries/Authorization.sol";
+import {ActionsBitmap} from "@rheo-solidity/src/factory/libraries/Authorization.sol";
 
 import {Deploy} from "@rheo-fm/script/Deploy.sol";
 
@@ -220,14 +221,15 @@ contract BaseTest is Test, Deploy, AssertsHelper {
     }
 
     function _findMarket(string memory collateralSymbol, string memory borrowSymbol) internal view returns (IRheo) {
-        IRheo[] memory markets = sizeFactory.getMarkets();
+        address[] memory markets = sizeFactory.getMarkets();
         for (uint256 i = 0; i < markets.length; i++) {
-            DataView memory dataView = IRheoView(address(markets[i])).data();
+            IRheo market = IRheo(markets[i]);
+            DataView memory dataView = IRheoView(address(market)).data();
             if (
                 Strings.equal(dataView.underlyingCollateralToken.symbol(), collateralSymbol)
                     && Strings.equal(dataView.underlyingBorrowToken.symbol(), borrowSymbol)
             ) {
-                return markets[i];
+                return market;
             }
         }
 
@@ -576,12 +578,30 @@ contract BaseTest is Test, Deploy, AssertsHelper {
         CopyLimitOrderConfig memory copyBorrowOfferConfig
     ) internal {
         vm.prank(user);
-        sizeFactory.setUserCollectionCopyLimitOrderConfigs(collectionId, copyLoanOfferConfig, copyBorrowOfferConfig);
+        sizeFactory.setUserCollectionCopyLimitOrderConfigs(
+            collectionId,
+            _toFactoryCopyLimitOrderConfig(copyLoanOfferConfig),
+            _toFactoryCopyLimitOrderConfig(copyBorrowOfferConfig)
+        );
     }
 
     function _setAuthorization(address user, address operator, ActionsBitmap actionsBitmap) internal {
         vm.prank(user);
         sizeFactory.setAuthorization(operator, actionsBitmap);
+    }
+
+    function _toFactoryCopyLimitOrderConfig(CopyLimitOrderConfig memory config)
+        internal
+        pure
+        returns (CopyLimitOrderConfigSize memory)
+    {
+        return CopyLimitOrderConfigSize({
+            minTenor: config.minTenor,
+            maxTenor: config.maxTenor,
+            minAPR: config.minAPR,
+            maxAPR: config.maxAPR,
+            offsetAPR: config.offsetAPR
+        });
     }
 
     function _offerFromTenors(uint256[] memory tenors, uint256[] memory aprs)

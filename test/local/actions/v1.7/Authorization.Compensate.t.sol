@@ -7,9 +7,9 @@ import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
 import {RESERVED_ID} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
 import {CompensateOnBehalfOfParams, CompensateParams} from "@rheo-fm/src/market/libraries/actions/Compensate.sol";
 
-import {Action, Authorization} from "@rheo-fm/src/factory/libraries/Authorization.sol";
 import {BaseTest, Vars} from "@rheo-fm/test/BaseTest.sol";
 import {FixedMaturityLimitOrderHelper} from "@rheo-fm/test/helpers/libraries/FixedMaturityLimitOrderHelper.sol";
+import {Action, Authorization} from "@rheo-solidity/src/factory/libraries/Authorization.sol";
 
 contract AuthorizationCompensateTest is BaseTest {
     function test_AuthorizationCompensate_compensateOnBehalfOf() public {

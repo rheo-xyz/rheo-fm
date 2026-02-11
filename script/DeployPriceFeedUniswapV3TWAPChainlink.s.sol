@@ -4,7 +4,6 @@ pragma solidity 0.8.23;
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
-import {RheoFactory} from "@rheo-fm/src/factory/RheoFactory.sol";
 import {console2 as console} from "forge-std/Script.sol";
 
 import {BaseScript} from "@rheo-fm/script/BaseScript.sol";

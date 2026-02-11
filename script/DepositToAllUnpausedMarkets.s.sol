@@ -9,24 +9,29 @@ import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IER
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {BaseScript} from "@rheo-fm/script/BaseScript.sol";
 import {Contract, Networks} from "@rheo-fm/script/Networks.sol";
-import {IRheoFactory} from "@rheo-fm/src/factory/interfaces/IRheoFactory.sol";
-import {IRheoFactoryV1_7} from "@rheo-fm/src/factory/interfaces/IRheoFactoryV1_7.sol";
-import {IRheoFactoryV1_8} from "@rheo-fm/src/factory/interfaces/IRheoFactoryV1_8.sol";
+import {ISizeFactory} from "@rheo-solidity/src/factory/interfaces/ISizeFactory.sol";
+import {ISizeFactoryV1_7} from "@rheo-solidity/src/factory/interfaces/ISizeFactoryV1_7.sol";
+import {ISizeFactoryV1_8} from "@rheo-solidity/src/factory/interfaces/ISizeFactoryV1_8.sol";
 
-import {Authorization} from "@rheo-fm/src/factory/libraries/Authorization.sol";
-import {Action} from "@rheo-fm/src/factory/libraries/Authorization.sol";
 import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
 import {IRheoV1_7} from "@rheo-fm/src/market/interfaces/v1.7/IRheoV1_7.sol";
 import {DepositParams} from "@rheo-fm/src/market/libraries/actions/Deposit.sol";
 import {DepositOnBehalfOfParams} from "@rheo-fm/src/market/libraries/actions/Deposit.sol";
+import {Authorization} from "@rheo-solidity/src/factory/libraries/Authorization.sol";
+import {Action} from "@rheo-solidity/src/factory/libraries/Authorization.sol";
+
 import {console} from "forge-std/console.sol";
 
 contract DepositToAllUnpausedMarketsScript is BaseScript, Networks {
     using SafeERC20 for IERC20Metadata;
 
     function run() external broadcast {
-        IRheoFactory sizeFactory = IRheoFactory(contracts[block.chainid][Contract.RHEO_FACTORY]);
-        IRheo[] memory markets = sizeFactory.getMarkets();
+        ISizeFactory sizeFactory = ISizeFactory(contracts[block.chainid][Contract.RHEO_FACTORY]);
+        address[] memory marketAddresses = sizeFactory.getMarkets();
+        IRheo[] memory markets = new IRheo[](marketAddresses.length);
+        for (uint256 i = 0; i < marketAddresses.length; i++) {
+            markets[i] = IRheo(marketAddresses[i]);
+        }
         IRheo[] memory unpausedMarkets = new IRheo[](markets.length);
         IERC20Metadata underlyingBorrowToken = IERC20Metadata(markets[0].data().underlyingBorrowToken);
         uint256 amount = 10 ** underlyingBorrowToken.decimals();
@@ -40,14 +45,14 @@ contract DepositToAllUnpausedMarketsScript is BaseScript, Networks {
         _unsafeSetLength(unpausedMarkets, unpausedMarketsLength);
         bytes[] memory datas = new bytes[](1 + unpausedMarketsLength + 1);
         datas[0] = abi.encodeCall(
-            IRheoFactoryV1_7.setAuthorization, (address(sizeFactory), Authorization.getActionsBitmap(Action.DEPOSIT))
+            ISizeFactoryV1_7.setAuthorization, (address(sizeFactory), Authorization.getActionsBitmap(Action.DEPOSIT))
         );
         for (uint256 i = 0; i < unpausedMarketsLength; i++) {
             underlyingBorrowToken.forceApprove(address(unpausedMarkets[i]), amount);
             datas[i + 1] = abi.encodeCall(
-                IRheoFactoryV1_8.callMarket,
+                ISizeFactoryV1_8.callMarket,
                 (
-                    unpausedMarkets[i],
+                    address(unpausedMarkets[i]),
                     abi.encodeCall(
                         IRheoV1_7.depositOnBehalfOf,
                         (
@@ -65,7 +70,7 @@ contract DepositToAllUnpausedMarketsScript is BaseScript, Networks {
             );
         }
         datas[unpausedMarketsLength + 1] =
-            abi.encodeCall(IRheoFactoryV1_7.setAuthorization, (address(sizeFactory), Authorization.nullActionsBitmap()));
+            abi.encodeCall(ISizeFactoryV1_7.setAuthorization, (address(sizeFactory), Authorization.nullActionsBitmap()));
         MulticallUpgradeable(address(sizeFactory)).multicall(datas);
     }
 }

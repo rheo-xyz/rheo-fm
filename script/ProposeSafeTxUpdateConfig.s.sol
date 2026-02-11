@@ -3,9 +3,9 @@ pragma solidity 0.8.23;
 
 import {BaseScript} from "@rheo-fm/script/BaseScript.sol";
 import {IMultiSendCallOnly} from "@rheo-fm/script/interfaces/IMultiSendCallOnly.sol";
-import {RheoFactory} from "@rheo-fm/src/factory/RheoFactory.sol";
-import {IRheoFactory} from "@rheo-fm/src/factory/interfaces/IRheoFactory.sol";
+
 import {UpdateConfigParams} from "@rheo-fm/src/market/libraries/actions/UpdateConfig.sol";
+import {ISizeFactory} from "@rheo-solidity/src/factory/interfaces/ISizeFactory.sol";
 
 import {Rheo} from "@rheo-fm/src/market/Rheo.sol";
 import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
@@ -22,7 +22,7 @@ contract ProposeSafeTxUpdateConfigScript is BaseScript, Networks {
 
     address signer;
     string derivationPath;
-    IRheoFactory private sizeFactory;
+    ISizeFactory private sizeFactory;
 
     modifier parseEnv() {
         safe.initialize(vm.envAddress("OWNER"));
@@ -33,23 +33,23 @@ contract ProposeSafeTxUpdateConfigScript is BaseScript, Networks {
         );
         signer = vm.envAddress("SIGNER");
         derivationPath = vm.envString("LEDGER_PATH");
-        sizeFactory = IRheoFactory(vm.envAddress("RHEO_FACTORY"));
+        sizeFactory = ISizeFactory(vm.envAddress("RHEO_FACTORY"));
 
         _;
     }
 
     function run() public parseEnv broadcast {
-        IRheo[] memory markets = sizeFactory.getMarkets();
+        address[] memory marketAddresses = sizeFactory.getMarkets();
 
         string memory updateConfigKey = "swapFeeAPR";
         uint256 updateConfigValue = 0.005e18;
 
-        address[] memory targets = new address[](markets.length);
-        bytes[] memory datas = new bytes[](markets.length);
+        address[] memory targets = new address[](marketAddresses.length);
+        bytes[] memory datas = new bytes[](marketAddresses.length);
 
         // Rheo.updateConfig(key, value) for all markets
-        for (uint256 i = 0; i < markets.length; i++) {
-            targets[i] = address(markets[i]);
+        for (uint256 i = 0; i < marketAddresses.length; i++) {
+            targets[i] = marketAddresses[i];
             datas[i] = abi.encodeCall(
                 Rheo.updateConfig, (UpdateConfigParams({key: updateConfigKey, value: updateConfigValue}))
             );

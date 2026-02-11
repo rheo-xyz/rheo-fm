@@ -13,7 +13,7 @@ import {PriceFeed, PriceFeedParams} from "@rheo-fm/src/oracle/v1.5.1/PriceFeed.s
 import {ForkTest} from "@rheo-fm/test/fork/ForkTest.sol";
 
 import {Contract, Networks} from "@rheo-fm/script/Networks.sol";
-import {IRheoFactory} from "@rheo-fm/src/factory/interfaces/IRheoFactory.sol";
+import {ISizeFactory} from "@rheo-solidity/src/factory/interfaces/ISizeFactory.sol";
 
 import {IUniswapV3Pool} from "@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol";
 import {console} from "forge-std/console.sol";
@@ -37,7 +37,7 @@ contract ForkChainlinkGoesDownUniswapIsUsedAsFallbackTest is ForkTest, Networks 
         vm.createSelectFork("base_archive");
         sizeCbBtcUsdcOwner = contracts[block.chainid][Contract.RHEO_GOVERNANCE];
         sizeCbBtcUsdc = findMarketByNetworkConfiguration(
-            IRheoFactory(contracts[block.chainid][Contract.RHEO_FACTORY]), "base-production-cbbtc-usdc"
+            ISizeFactory(contracts[block.chainid][Contract.RHEO_FACTORY]), "base-production-cbbtc-usdc"
         );
 
         vm.rollFork(blockNumberChainlinkAggregatorRoundId397);

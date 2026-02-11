@@ -32,6 +32,12 @@
   "lib/properties": {
     "rev": "4a328b8d2637a48ac9f7cb74549cc93eb073d2ff"
   },
+  "lib/rheo-solidity": {
+    "tag": {
+      "name": "v1.8.4",
+      "rev": "731984bb2e22ea17eb8393ff1c8f73874e33299b"
+    }
+  },
   "lib/safe-utils": {
     "tag": {
       "name": "v0.0.19",

@@ -12,10 +12,10 @@ import {ERC20Mock} from "@openzeppelin/contracts/mocks/token/ERC20Mock.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
-import {RheoFactory} from "@rheo-fm/src/factory/RheoFactory.sol";
-import {IRheoFactory} from "@rheo-fm/src/factory/interfaces/IRheoFactory.sol";
-import {Action, Authorization} from "@rheo-fm/src/factory/libraries/Authorization.sol";
 import {Rheo} from "@rheo-fm/src/market/Rheo.sol";
+import {SizeFactory} from "@rheo-solidity/src/factory/SizeFactory.sol";
+import {ISizeFactory} from "@rheo-solidity/src/factory/interfaces/ISizeFactory.sol";
+import {Action, Authorization} from "@rheo-solidity/src/factory/libraries/Authorization.sol";
 import {MockERC4626 as ERC4626Solady} from "@solady/test/utils/mocks/MockERC4626.sol";
 
 import {DataView} from "@rheo-fm/src/market/RheoViewData.sol";
@@ -40,18 +40,15 @@ import {WETH} from "@rheo-fm/test/mocks/WETH.sol";
 
 import {PriceFeed, PriceFeedParams} from "@rheo-fm/src/oracle/v1.5.1/PriceFeed.sol";
 
-import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
-
 import "@rheo-fm/src/market/token/NonTransferrableRebasingTokenVault.sol";
 import {AaveAdapter} from "@rheo-fm/src/market/token/adapters/AaveAdapter.sol";
-import {PriceFeedMock} from "@rheo-fm/test/mocks/PriceFeedMock.sol";
 
 contract HalmosRheoTest is Test, HalmosHelpers {
     uint256 private constant USDC_INITIAL_BALANCE = 1_000_000e6;
     address deployer = address(0xcafe0000);
     address feeRecipient = address(0xcafe0001);
 
-    RheoFactory internal sizeFactory;
+    ISizeFactory internal sizeFactory;
     address internal implementation;
     IERC20Metadata internal collateral;
     PriceFeedMock internal priceFeed;
@@ -116,11 +113,11 @@ contract HalmosRheoTest is Test, HalmosHelpers {
         variablePool = IPool(address(new PoolMock()));
 
         token = new NonTransferrableRebasingTokenVaultMock();
-        sizeFactory = RheoFactory(
-            address(new ERC1967Proxy(address(new RheoFactory()), abi.encodeCall(RheoFactory.initialize, (deployer))))
+        sizeFactory = ISizeFactory(
+            address(new ERC1967Proxy(address(new SizeFactory()), abi.encodeCall(SizeFactory.initialize, (deployer))))
         );
         token.initialize(
-            IRheoFactory(address(sizeFactory)),
+            sizeFactory,
             variablePool,
             usdc,
             address(deployer),
@@ -160,7 +157,13 @@ contract HalmosRheoTest is Test, HalmosHelpers {
 
         implementation = address(new Rheo());
         sizeFactory.setRheoImplementation(implementation);
-        proxy = ERC1967Proxy(payable(address(sizeFactory.createMarket(f, r, o, d))));
+        InitializeFeeConfigParams memory feeConfigParams = f;
+        InitializeRiskConfigParams memory riskConfigParams = r;
+        InitializeOracleParams memory oracleParams = o;
+        InitializeDataParams memory dataParams = d;
+        proxy = ERC1967Proxy(
+            payable(sizeFactory.createMarketRheo(feeConfigParams, riskConfigParams, oracleParams, dataParams))
+        );
         size = Rheo(payable(proxy));
         PriceFeedMock(address(priceFeed)).setPrice(1337e18);
 

@@ -5,12 +5,12 @@ import {IAToken} from "@aave/interfaces/IAToken.sol";
 import {UserView} from "@rheo-fm/src/market/RheoView.sol";
 import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
 
-import {Action, Authorization} from "@rheo-fm/src/factory/libraries/Authorization.sol";
 import {FixedMaturityLimitOrder, OfferLibrary} from "@rheo-fm/src/market/libraries/OfferLibrary.sol";
 import {
     BuyCreditLimitOnBehalfOfParams,
     BuyCreditLimitParams
 } from "@rheo-fm/src/market/libraries/actions/BuyCreditLimit.sol";
+import {Action, Authorization} from "@rheo-solidity/src/factory/libraries/Authorization.sol";
 
 import {BaseTest} from "@rheo-fm/test/BaseTest.sol";
 

@@ -9,7 +9,7 @@ import {GetMarketShutdownCalldataScript} from "@rheo-fm/script/GetMarketShutdown
 import {Contract, Networks} from "@rheo-fm/script/Networks.sol";
 import {Safe} from "@safe-utils/Safe.sol";
 
-import {IRheoFactory} from "@rheo-fm/src/factory/interfaces/IRheoFactory.sol";
+import {ISizeFactory} from "@rheo-solidity/src/factory/interfaces/ISizeFactory.sol";
 
 import {DataView} from "@rheo-fm/src/market/RheoViewData.sol";
 import {IMulticall} from "@rheo-fm/src/market/interfaces/IMulticall.sol";
@@ -44,7 +44,7 @@ contract ProposeSafeTxMarketShutdownScript is BaseScript, Networks {
     }
 
     function getMarketShutdownData() public returns (address[] memory targets, bytes[] memory datas) {
-        IRheoFactory sizeFactory = IRheoFactory(contracts[block.chainid][Contract.RHEO_FACTORY]);
+        ISizeFactory sizeFactory = ISizeFactory(contracts[block.chainid][Contract.RHEO_FACTORY]);
         IRheo[] memory marketsToShutdown = _getMarketsToShutdown(sizeFactory);
         IRheo remainingMarket = _getRemainingMarket(sizeFactory, marketsToShutdown);
 
@@ -94,7 +94,7 @@ contract ProposeSafeTxMarketShutdownScript is BaseScript, Networks {
 
         bytes[] memory removeMarketData = new bytes[](marketsToShutdown.length);
         for (uint256 i = 0; i < marketsToShutdown.length; i++) {
-            removeMarketData[i] = abi.encodeCall(IRheoFactory.removeMarket, (address(marketsToShutdown[i])));
+            removeMarketData[i] = abi.encodeCall(ISizeFactory.removeMarket, (address(marketsToShutdown[i])));
         }
         targets[index] = address(sizeFactory);
         datas[index] = abi.encodeCall(IMulticall.multicall, (removeMarketData));
@@ -125,7 +125,7 @@ contract ProposeSafeTxMarketShutdownScript is BaseScript, Networks {
         return index;
     }
 
-    function _getMarketsToShutdown(IRheoFactory sizeFactory) internal view returns (IRheo[] memory marketsToShutdown) {
+    function _getMarketsToShutdown(ISizeFactory sizeFactory) internal view returns (IRheo[] memory marketsToShutdown) {
         string[] memory collateralMarketsToShutdown = block.chainid == 1
             ? collateralMarketsToShutdownMainnet
             : block.chainid == 8453 ? collateralMarketsToShutdownBase : new string[](0);
@@ -136,7 +136,7 @@ contract ProposeSafeTxMarketShutdownScript is BaseScript, Networks {
         }
     }
 
-    function _getRemainingMarket(IRheoFactory sizeFactory, IRheo[] memory marketsToShutdown)
+    function _getRemainingMarket(ISizeFactory sizeFactory, IRheo[] memory marketsToShutdown)
         internal
         view
         returns (IRheo)

@@ -9,7 +9,8 @@ import {Safe} from "@safe-utils/Safe.sol";
 
 import {CollectionsManager} from "@rheo-fm/src/collections/CollectionsManager.sol";
 import {ICollectionsManager} from "@rheo-fm/src/collections/interfaces/ICollectionsManager.sol";
-import {RheoFactory} from "@rheo-fm/src/factory/RheoFactory.sol";
+import {SizeFactory} from "@rheo-solidity/src/factory/SizeFactory.sol";
+import {ISizeFactory} from "@rheo-solidity/src/factory/interfaces/ISizeFactory.sol";
 
 import {console} from "forge-std/console.sol";
 
@@ -50,8 +51,9 @@ contract ProposeSafeTxUpgradeCollectionsManagerV1_8_4_Update2Script is BaseScrip
         public
         returns (address[] memory targets, bytes[] memory datas)
     {
-        RheoFactory sizeFactory = RheoFactory(contracts[block.chainid][Contract.RHEO_FACTORY]);
-        ICollectionsManager collectionsManager = sizeFactory.collectionsManager();
+        ISizeFactory sizeFactory = ISizeFactory(contracts[block.chainid][Contract.RHEO_FACTORY]);
+        ICollectionsManager collectionsManager =
+            ICollectionsManager(address(SizeFactory(payable(address(sizeFactory))).collectionsManager()));
 
         CollectionsManager newCollectionsManagerImplementation = new CollectionsManager();
         console.log(
