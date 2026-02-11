@@ -3,25 +3,52 @@
 set -ux
 
 j=$((0x10))
-SEARCH_DIRS=(
+BASE_SEARCH_DIRS=(
   src/market/libraries
   src/market/token/libraries
+  src/factory/libraries
+  test/helpers/libraries
+)
+LEGACY_SEARCH_DIRS=(
   lib/rheo-solidity/src/market/libraries
   lib/rheo-solidity/src/market/token/libraries
   lib/rheo-solidity/src/factory/libraries
-  test/helpers/libraries
 )
-EXISTING_DIRS=()
-for d in "${SEARCH_DIRS[@]}"; do
+
+BASE_EXISTING_DIRS=()
+for d in "${BASE_SEARCH_DIRS[@]}"; do
     if [ -d "$d" ]; then
-        EXISTING_DIRS+=("$d")
+        BASE_EXISTING_DIRS+=("$d")
     fi
 done
 
-if [ "${#EXISTING_DIRS[@]}" -eq 0 ]; then
-    SOLIDITY_FILES=""
+LEGACY_EXISTING_DIRS=()
+for d in "${LEGACY_SEARCH_DIRS[@]}"; do
+    if [ -d "$d" ]; then
+        LEGACY_EXISTING_DIRS+=("$d")
+    fi
+done
+
+if [ "${#BASE_EXISTING_DIRS[@]}" -eq 0 ]; then
+    BASE_SOLIDITY_FILES=""
 else
-    SOLIDITY_FILES=$(find "${EXISTING_DIRS[@]}" -type f -name '*.sol' -printf '%f\n' | sed 's/\.sol$//' | sort -u)
+    BASE_SOLIDITY_FILES=$(find "${BASE_EXISTING_DIRS[@]}" -type f -name '*.sol' -printf '%f\n' | sed 's/\.sol$//' | sort -u)
+fi
+
+if [ "${#LEGACY_EXISTING_DIRS[@]}" -eq 0 ]; then
+    LEGACY_SOLIDITY_FILES=""
+else
+    LEGACY_SOLIDITY_FILES=$(find "${LEGACY_EXISTING_DIRS[@]}" -type f -name '*.sol' -printf '%f\n' | sed 's/\.sol$//' | sort -u)
+fi
+
+if [ -n "$LEGACY_SOLIDITY_FILES" ] && [ -n "$BASE_SOLIDITY_FILES" ]; then
+    # Keep local Rheo libraries authoritative and only import additional legacy libs.
+    LEGACY_SOLIDITY_FILES=$(grep -vxF -f <(printf "%s\n" "$BASE_SOLIDITY_FILES") <(printf "%s\n" "$LEGACY_SOLIDITY_FILES") || true)
+fi
+
+SOLIDITY_FILES=$(printf "%s\n%s\n" "$BASE_SOLIDITY_FILES" "$LEGACY_SOLIDITY_FILES" | sed '/^$/d')
+if [ -n "$SOLIDITY_FILES" ]; then
+    SOLIDITY_FILES=$(printf "%s\n" "$SOLIDITY_FILES" | sort -u)
 fi
 
 rm COMPILE_LIBRARIES.txt || true
