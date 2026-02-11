@@ -6,8 +6,11 @@ j=$((0x10))
 SEARCH_DIRS=(
   src/market/libraries
   src/market/token/libraries
+  lib/rheo-solidity/src/market/libraries
+  lib/rheo-solidity/src/market/token/libraries
   lib/rheo-solidity/src/factory/libraries
   test/helpers/libraries
+  lib/rheo-solidity/test/helpers/libraries
 )
 EXISTING_DIRS=()
 for d in "${SEARCH_DIRS[@]}"; do
@@ -19,7 +22,7 @@ done
 if [ "${#EXISTING_DIRS[@]}" -eq 0 ]; then
     SOLIDITY_FILES=""
 else
-    SOLIDITY_FILES=$(find "${EXISTING_DIRS[@]}" -type f | sed 's/.*\///' | sed 's/\.sol//')
+    SOLIDITY_FILES=$(find "${EXISTING_DIRS[@]}" -type f -name '*.sol' -printf '%f\n' | sed 's/\.sol$//' | sort -u)
 fi
 
 rm COMPILE_LIBRARIES.txt || true
