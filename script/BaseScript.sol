@@ -2,6 +2,7 @@
 pragma solidity 0.8.23;
 
 import {Script} from "forge-std/Script.sol";
+import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
 import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
 import {IPriceFeed} from "@rheo-fm/src/oracle/IPriceFeed.sol";
@@ -111,13 +112,11 @@ abstract contract BaseScript is Script {
         string memory underlyingBorrowTokenSymbol
     ) internal view returns (IRheo market) {
         address[] memory markets = sizeFactory.getMarkets();
-        bytes32 collateralHash = keccak256(bytes(underlyingCollateralTokenSymbol));
-        bytes32 borrowHash = keccak256(bytes(underlyingBorrowTokenSymbol));
         for (uint256 i = 0; i < markets.length; i++) {
             IRheo candidate = IRheo(markets[i]);
             if (
-                keccak256(bytes(candidate.data().underlyingCollateralToken.symbol())) == collateralHash
-                    && keccak256(bytes(candidate.data().underlyingBorrowToken.symbol())) == borrowHash
+                Strings.equal(candidate.data().underlyingCollateralToken.symbol(), underlyingCollateralTokenSymbol)
+                    && Strings.equal(candidate.data().underlyingBorrowToken.symbol(), underlyingBorrowTokenSymbol)
             ) {
                 return candidate;
             }

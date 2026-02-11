@@ -595,6 +595,7 @@ contract BaseTest is Test, Deploy, AssertsHelper {
         pure
         returns (CopyLimitOrderConfigSize memory)
     {
+        // Same fields, but Solidity treats structs from different imports as distinct types.
         return CopyLimitOrderConfigSize({
             minTenor: config.minTenor,
             maxTenor: config.maxTenor,
