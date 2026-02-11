@@ -10,6 +10,7 @@ SEARCH_DIRS=(
   lib/rheo-solidity/src/market/token/libraries
   lib/rheo-solidity/src/factory/libraries
   test/helpers/libraries
+  lib/rheo-solidity/test/helpers/libraries
 )
 EXISTING_DIRS=()
 for d in "${SEARCH_DIRS[@]}"; do
