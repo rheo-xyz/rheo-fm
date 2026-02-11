@@ -16,7 +16,7 @@ import {SetCopyLimitOrderConfigsOnBehalfOfParams} from
 import {SetUserConfigurationOnBehalfOfParams} from "@rheo-fm/src/market/libraries/actions/SetUserConfiguration.sol";
 import {WithdrawOnBehalfOfParams} from "@rheo-fm/src/market/libraries/actions/Withdraw.sol";
 
-import {IRheoFactory} from "@rheo-fm/src/factory/interfaces/IRheoFactory.sol";
+import {ISizeFactory} from "@rheo-solidity/src/factory/interfaces/ISizeFactory.sol";
 
 /// @title IRheoV1_7
 /// @custom:security-contact security@rheo.xyz

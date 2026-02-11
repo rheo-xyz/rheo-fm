@@ -7,7 +7,7 @@ import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IER
 
 import {BaseScript} from "@rheo-fm/script/BaseScript.sol";
 import {Contract, Networks} from "@rheo-fm/script/Networks.sol";
-import {IRheoFactory} from "@rheo-fm/src/factory/interfaces/IRheoFactory.sol";
+
 import {DataView} from "@rheo-fm/src/market/RheoViewData.sol";
 import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
 import {
@@ -16,6 +16,8 @@ import {
     InitializeOracleParams,
     InitializeRiskConfigParams
 } from "@rheo-fm/src/market/libraries/actions/Initialize.sol";
+import {ISizeFactory} from "@rheo-solidity/src/factory/interfaces/ISizeFactory.sol";
+import {ISizeFactoryV1_9} from "@rheo-solidity/src/factory/interfaces/ISizeFactoryV1_9.sol";
 import {Safe} from "@safe-utils/Safe.sol";
 
 import {IPriceFeed} from "@rheo-fm/src/oracle/IPriceFeed.sol";
@@ -25,10 +27,9 @@ import {Tenderly} from "@tenderly-utils/Tenderly.sol";
 
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
-import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
-
 import {PendleChainlinkOracle} from "@pendle/contracts/oracles/PtYtLpOracle/chainlink/PendleChainlinkOracle.sol";
 import {PendleSparkLinearDiscountOracle} from "@pendle/contracts/oracles/internal/PendleSparkLinearDiscountOracle.sol";
+
 import {PriceFeedPendleSparkLinearDiscountChainlink} from
     "@rheo-fm/src/oracle/v1.7.1/PriceFeedPendleSparkLinearDiscountChainlink.sol";
 import {PriceFeedPendleTWAPChainlink} from "@rheo-fm/src/oracle/v1.7.2/PriceFeedPendleTWAPChainlink.sol";
@@ -42,7 +43,7 @@ contract ProposeSafeTxDeployPTMarketScript is BaseScript, Networks {
     address signer;
     string derivationPath;
 
-    IRheoFactory private sizeFactory;
+    ISizeFactory private sizeFactory;
     address private safeAddress;
 
     IERC20Metadata private underlyingCollateralToken;
@@ -51,7 +52,7 @@ contract ProposeSafeTxDeployPTMarketScript is BaseScript, Networks {
     modifier parseEnv() {
         signer = vm.envAddress("SIGNER");
         derivationPath = vm.envString("LEDGER_PATH");
-        sizeFactory = IRheoFactory(contracts[block.chainid][Contract.RHEO_FACTORY]);
+        sizeFactory = ISizeFactory(contracts[block.chainid][Contract.RHEO_FACTORY]);
 
         string memory accountSlug = vm.envString("TENDERLY_ACCOUNT_NAME");
         string memory projectSlug = vm.envString("TENDERLY_PROJECT_NAME");
@@ -69,7 +70,7 @@ contract ProposeSafeTxDeployPTMarketScript is BaseScript, Networks {
     }
 
     function run() external parseEnv deleteVirtualTestnets {
-        IRheo market = sizeFactory.getMarket(1);
+        IRheo market = IRheo(sizeFactory.getMarket(1));
         InitializeFeeConfigParams memory feeConfigParams = market.feeConfig();
 
         InitializeRiskConfigParams memory riskConfigParams = market.riskConfig();
@@ -86,8 +87,9 @@ contract ProposeSafeTxDeployPTMarketScript is BaseScript, Networks {
             borrowTokenVault: address(dataView.borrowTokenVault),
             sizeFactory: address(sizeFactory)
         });
-        bytes memory data =
-            abi.encodeCall(IRheoFactory.createMarket, (feeConfigParams, riskConfigParams, oracleParams, dataParams));
+        bytes memory data = abi.encodeCall(
+            ISizeFactoryV1_9.createMarketRheo, (feeConfigParams, riskConfigParams, oracleParams, dataParams)
+        );
         address target = address(sizeFactory);
         safe.proposeTransaction(target, data, signer, derivationPath);
         Tenderly.VirtualTestnet memory vnet = tenderly.createVirtualTestnet("pt-market-vnet", block.chainid);

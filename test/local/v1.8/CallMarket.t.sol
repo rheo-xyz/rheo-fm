@@ -1,17 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
+import {MulticallUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/MulticallUpgradeable.sol";
 import {ERC20Mock} from "@openzeppelin/contracts/mocks/token/ERC20Mock.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
-import {IRheoFactory} from "@rheo-fm/src/factory/interfaces/IRheoFactory.sol";
-import {IRheoFactoryV1_7} from "@rheo-fm/src/factory/interfaces/IRheoFactoryV1_7.sol";
-import {IRheoFactoryV1_8} from "@rheo-fm/src/factory/interfaces/IRheoFactoryV1_8.sol";
-import {Action, Authorization} from "@rheo-fm/src/factory/libraries/Authorization.sol";
 import {DataView} from "@rheo-fm/src/market/RheoViewData.sol";
 import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
 import {IRheoV1_7} from "@rheo-fm/src/market/interfaces/v1.7/IRheoV1_7.sol";
 import {IRheoV1_8} from "@rheo-fm/src/market/interfaces/v1.8/IRheoV1_8.sol";
+import {ISizeFactory} from "@rheo-solidity/src/factory/interfaces/ISizeFactory.sol";
+import {ISizeFactoryV1_7} from "@rheo-solidity/src/factory/interfaces/ISizeFactoryV1_7.sol";
+import {ISizeFactoryV1_8} from "@rheo-solidity/src/factory/interfaces/ISizeFactoryV1_8.sol";
+import {Action, Authorization} from "@rheo-solidity/src/factory/libraries/Authorization.sol";
 
 import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
 import {RESERVED_ID} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
@@ -91,12 +92,12 @@ contract CallMarketTest is BaseTest {
 
         bytes[] memory datas = new bytes[](7);
         datas[0] = abi.encodeCall(
-            IRheoFactoryV1_7.setAuthorization, (address(sizeFactory), Authorization.getActionsBitmap(actions))
+            ISizeFactoryV1_7.setAuthorization, (address(sizeFactory), Authorization.getActionsBitmap(actions))
         );
         datas[1] = abi.encodeCall(
-            IRheoFactoryV1_8.callMarket,
+            ISizeFactoryV1_8.callMarket,
             (
-                size1,
+                address(size1),
                 abi.encodeCall(
                     IRheoV1_7.depositOnBehalfOf,
                     (
@@ -109,9 +110,9 @@ contract CallMarketTest is BaseTest {
             )
         );
         datas[2] = abi.encodeCall(
-            IRheoFactoryV1_8.callMarket,
+            ISizeFactoryV1_8.callMarket,
             (
-                size1,
+                address(size1),
                 abi.encodeCall(
                     IRheoV1_7.sellCreditMarketOnBehalfOf,
                     (
@@ -135,9 +136,9 @@ contract CallMarketTest is BaseTest {
             )
         );
         datas[3] = abi.encodeCall(
-            IRheoFactoryV1_8.callMarket,
+            ISizeFactoryV1_8.callMarket,
             (
-                size2,
+                address(size2),
                 abi.encodeCall(
                     IRheoV1_7.depositOnBehalfOf,
                     (
@@ -150,9 +151,9 @@ contract CallMarketTest is BaseTest {
             )
         );
         datas[4] = abi.encodeCall(
-            IRheoFactoryV1_8.callMarket,
+            ISizeFactoryV1_8.callMarket,
             (
-                size2,
+                address(size2),
                 abi.encodeCall(
                     IRheoV1_7.sellCreditMarketOnBehalfOf,
                     (
@@ -176,9 +177,9 @@ contract CallMarketTest is BaseTest {
             )
         );
         datas[5] = abi.encodeCall(
-            IRheoFactoryV1_8.callMarket,
+            ISizeFactoryV1_8.callMarket,
             (
-                size1,
+                address(size1),
                 abi.encodeCall(
                     IRheoV1_7.withdrawOnBehalfOf,
                     (
@@ -191,10 +192,10 @@ contract CallMarketTest is BaseTest {
             )
         );
         datas[6] =
-            abi.encodeCall(IRheoFactoryV1_7.setAuthorization, (address(sizeFactory), Authorization.nullActionsBitmap()));
+            abi.encodeCall(ISizeFactoryV1_7.setAuthorization, (address(sizeFactory), Authorization.nullActionsBitmap()));
 
         vm.startPrank(bob);
-        sizeFactory.multicall(datas);
+        MulticallUpgradeable(address(sizeFactory)).multicall(datas);
 
         assertEq(usdc.balanceOf(bob), usdcBalanceBefore + usdcAmount * 2);
     }
@@ -203,7 +204,7 @@ contract CallMarketTest is BaseTest {
         vm.startPrank(bob);
         vm.expectRevert(abi.encodeWithSelector(Errors.INVALID_MARKET.selector, address(alice)));
         sizeFactory.callMarket(
-            IRheo(address(alice)),
+            address(alice),
             abi.encodeCall(IRheo.withdraw, (WithdrawParams({token: address(usdc), amount: 100e6, to: bob})))
         );
     }
@@ -227,13 +228,13 @@ contract CallMarketTest is BaseTest {
 
         bytes[] memory datas = new bytes[](5);
         datas[0] = abi.encodeCall(
-            IRheoFactoryV1_7.setAuthorization,
+            ISizeFactoryV1_7.setAuthorization,
             (address(sizeFactory), Authorization.getActionsBitmap(Action.SET_COPY_LIMIT_ORDER_CONFIGS))
         );
         datas[1] = abi.encodeCall(
-            IRheoFactoryV1_8.callMarket,
+            ISizeFactoryV1_8.callMarket,
             (
-                size1,
+                address(size1),
                 abi.encodeCall(
                     IRheoV1_7.setCopyLimitOrderConfigsOnBehalfOf,
                     (
@@ -249,9 +250,9 @@ contract CallMarketTest is BaseTest {
             )
         );
         datas[2] = abi.encodeCall(
-            IRheoFactoryV1_8.callMarket,
+            ISizeFactoryV1_8.callMarket,
             (
-                size2,
+                address(size2),
                 abi.encodeCall(
                     IRheoV1_7.setCopyLimitOrderConfigsOnBehalfOf,
                     (
@@ -267,11 +268,11 @@ contract CallMarketTest is BaseTest {
             )
         );
         datas[3] =
-            abi.encodeCall(IRheoFactoryV1_7.setAuthorization, (address(sizeFactory), Authorization.nullActionsBitmap()));
-        datas[4] = abi.encodeCall(IRheoFactoryV1_8.subscribeToCollections, (collectionIds));
+            abi.encodeCall(ISizeFactoryV1_7.setAuthorization, (address(sizeFactory), Authorization.nullActionsBitmap()));
+        datas[4] = abi.encodeCall(ISizeFactoryV1_8.subscribeToCollections, (collectionIds));
 
         vm.startPrank(bob);
-        sizeFactory.multicall(datas);
+        MulticallUpgradeable(address(sizeFactory)).multicall(datas);
 
         uint256 maturity = block.timestamp + 150 days;
         assertEq(size1.getLoanOfferAPR(bob, collectionId, alice, maturity), 0.03e18);
@@ -309,12 +310,12 @@ contract CallMarketTest is BaseTest {
 
         bytes[] memory datas = new bytes[](5);
         datas[0] = abi.encodeCall(
-            IRheoFactoryV1_7.setAuthorization, (address(sizeFactory), Authorization.getActionsBitmap(actions))
+            ISizeFactoryV1_7.setAuthorization, (address(sizeFactory), Authorization.getActionsBitmap(actions))
         );
         datas[1] = abi.encodeCall(
-            IRheoFactoryV1_8.callMarket,
+            ISizeFactoryV1_8.callMarket,
             (
-                size1,
+                address(size1),
                 abi.encodeCall(
                     IRheoV1_8.setVaultOnBehalfOf,
                     (
@@ -327,9 +328,9 @@ contract CallMarketTest is BaseTest {
             )
         );
         datas[2] = abi.encodeCall(
-            IRheoFactoryV1_8.callMarket,
+            ISizeFactoryV1_8.callMarket,
             (
-                size1,
+                address(size1),
                 abi.encodeCall(
                     IRheoV1_7.depositOnBehalfOf,
                     (
@@ -341,14 +342,14 @@ contract CallMarketTest is BaseTest {
                 )
             )
         );
-        datas[3] = abi.encodeCall(IRheoFactoryV1_8.subscribeToCollections, (collectionIds));
+        datas[3] = abi.encodeCall(ISizeFactoryV1_8.subscribeToCollections, (collectionIds));
         datas[4] =
-            abi.encodeCall(IRheoFactoryV1_7.setAuthorization, (address(sizeFactory), Authorization.nullActionsBitmap()));
+            abi.encodeCall(ISizeFactoryV1_7.setAuthorization, (address(sizeFactory), Authorization.nullActionsBitmap()));
 
         vm.prank(candy);
         usdc.approve(address(size1), depositAmount);
         vm.prank(candy);
-        sizeFactory.multicall(datas);
+        MulticallUpgradeable(address(sizeFactory)).multicall(datas);
 
         assertEq(_state().candy.borrowTokenBalance, depositAmount);
         uint256 maturity = block.timestamp + 150 days;

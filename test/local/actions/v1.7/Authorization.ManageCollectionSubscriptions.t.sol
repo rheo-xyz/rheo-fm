@@ -7,8 +7,8 @@ import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
 import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
 import {CopyLimitOrderConfig} from "@rheo-fm/src/market/libraries/OfferLibrary.sol";
 
-import {Action, Authorization} from "@rheo-fm/src/factory/libraries/Authorization.sol";
 import {BaseTest} from "@rheo-fm/test/BaseTest.sol";
+import {Action, Authorization} from "@rheo-solidity/src/factory/libraries/Authorization.sol";
 
 contract AuthorizationManageCollectionSubscriptionsTest is BaseTest {
     uint256 private collectionId;
@@ -27,12 +27,12 @@ contract AuthorizationManageCollectionSubscriptionsTest is BaseTest {
         vm.prank(candy);
         sizeFactory.subscribeToCollectionsOnBehalfOf(collectionIds, alice);
 
-        assertEq(sizeFactory.collectionsManager().isSubscribedToCollection(alice, collectionId), true);
+        assertEq(collectionsManager.isSubscribedToCollection(alice, collectionId), true);
 
         vm.prank(candy);
         sizeFactory.unsubscribeFromCollectionsOnBehalfOf(collectionIds, alice);
 
-        assertEq(sizeFactory.collectionsManager().isSubscribedToCollection(alice, collectionId), false);
+        assertEq(collectionsManager.isSubscribedToCollection(alice, collectionId), false);
     }
 
     function test_AuthorizationManageCollectionSubscriptions_validation() public {
@@ -80,7 +80,10 @@ contract AuthorizationManageCollectionSubscriptionsTest is BaseTest {
         // Should not revert when authorized
         vm.prank(candy);
         sizeFactory.setUserCollectionCopyLimitOrderConfigsOnBehalfOf(
-            collectionId, copyLoanOfferConfig, copyBorrowOfferConfig, alice
+            collectionId,
+            _toFactoryCopyLimitOrderConfig(copyLoanOfferConfig),
+            _toFactoryCopyLimitOrderConfig(copyBorrowOfferConfig),
+            alice
         );
     }
 
@@ -109,7 +112,10 @@ contract AuthorizationManageCollectionSubscriptionsTest is BaseTest {
         );
         vm.prank(alice);
         sizeFactory.setUserCollectionCopyLimitOrderConfigsOnBehalfOf(
-            collectionId, copyLoanOfferConfig, copyBorrowOfferConfig, bob
+            collectionId,
+            _toFactoryCopyLimitOrderConfig(copyLoanOfferConfig),
+            _toFactoryCopyLimitOrderConfig(copyBorrowOfferConfig),
+            bob
         );
     }
 }

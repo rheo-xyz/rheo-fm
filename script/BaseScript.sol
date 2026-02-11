@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
+import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {Script} from "forge-std/Script.sol";
 
-import {IRheoFactory} from "@rheo-fm/src/factory/interfaces/IRheoFactory.sol";
 import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
 import {IPriceFeed} from "@rheo-fm/src/oracle/IPriceFeed.sol";
+import {ISizeFactory} from "@rheo-solidity/src/factory/interfaces/ISizeFactory.sol";
 
 import {Safe} from "@safe-utils/Safe.sol";
 import {Tenderly} from "@tenderly-utils/Tenderly.sol";
@@ -106,19 +107,18 @@ abstract contract BaseScript is Script {
     }
 
     function _getMarket(
-        IRheoFactory sizeFactory,
+        ISizeFactory sizeFactory,
         string memory underlyingCollateralTokenSymbol,
         string memory underlyingBorrowTokenSymbol
     ) internal view returns (IRheo market) {
-        IRheo[] memory markets = sizeFactory.getMarkets();
-        bytes32 collateralHash = keccak256(bytes(underlyingCollateralTokenSymbol));
-        bytes32 borrowHash = keccak256(bytes(underlyingBorrowTokenSymbol));
+        address[] memory markets = sizeFactory.getMarkets();
         for (uint256 i = 0; i < markets.length; i++) {
+            IRheo candidate = IRheo(markets[i]);
             if (
-                keccak256(bytes(markets[i].data().underlyingCollateralToken.symbol())) == collateralHash
-                    && keccak256(bytes(markets[i].data().underlyingBorrowToken.symbol())) == borrowHash
+                Strings.equal(candidate.data().underlyingCollateralToken.symbol(), underlyingCollateralTokenSymbol)
+                    && Strings.equal(candidate.data().underlyingBorrowToken.symbol(), underlyingBorrowTokenSymbol)
             ) {
-                return markets[i];
+                return candidate;
             }
         }
         revert("market not found");

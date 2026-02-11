@@ -52,3 +52,6 @@
 [submodule "lib/safe-utils"]
 	path = lib/safe-utils
 	url = https://github.com/Recon-Fuzz/safe-utils
+[submodule "lib/rheo-solidity"]
+	path = lib/rheo-solidity
+	url = https://github.com/rheo-xyz/rheo-solidity

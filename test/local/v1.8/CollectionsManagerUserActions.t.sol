@@ -12,7 +12,7 @@ contract CollectionsManagerUserActionsTest is BaseTest {
 
         _subscribeToCollection(bob, collectionId);
 
-        assertEq(sizeFactory.collectionsManager().isSubscribedToCollection(bob, collectionId), true);
+        assertEq(collectionsManager.isSubscribedToCollection(bob, collectionId), true);
 
         CopyLimitOrderConfig memory expectedConfig = CopyLimitOrderConfig({
             minTenor: 0,
@@ -22,44 +22,44 @@ contract CollectionsManagerUserActionsTest is BaseTest {
             offsetAPR: 0
         });
         assertEq(
-            sizeFactory.collectionsManager().getUserDefinedCollectionCopyLoanOfferConfig(bob, collectionId).minTenor,
+            collectionsManager.getUserDefinedCollectionCopyLoanOfferConfig(bob, collectionId).minTenor,
             expectedConfig.minTenor
         );
         assertEq(
-            sizeFactory.collectionsManager().getUserDefinedCollectionCopyLoanOfferConfig(bob, collectionId).maxTenor,
+            collectionsManager.getUserDefinedCollectionCopyLoanOfferConfig(bob, collectionId).maxTenor,
             expectedConfig.maxTenor
         );
         assertEq(
-            sizeFactory.collectionsManager().getUserDefinedCollectionCopyLoanOfferConfig(bob, collectionId).minAPR,
+            collectionsManager.getUserDefinedCollectionCopyLoanOfferConfig(bob, collectionId).minAPR,
             expectedConfig.minAPR
         );
         assertEq(
-            sizeFactory.collectionsManager().getUserDefinedCollectionCopyLoanOfferConfig(bob, collectionId).maxAPR,
+            collectionsManager.getUserDefinedCollectionCopyLoanOfferConfig(bob, collectionId).maxAPR,
             expectedConfig.maxAPR
         );
         assertEq(
-            sizeFactory.collectionsManager().getUserDefinedCollectionCopyLoanOfferConfig(bob, collectionId).offsetAPR,
+            collectionsManager.getUserDefinedCollectionCopyLoanOfferConfig(bob, collectionId).offsetAPR,
             expectedConfig.offsetAPR
         );
 
         assertEq(
-            sizeFactory.collectionsManager().getUserDefinedCollectionCopyBorrowOfferConfig(bob, collectionId).minTenor,
+            collectionsManager.getUserDefinedCollectionCopyBorrowOfferConfig(bob, collectionId).minTenor,
             expectedConfig.minTenor
         );
         assertEq(
-            sizeFactory.collectionsManager().getUserDefinedCollectionCopyBorrowOfferConfig(bob, collectionId).maxTenor,
+            collectionsManager.getUserDefinedCollectionCopyBorrowOfferConfig(bob, collectionId).maxTenor,
             expectedConfig.maxTenor
         );
         assertEq(
-            sizeFactory.collectionsManager().getUserDefinedCollectionCopyBorrowOfferConfig(bob, collectionId).minAPR,
+            collectionsManager.getUserDefinedCollectionCopyBorrowOfferConfig(bob, collectionId).minAPR,
             expectedConfig.minAPR
         );
         assertEq(
-            sizeFactory.collectionsManager().getUserDefinedCollectionCopyBorrowOfferConfig(bob, collectionId).maxAPR,
+            collectionsManager.getUserDefinedCollectionCopyBorrowOfferConfig(bob, collectionId).maxAPR,
             expectedConfig.maxAPR
         );
         assertEq(
-            sizeFactory.collectionsManager().getUserDefinedCollectionCopyBorrowOfferConfig(bob, collectionId).offsetAPR,
+            collectionsManager.getUserDefinedCollectionCopyBorrowOfferConfig(bob, collectionId).offsetAPR,
             expectedConfig.offsetAPR
         );
     }
@@ -76,11 +76,11 @@ contract CollectionsManagerUserActionsTest is BaseTest {
 
         _subscribeToCollection(bob, collectionId);
 
-        assertEq(sizeFactory.collectionsManager().isSubscribedToCollection(bob, collectionId), true);
+        assertEq(collectionsManager.isSubscribedToCollection(bob, collectionId), true);
 
         _unsubscribeFromCollection(bob, collectionId);
 
-        assertEq(sizeFactory.collectionsManager().isSubscribedToCollection(bob, collectionId), false);
+        assertEq(collectionsManager.isSubscribedToCollection(bob, collectionId), false);
     }
 
     function test_CollectionsManagerUserActions_unsubscribeFromCollection_invalid() public {

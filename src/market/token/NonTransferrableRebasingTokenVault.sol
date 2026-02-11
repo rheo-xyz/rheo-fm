@@ -19,7 +19,7 @@ import {IERC20Metadata} from "@openzeppelin/contracts/interfaces/IERC20Metadata.
 
 import {IERC4626} from "@openzeppelin/contracts/interfaces/IERC4626.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {IRheoFactory} from "@rheo-fm/src/factory/interfaces/IRheoFactory.sol";
+import {ISizeFactory} from "@rheo-solidity/src/factory/interfaces/ISizeFactory.sol";
 
 import {Math} from "@rheo-fm/src/market/libraries/Math.sol";
 
@@ -63,7 +63,7 @@ contract NonTransferrableRebasingTokenVault is
     // slither-disable-start uninitialized-state
     // slither-disable-start constable-states
     // v1.5
-    IRheoFactory public sizeFactory;
+    ISizeFactory public sizeFactory;
     IPool public variablePool;
     IERC20Metadata public underlyingToken;
     string public name;
@@ -125,7 +125,7 @@ contract NonTransferrableRebasingTokenVault is
 
     /// @dev Changing the IAdapter requires a reset in AToken approvals
     function initialize(
-        IRheoFactory sizeFactory_,
+        ISizeFactory sizeFactory_,
         IPool variablePool_,
         IERC20Metadata underlyingToken_,
         address owner_,

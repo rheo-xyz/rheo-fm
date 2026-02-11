@@ -8,9 +8,9 @@ import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
 import {RESERVED_ID} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
 import {Math, PERCENT} from "@rheo-fm/src/market/libraries/Math.sol";
 
-import {Action, Authorization} from "@rheo-fm/src/factory/libraries/Authorization.sol";
 import {BaseTest, Vars} from "@rheo-fm/test/BaseTest.sol";
 import {FixedMaturityLimitOrderHelper} from "@rheo-fm/test/helpers/libraries/FixedMaturityLimitOrderHelper.sol";
+import {Action, Authorization} from "@rheo-solidity/src/factory/libraries/Authorization.sol";
 
 contract AuthorizationRevokeAllAuthorizationsTest is BaseTest {
     function test_AuthorizationRevokeAllAuthorizations_revokeAllAuthorizations() public {

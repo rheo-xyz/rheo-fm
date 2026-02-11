@@ -3,8 +3,9 @@ pragma solidity 0.8.23;
 
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
-import {IRheoFactory} from "@rheo-fm/src/factory/interfaces/IRheoFactory.sol";
+
 import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
+import {ISizeFactory} from "@rheo-solidity/src/factory/interfaces/ISizeFactory.sol";
 
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
@@ -260,20 +261,21 @@ abstract contract Networks {
         }
     }
 
-    function findMarketByNetworkConfiguration(IRheoFactory factory, string memory networkConfiguration)
+    function findMarketByNetworkConfiguration(ISizeFactory factory, string memory networkConfiguration)
         internal
         view
         returns (IRheo)
     {
         NetworkConfiguration memory cfg = params(networkConfiguration);
 
-        IRheo[] memory markets = factory.getMarkets();
+        address[] memory markets = factory.getMarkets();
         for (uint256 i = 0; i < markets.length; i++) {
+            IRheo market = IRheo(markets[i]);
             if (
-                address(markets[i].data().underlyingCollateralToken) == cfg.underlyingCollateralToken
-                    && address(markets[i].data().underlyingBorrowToken) == cfg.underlyingBorrowToken
+                address(market.data().underlyingCollateralToken) == cfg.underlyingCollateralToken
+                    && address(market.data().underlyingBorrowToken) == cfg.underlyingBorrowToken
             ) {
-                return markets[i];
+                return market;
             }
         }
 
@@ -539,12 +541,13 @@ abstract contract Networks {
         quoteToken = IERC20Metadata(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48);
     }
 
-    function getUnpausedMarkets(IRheoFactory _sizeFactory) public view returns (IRheo[] memory markets) {
-        markets = _sizeFactory.getMarkets();
+    function getUnpausedMarkets(ISizeFactory _sizeFactory) public view returns (IRheo[] memory markets) {
+        address[] memory marketAddresses = _sizeFactory.getMarkets();
+        markets = new IRheo[](marketAddresses.length);
         uint256 j = 0;
-        for (uint256 i = 0; i < markets.length; i++) {
-            if (!PausableUpgradeable(address(markets[i])).paused()) {
-                markets[j++] = markets[i];
+        for (uint256 i = 0; i < marketAddresses.length; i++) {
+            if (!PausableUpgradeable(marketAddresses[i]).paused()) {
+                markets[j++] = IRheo(marketAddresses[i]);
             }
         }
         _unsafeSetLength(markets, j);

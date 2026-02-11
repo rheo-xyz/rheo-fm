@@ -6,7 +6,7 @@ import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import {BaseScript} from "@rheo-fm/script/BaseScript.sol";
 import {Contract, Networks} from "@rheo-fm/script/Networks.sol";
-import {IRheoFactory} from "@rheo-fm/src/factory/interfaces/IRheoFactory.sol";
+import {ISizeFactory} from "@rheo-solidity/src/factory/interfaces/ISizeFactory.sol";
 
 import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
 import {IRheoAdmin} from "@rheo-fm/src/market/interfaces/IRheoAdmin.sol";
@@ -26,16 +26,16 @@ contract MWEScript is BaseScript, Networks {
     using HTTP for *;
 
     HTTP.Client http;
-    IRheoFactory sizeFactory;
+    ISizeFactory sizeFactory;
 
     modifier parseEnv() {
-        sizeFactory = IRheoFactory(contracts[block.chainid][Contract.RHEO_FACTORY]);
+        sizeFactory = ISizeFactory(contracts[block.chainid][Contract.RHEO_FACTORY]);
         http.initialize();
         _;
     }
 
     function run() external parseEnv {
-        IRheo market = sizeFactory.getMarket(1);
+        IRheo market = IRheo(sizeFactory.getMarket(1));
         IPriceFeed oldPriceFeed = IPriceFeed(market.oracle().priceFeed);
         uint256 oldPrice = oldPriceFeed.getPrice();
         console.log("old Price Feed", address(oldPriceFeed));

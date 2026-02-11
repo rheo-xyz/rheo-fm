@@ -195,11 +195,15 @@ jobs:
           version: v1.3.5
 
       - name: Run Slither
-        uses: crytic/slither-action@v0.4.0
+        uses: crytic/slither-action@v0.4.2
         id: slither
         with:
           fail-on: low
           solc-version: 0.8.23
+          slither-args: --exclude-dependencies
+          # Temporary pin: avoids a known crash in Slither argument reordering.
+          # Remove once the fix lands in an official slither-analyzer release.
+          slither-version: cff1469a4a5cb2ae9597ddc9ee18dfe468c5fd60
 
 
   solhint:

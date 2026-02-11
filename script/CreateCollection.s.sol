@@ -9,8 +9,9 @@ import {BaseScript} from "@rheo-fm/script/BaseScript.sol";
 import {Contract, NetworkConfiguration, Networks} from "@rheo-fm/script/Networks.sol";
 
 import {ICollectionsManager} from "@rheo-fm/src/collections/interfaces/ICollectionsManager.sol";
-import {RheoFactory} from "@rheo-fm/src/factory/RheoFactory.sol";
 import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
+import {SizeFactory} from "@rheo-solidity/src/factory/SizeFactory.sol";
+import {ISizeFactory} from "@rheo-solidity/src/factory/interfaces/ISizeFactory.sol";
 
 contract CreateCollectionScript is BaseScript, Networks {
     address curator;
@@ -22,15 +23,16 @@ contract CreateCollectionScript is BaseScript, Networks {
     }
 
     function run() public broadcast {
-        RheoFactory sizeFactory = RheoFactory(contracts[block.chainid][Contract.RHEO_FACTORY]);
-        ICollectionsManager collectionsManager = sizeFactory.collectionsManager();
+        ISizeFactory sizeFactory = ISizeFactory(contracts[block.chainid][Contract.RHEO_FACTORY]);
+        ICollectionsManager collectionsManager =
+            ICollectionsManager(address(SizeFactory(payable(address(sizeFactory))).collectionsManager()));
         uint256 collectionId = collectionsManager.createCollection();
-        IRheo[] memory markets = sizeFactory.getMarkets();
+        address[] memory markets = sizeFactory.getMarkets();
         IRheo[] memory unpausedMarkets = new IRheo[](markets.length);
         uint256 j = 0;
         for (uint256 i = 0; i < markets.length; i++) {
-            if (!PausableUpgradeable(address(markets[i])).paused()) {
-                unpausedMarkets[j] = markets[i];
+            if (!PausableUpgradeable(markets[i]).paused()) {
+                unpausedMarkets[j] = IRheo(markets[i]);
                 j++;
             }
         }

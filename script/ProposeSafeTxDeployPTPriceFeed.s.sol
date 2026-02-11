@@ -7,7 +7,7 @@ import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IER
 
 import {BaseScript} from "@rheo-fm/script/BaseScript.sol";
 import {Contract, Networks} from "@rheo-fm/script/Networks.sol";
-import {IRheoFactory} from "@rheo-fm/src/factory/interfaces/IRheoFactory.sol";
+import {ISizeFactory} from "@rheo-solidity/src/factory/interfaces/ISizeFactory.sol";
 import {Safe} from "@safe-utils/Safe.sol";
 
 import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
@@ -16,6 +16,7 @@ import {UpdateConfigParams} from "@rheo-fm/src/market/libraries/actions/UpdateCo
 
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 import {PendleSparkLinearDiscountOracle} from "@pendle/contracts/oracles/internal/PendleSparkLinearDiscountOracle.sol";
+
 import {IPriceFeed} from "@rheo-fm/src/oracle/IPriceFeed.sol";
 import {PriceFeedPendleSparkLinearDiscountChainlink} from
     "@rheo-fm/src/oracle/v1.7.1/PriceFeedPendleSparkLinearDiscountChainlink.sol";
@@ -30,13 +31,13 @@ contract ProposeSafeTxDeployPTPriceFeedScript is BaseScript, Networks {
     address signer;
     string derivationPath;
 
-    IRheoFactory private sizeFactory;
+    ISizeFactory private sizeFactory;
     address private safeAddress;
 
     modifier parseEnv() {
         signer = vm.envAddress("SIGNER");
         derivationPath = vm.envString("LEDGER_PATH");
-        sizeFactory = IRheoFactory(contracts[block.chainid][Contract.RHEO_FACTORY]);
+        sizeFactory = ISizeFactory(contracts[block.chainid][Contract.RHEO_FACTORY]);
 
         string memory accountSlug = vm.envString("TENDERLY_ACCOUNT_NAME");
         string memory projectSlug = vm.envString("TENDERLY_PROJECT_NAME");
@@ -54,7 +55,7 @@ contract ProposeSafeTxDeployPTPriceFeedScript is BaseScript, Networks {
         vm.createSelectFork("mainnet");
         (IPriceFeed priceFeed,,,,,,,) = priceFeedPendleChainlink29May2025UsdcMainnet();
 
-        IRheo market = sizeFactory.getMarket(1);
+        IRheo market = IRheo(sizeFactory.getMarket(1));
         IPriceFeed oldPriceFeed = IPriceFeed(market.oracle().priceFeed);
         uint256 oldPrice = oldPriceFeed.getPrice();
         console.log("old Price Feed", address(oldPriceFeed));

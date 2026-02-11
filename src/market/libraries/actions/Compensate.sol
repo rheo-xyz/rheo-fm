@@ -11,8 +11,8 @@ import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
 import {Events} from "@rheo-fm/src/market/libraries/Events.sol";
 import {CreditPosition, DebtPosition, LoanLibrary, LoanStatus} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
 
-import {Action} from "@rheo-fm/src/factory/libraries/Authorization.sol";
 import {RiskLibrary} from "@rheo-fm/src/market/libraries/RiskLibrary.sol";
+import {Action} from "@rheo-solidity/src/factory/libraries/Authorization.sol";
 
 struct CompensateParams {
     // The credit position ID with debt to repay
