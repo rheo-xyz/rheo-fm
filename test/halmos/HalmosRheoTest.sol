@@ -14,6 +14,7 @@ import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IER
 
 import {Rheo} from "@rheo-fm/src/market/Rheo.sol";
 import {SizeFactory} from "@rheo-solidity/src/factory/SizeFactory.sol";
+import {IRheoFactory} from "@rheo-fm/src/factory/interfaces/IRheoFactory.sol";
 import {ISizeFactory} from "@rheo-solidity/src/factory/interfaces/ISizeFactory.sol";
 import {Action, Authorization} from "@rheo-solidity/src/factory/libraries/Authorization.sol";
 import {MockERC4626 as ERC4626Solady} from "@solady/test/utils/mocks/MockERC4626.sol";
@@ -117,7 +118,7 @@ contract HalmosRheoTest is Test, HalmosHelpers {
             address(new ERC1967Proxy(address(new SizeFactory()), abi.encodeCall(SizeFactory.initialize, (deployer))))
         );
         token.initialize(
-            sizeFactory,
+            IRheoFactory(address(sizeFactory)),
             variablePool,
             usdc,
             address(deployer),

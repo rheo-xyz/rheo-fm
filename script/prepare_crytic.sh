@@ -51,6 +51,29 @@ if [ -n "$SOLIDITY_FILES" ]; then
     SOLIDITY_FILES=$(printf "%s\n" "$SOLIDITY_FILES" | sort -u)
 fi
 
+# Only keep libraries that are actually present in Crytic's compilation unit.
+# Include names from both "## <contract>" headers and transitive "uses: [...]" deps.
+CRYTIC_LINK_NAMES=$(
+    crytic-compile --print-libraries test/invariants/crytic/CryticTester.sol 2>/dev/null \
+        | awk '
+            /^## / { print $2 }
+            /uses: \[/ {
+                line = $0
+                sub(/^.*uses: \[/, "", line)
+                sub(/\].*$/, "", line)
+                gsub(/\047/, "", line)
+                gsub(/, /, "\n", line)
+                print line
+            }
+        ' \
+        | sed '/^$/d' \
+        | sort -u \
+        || true
+)
+if [ -n "$CRYTIC_LINK_NAMES" ] && [ -n "$SOLIDITY_FILES" ]; then
+    SOLIDITY_FILES=$(grep -xF -f <(printf "%s\n" "$CRYTIC_LINK_NAMES") <(printf "%s\n" "$SOLIDITY_FILES") || true)
+fi
+
 rm COMPILE_LIBRARIES.txt || true
 rm DEPLOY_CONTRACTS.txt || true
 rm PREDEPLOYED_CONTRACTS.txt || true

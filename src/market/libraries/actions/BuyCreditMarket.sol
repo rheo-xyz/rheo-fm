@@ -10,7 +10,7 @@ import {CreditPosition, DebtPosition, LoanLibrary, RESERVED_ID} from "@rheo-fm/s
 import {Math, PERCENT} from "@rheo-fm/src/market/libraries/Math.sol";
 import {FixedMaturityLimitOrder, OfferLibrary} from "@rheo-fm/src/market/libraries/OfferLibrary.sol";
 import {RiskLibrary} from "@rheo-fm/src/market/libraries/RiskLibrary.sol";
-import {Action} from "@rheo-solidity/src/factory/libraries/Authorization.sol";
+import {Action} from "@rheo-fm/src/factory/libraries/Authorization.sol";
 
 struct BuyCreditMarketParams {
     // The borrower

@@ -9,7 +9,7 @@ import {CompensateOnBehalfOfParams, CompensateParams} from "@rheo-fm/src/market/
 
 import {BaseTest, Vars} from "@rheo-fm/test/BaseTest.sol";
 import {FixedMaturityLimitOrderHelper} from "@rheo-fm/test/helpers/libraries/FixedMaturityLimitOrderHelper.sol";
-import {Action, Authorization} from "@rheo-solidity/src/factory/libraries/Authorization.sol";
+import {Action, Authorization} from "@rheo-fm/src/factory/libraries/Authorization.sol";
 
 contract AuthorizationCompensateTest is BaseTest {
     function test_AuthorizationCompensate_compensateOnBehalfOf() public {

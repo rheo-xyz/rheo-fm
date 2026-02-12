@@ -47,7 +47,7 @@ import {SetVaultParams} from "@rheo-fm/src/market/libraries/actions/SetVault.sol
 import {UserView} from "@rheo-fm/src/market/RheoView.sol";
 import {CopyLimitOrderConfig} from "@rheo-fm/src/market/libraries/OfferLibrary.sol";
 import {SetCopyLimitOrderConfigsParams} from "@rheo-fm/src/market/libraries/actions/SetCopyLimitOrderConfigs.sol";
-import {CopyLimitOrderConfig as CopyLimitOrderConfigSize} from "@rheo-solidity/src/market/libraries/OfferLibrary.sol";
+import {FactoryCopyLimitOrderConfig} from "@rheo-fm/src/factory/interfaces/IRheoFactory.sol";
 
 import {DataView} from "@rheo-fm/src/market/RheoViewData.sol";
 import {IRheoView} from "@rheo-fm/src/market/interfaces/IRheoView.sol";
@@ -56,7 +56,7 @@ import {UpdateConfigParams} from "@rheo-fm/src/market/libraries/actions/UpdateCo
 import {PoolMock} from "@rheo-fm/test/mocks/PoolMock.sol";
 import {PriceFeedMock} from "@rheo-fm/test/mocks/PriceFeedMock.sol";
 
-import {ActionsBitmap} from "@rheo-solidity/src/factory/libraries/Authorization.sol";
+import {ActionsBitmap} from "@rheo-fm/src/factory/libraries/Authorization.sol";
 
 import {Deploy} from "@rheo-fm/script/Deploy.sol";
 
@@ -593,10 +593,9 @@ contract BaseTest is Test, Deploy, AssertsHelper {
     function _toFactoryCopyLimitOrderConfig(CopyLimitOrderConfig memory config)
         internal
         pure
-        returns (CopyLimitOrderConfigSize memory)
+        returns (FactoryCopyLimitOrderConfig memory)
     {
-        // Same fields, but Solidity treats structs from different imports as distinct types.
-        return CopyLimitOrderConfigSize({
+        return FactoryCopyLimitOrderConfig({
             minTenor: config.minTenor,
             maxTenor: config.maxTenor,
             minAPR: config.minAPR,

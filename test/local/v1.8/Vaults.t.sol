@@ -39,7 +39,7 @@ import {FullyAsyncVault} from "@ERC-7540-Reference/src/FullyAsyncVault.sol";
 import {FeeOnEntryExitERC4626} from "@rheo-fm/test/mocks/vaults/FeeOnEntryExitERC4626.sol";
 import {FeeOnTransferERC4626} from "@rheo-fm/test/mocks/vaults/FeeOnTransferERC4626.sol";
 import {LimitsERC4626} from "@rheo-fm/test/mocks/vaults/LimitsERC4626.sol";
-import {Action, Authorization} from "@rheo-solidity/src/factory/libraries/Authorization.sol";
+import {Action, Authorization} from "@rheo-fm/src/factory/libraries/Authorization.sol";
 
 import {MaliciousERC4626Reentrancy} from "@rheo-fm/test/mocks/vaults/MaliciousERC4626Reentrancy.sol";
 import {MaliciousERC4626WithdrawNotAllowed} from "@rheo-fm/test/mocks/vaults/MaliciousERC4626WithdrawNotAllowed.sol";

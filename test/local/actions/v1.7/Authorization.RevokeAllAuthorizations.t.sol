@@ -10,7 +10,7 @@ import {Math, PERCENT} from "@rheo-fm/src/market/libraries/Math.sol";
 
 import {BaseTest, Vars} from "@rheo-fm/test/BaseTest.sol";
 import {FixedMaturityLimitOrderHelper} from "@rheo-fm/test/helpers/libraries/FixedMaturityLimitOrderHelper.sol";
-import {Action, Authorization} from "@rheo-solidity/src/factory/libraries/Authorization.sol";
+import {Action, Authorization} from "@rheo-fm/src/factory/libraries/Authorization.sol";
 
 contract AuthorizationRevokeAllAuthorizationsTest is BaseTest {
     function test_AuthorizationRevokeAllAuthorizations_revokeAllAuthorizations() public {

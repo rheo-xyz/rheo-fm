@@ -23,7 +23,7 @@ import {
     DEFAULT_VAULT,
     ERC4626_ADAPTER_ID
 } from "@rheo-fm/src/market/token/NonTransferrableRebasingTokenVault.sol";
-import {ISizeFactory} from "@rheo-solidity/src/factory/interfaces/ISizeFactory.sol";
+import {IRheoFactory} from "@rheo-fm/src/factory/interfaces/IRheoFactory.sol";
 
 import {BaseTest} from "@rheo-fm/test/BaseTest.sol";
 import {PoolMock} from "@rheo-fm/test/mocks/PoolMock.sol";
@@ -83,7 +83,7 @@ contract NonTransferrableRebasingTokenVaultTest is BaseTest {
                     abi.encodeCall(
                         NonTransferrableRebasingTokenVault.initialize,
                         (
-                            ISizeFactory(address(0)),
+                            IRheoFactory(address(0)),
                             IPool(address(0)),
                             IERC20Metadata(address(0)),
                             owner,

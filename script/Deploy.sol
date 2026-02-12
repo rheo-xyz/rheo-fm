@@ -42,6 +42,7 @@ import {
     InitializeOracleParams,
     InitializeRiskConfigParams
 } from "@rheo-fm/src/market/libraries/actions/Initialize.sol";
+import {SizeFactory} from "@rheo-fm/src/factory/SizeFactory.sol";
 
 import {RheoMock} from "@rheo-fm/test/mocks/RheoMock.sol";
 import {USDC} from "@rheo-fm/test/mocks/USDC.sol";
@@ -49,10 +50,7 @@ import {WETH} from "@rheo-fm/test/mocks/WETH.sol";
 
 import {NonTransferrableRebasingTokenVault} from "@rheo-fm/src/market/token/NonTransferrableRebasingTokenVault.sol";
 import {NonTransferrableRebasingTokenVaultGhost} from "@rheo-fm/test/mocks/NonTransferrableRebasingTokenVaultGhost.sol";
-import {ICollectionsManager as ICollectionsManagerSize} from
-    "@rheo-solidity/src/collections/interfaces/ICollectionsManager.sol";
-import {SizeFactory} from "@rheo-solidity/src/factory/SizeFactory.sol";
-import {ISizeFactory} from "@rheo-solidity/src/factory/interfaces/ISizeFactory.sol";
+import {IRheoFactory} from "@rheo-fm/src/factory/interfaces/IRheoFactory.sol";
 
 import {ERC20Mock} from "@openzeppelin/contracts/mocks/token/ERC20Mock.sol";
 
@@ -91,7 +89,7 @@ abstract contract Deploy {
     IERC20Metadata internal collateralToken;
     IERC20Metadata internal borrowToken;
 
-    ISizeFactory internal sizeFactory;
+    IRheoFactory internal sizeFactory;
     CollectionsManager internal collectionsManager;
 
     bool internal shouldDeploySizeFactory = true;
@@ -136,7 +134,7 @@ abstract contract Deploy {
         PoolMock(address(variablePool)).setLiquidityIndex(address(usdc), WadRayMath.RAY);
 
         if (shouldDeploySizeFactory) {
-            sizeFactory = ISizeFactory(
+            sizeFactory = IRheoFactory(
                 address(new ERC1967Proxy(address(new SizeFactory()), abi.encodeCall(SizeFactory.initialize, (owner))))
             );
 
@@ -148,9 +146,7 @@ abstract contract Deploy {
                 )
             );
             hevm.prank(owner);
-            SizeFactory(payable(address(sizeFactory))).setCollectionsManager(
-                ICollectionsManagerSize(address(collectionsManager))
-            );
+            SizeFactory(payable(address(sizeFactory))).setCollectionsManager(address(collectionsManager));
         }
 
         address borrowTokenVaultImplementation = address(new NonTransferrableRebasingTokenVaultGhost());
@@ -240,7 +236,7 @@ abstract contract Deploy {
         PoolMock(address(variablePool)).setLiquidityIndex(address(borrowToken), 1.234567e27);
 
         if (shouldDeploySizeFactory) {
-            sizeFactory = ISizeFactory(
+            sizeFactory = IRheoFactory(
                 address(new ERC1967Proxy(address(new SizeFactory()), abi.encodeCall(SizeFactory.initialize, (owner))))
             );
 
@@ -252,9 +248,7 @@ abstract contract Deploy {
                 )
             );
             hevm.prank(owner);
-            SizeFactory(payable(address(sizeFactory))).setCollectionsManager(
-                ICollectionsManagerSize(address(collectionsManager))
-            );
+            SizeFactory(payable(address(sizeFactory))).setCollectionsManager(address(collectionsManager));
         }
 
         address borrowTokenVaultImplementation = address(new NonTransferrableRebasingTokenVaultGhost());

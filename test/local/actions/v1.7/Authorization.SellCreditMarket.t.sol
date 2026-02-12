@@ -14,7 +14,7 @@ import {
     SellCreditMarketOnBehalfOfParams,
     SellCreditMarketParams
 } from "@rheo-fm/src/market/libraries/actions/SellCreditMarket.sol";
-import {Action, Authorization} from "@rheo-solidity/src/factory/libraries/Authorization.sol";
+import {Action, Authorization} from "@rheo-fm/src/factory/libraries/Authorization.sol";
 
 contract AuthorizationSellCreditMarketTest is BaseTest {
     function test_AuthorizationSellCreditMarket_sellCreditMarketOnBehalfOf() public {

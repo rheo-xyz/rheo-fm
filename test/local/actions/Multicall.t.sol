@@ -25,7 +25,7 @@ import {SellCreditLimitParams} from "@rheo-fm/src/market/libraries/actions/SellC
 import {WithdrawParams} from "@rheo-fm/src/market/libraries/actions/Withdraw.sol";
 import {WithdrawParams} from "@rheo-fm/src/market/libraries/actions/Withdraw.sol";
 
-import {Action, Authorization} from "@rheo-solidity/src/factory/libraries/Authorization.sol";
+import {Action, Authorization} from "@rheo-fm/src/factory/libraries/Authorization.sol";
 
 import {FixedMaturityLimitOrder} from "@rheo-fm/src/market/libraries/OfferLibrary.sol";
 import {FixedMaturityLimitOrderHelper} from "@rheo-fm/test/helpers/libraries/FixedMaturityLimitOrderHelper.sol";

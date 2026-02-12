@@ -36,7 +36,7 @@ contract UpgradeScript is BaseScript, Networks, Deploy {
 
         if (shouldUpgrade) {
             ISizeFactory factory = ISizeFactory(contracts[block.chainid][Contract.RHEO_FACTORY]);
-            IRheo market = findMarketByNetworkConfiguration(factory, networkConfiguration);
+            IRheo market = findMarketByNetworkConfiguration(address(factory), networkConfiguration);
             Rheo(address(market)).upgradeToAndCall(address(upgrade), "");
             console.log("[Rheo v1] upgraded\n");
         } else {
