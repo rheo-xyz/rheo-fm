@@ -92,6 +92,7 @@ contract ERC4626Adapter is Ownable, IAdapter {
         uint256 shares = sharesBefore - IERC4626(vault).balanceOf(address(tokenVault));
         assets = underlyingToken.balanceOf(address(this)) - assetsBefore;
 
+        // slither-disable-next-line reentrancy-balance
         if (userSharesBefore < shares) {
             revert IERC20Errors.ERC20InsufficientBalance(from, userBalanceBefore, amount);
         }
