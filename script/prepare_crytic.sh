@@ -76,9 +76,6 @@ CRYTIC_LINK_NAMES=$(
 )
 if [ -n "$CRYTIC_LINK_NAMES" ] && [ -n "$SOLIDITY_FILES" ]; then
     SOLIDITY_FILES=$(grep -xF -f <(printf "%s\n" "$CRYTIC_LINK_NAMES") <(printf "%s\n" "$SOLIDITY_FILES") || true)
-elif [ -n "$BASE_SOLIDITY_FILES" ]; then
-    # If Crytic introspection returns nothing, prefer local Rheo libraries.
-    SOLIDITY_FILES=$(printf "%s\n" "$BASE_SOLIDITY_FILES" | sort -u)
 fi
 
 rm COMPILE_LIBRARIES.txt || true
