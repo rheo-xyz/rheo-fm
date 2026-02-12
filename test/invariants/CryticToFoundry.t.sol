@@ -22,7 +22,6 @@ contract CryticToFoundry is BaseTest, TargetFunctions, SetupLocal, FoundryAssert
         vm.roll(4370000);
 
         setup();
-        post_setup();
 
         sender = USER1;
 

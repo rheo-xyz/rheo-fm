@@ -13,7 +13,6 @@ contract FoundryHandler is TargetFunctions, SetupLocal, FoundryAsserts {
         vm.deal(address(USER3), 100e18);
 
         setup();
-        _postSetupOnce();
     }
 
     modifier getSender() override {
