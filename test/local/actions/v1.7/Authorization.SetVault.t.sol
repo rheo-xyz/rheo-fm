@@ -8,7 +8,7 @@ import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
 
 import {SetVaultOnBehalfOfParams, SetVaultParams} from "@rheo-fm/src/market/libraries/actions/SetVault.sol";
 
-import {Action, Authorization} from "@rheo-fm/src/factory/libraries/Authorization.sol";
+import {Action, Authorization} from "@rheo-solidity/src/factory/libraries/Authorization.sol";
 
 import {ERC4626_ADAPTER_ID} from "@rheo-fm/src/market/token/NonTransferrableRebasingTokenVault.sol";
 import {BaseTest} from "@rheo-fm/test/BaseTest.sol";

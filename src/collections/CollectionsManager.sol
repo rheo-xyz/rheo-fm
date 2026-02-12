@@ -15,7 +15,7 @@ import {CollectionsManagerView} from "@rheo-fm/src/collections/actions/Collectio
 
 import {ICollectionsManager} from "@rheo-fm/src/collections/interfaces/ICollectionsManager.sol";
 
-import {DEFAULT_ADMIN_ROLE, IRheoFactory} from "@rheo-fm/src/factory/interfaces/IRheoFactory.sol";
+import {DEFAULT_ADMIN_ROLE, IRheoFactory} from "@rheo-fm/src/factory-compat/interfaces/IRheoFactory.sol";
 import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
 
 /// @title CollectionsManager

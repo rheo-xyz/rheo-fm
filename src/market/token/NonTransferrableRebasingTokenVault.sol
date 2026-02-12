@@ -19,7 +19,7 @@ import {IERC20Metadata} from "@openzeppelin/contracts/interfaces/IERC20Metadata.
 
 import {IERC4626} from "@openzeppelin/contracts/interfaces/IERC4626.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {IRheoFactory} from "@rheo-fm/src/factory/interfaces/IRheoFactory.sol";
+import {IRheoFactory} from "@rheo-fm/src/factory-compat/interfaces/IRheoFactory.sol";
 
 import {Math} from "@rheo-fm/src/market/libraries/Math.sol";
 

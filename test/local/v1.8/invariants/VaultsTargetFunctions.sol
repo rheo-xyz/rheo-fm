@@ -24,8 +24,8 @@ import {MaliciousERC4626ReentrancyGeneric} from "@rheo-fm/test/mocks/vaults/Mali
 import {DepositParams} from "@rheo-fm/src/market/libraries/actions/Deposit.sol";
 import {WithdrawParams} from "@rheo-fm/src/market/libraries/actions/Withdraw.sol";
 
-import {Action, ActionsBitmap, Authorization} from "@rheo-fm/src/factory/libraries/Authorization.sol";
 import {SetupLocal} from "@rheo-fm/test/invariants/SetupLocal.sol";
+import {Action, ActionsBitmap, Authorization} from "@rheo-solidity/src/factory/libraries/Authorization.sol";
 
 abstract contract VaultsTargetFunctions is Asserts, Deploy, SetupLocal {
     uint256 private constant MAX_REENTER_COUNT = 5;

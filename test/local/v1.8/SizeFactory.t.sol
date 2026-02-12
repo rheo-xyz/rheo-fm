@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {SizeFactory} from "@rheo-fm/src/factory/SizeFactory.sol";
 import {BaseTest} from "@rheo-fm/test/BaseTest.sol";
 import {RheoMock} from "@rheo-fm/test/mocks/RheoMock.sol";
+import {SizeFactory} from "@rheo-solidity/src/factory/SizeFactory.sol";
 
 contract SizeFactoryTest is BaseTest {
     function test_SizeFactory_setSizeImplementation_updates_aliases() public {

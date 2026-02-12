@@ -44,7 +44,7 @@ import {BuyCreditMarketParams} from "@rheo-fm/src/market/libraries/actions/BuyCr
 import {SetUserConfigurationParams} from "@rheo-fm/src/market/libraries/actions/SetUserConfiguration.sol";
 import {SetVaultParams} from "@rheo-fm/src/market/libraries/actions/SetVault.sol";
 
-import {FactoryCopyLimitOrderConfig} from "@rheo-fm/src/factory/interfaces/IRheoFactory.sol";
+import {FactoryCopyLimitOrderConfig} from "@rheo-fm/src/factory-compat/interfaces/IRheoFactory.sol";
 import {UserView} from "@rheo-fm/src/market/RheoView.sol";
 import {CopyLimitOrderConfig} from "@rheo-fm/src/market/libraries/OfferLibrary.sol";
 import {SetCopyLimitOrderConfigsParams} from "@rheo-fm/src/market/libraries/actions/SetCopyLimitOrderConfigs.sol";
@@ -56,7 +56,7 @@ import {UpdateConfigParams} from "@rheo-fm/src/market/libraries/actions/UpdateCo
 import {PoolMock} from "@rheo-fm/test/mocks/PoolMock.sol";
 import {PriceFeedMock} from "@rheo-fm/test/mocks/PriceFeedMock.sol";
 
-import {ActionsBitmap} from "@rheo-fm/src/factory/libraries/Authorization.sol";
+import {ActionsBitmap} from "@rheo-solidity/src/factory/libraries/Authorization.sol";
 
 import {Deploy} from "@rheo-fm/script/Deploy.sol";
 

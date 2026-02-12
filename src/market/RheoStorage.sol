@@ -15,7 +15,7 @@ import {IPriceFeed} from "@rheo-fm/src/oracle/IPriceFeed.sol";
 import {NonTransferrableRebasingTokenVault} from "@rheo-fm/src/market/token/NonTransferrableRebasingTokenVault.sol";
 import {NonTransferrableToken} from "@rheo-fm/src/market/token/NonTransferrableToken.sol";
 
-import {IRheoFactory} from "@rheo-fm/src/factory/interfaces/IRheoFactory.sol";
+import {IRheoFactory} from "@rheo-fm/src/factory-compat/interfaces/IRheoFactory.sol";
 
 struct User {
     // The user's loan offer

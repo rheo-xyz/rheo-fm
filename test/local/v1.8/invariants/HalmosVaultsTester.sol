@@ -14,7 +14,7 @@ import {Deploy} from "@rheo-fm/script/Deploy.sol";
 import {MockERC4626 as ERC4626Solmate} from "@solmate/src/test/utils/mocks/MockERC4626.sol";
 import {ERC20 as ERC20Solmate} from "@solmate/src/tokens/ERC20.sol";
 
-import {IRheoFactory} from "@rheo-fm/src/factory/interfaces/IRheoFactory.sol";
+import {IRheoFactory} from "@rheo-fm/src/factory-compat/interfaces/IRheoFactory.sol";
 import {
     AAVE_ADAPTER_ID,
     DEFAULT_VAULT,

@@ -7,8 +7,8 @@ import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
 import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
 import {CopyLimitOrderConfig} from "@rheo-fm/src/market/libraries/OfferLibrary.sol";
 
-import {Action, Authorization} from "@rheo-fm/src/factory/libraries/Authorization.sol";
 import {BaseTest} from "@rheo-fm/test/BaseTest.sol";
+import {Action, Authorization} from "@rheo-solidity/src/factory/libraries/Authorization.sol";
 
 contract AuthorizationManageCollectionSubscriptionsTest is BaseTest {
     uint256 private collectionId;

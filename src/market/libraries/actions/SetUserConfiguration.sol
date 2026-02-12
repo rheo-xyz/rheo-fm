@@ -5,7 +5,7 @@ import {State, User} from "@rheo-fm/src/market/RheoStorage.sol";
 
 import {CreditPosition, LoanLibrary, LoanStatus} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
 
-import {Action} from "@rheo-fm/src/factory/libraries/Authorization.sol";
+import {Action} from "@rheo-solidity/src/factory/libraries/Authorization.sol";
 
 import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
 import {Events} from "@rheo-fm/src/market/libraries/Events.sol";
