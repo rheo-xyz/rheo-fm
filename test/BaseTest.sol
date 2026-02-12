@@ -577,30 +577,12 @@ contract BaseTest is Test, Deploy, AssertsHelper {
         CopyLimitOrderConfig memory copyBorrowOfferConfig
     ) internal {
         vm.prank(user);
-        sizeFactory.setUserCollectionCopyLimitOrderConfigs(
-            collectionId,
-            _toFactoryCopyLimitOrderConfig(copyLoanOfferConfig),
-            _toFactoryCopyLimitOrderConfig(copyBorrowOfferConfig)
-        );
+        sizeFactory.setUserCollectionCopyLimitOrderConfigs(collectionId, copyLoanOfferConfig, copyBorrowOfferConfig);
     }
 
     function _setAuthorization(address user, address operator, ActionsBitmap actionsBitmap) internal {
         vm.prank(user);
         sizeFactory.setAuthorization(operator, actionsBitmap);
-    }
-
-    function _toFactoryCopyLimitOrderConfig(CopyLimitOrderConfig memory config)
-        internal
-        pure
-        returns (CopyLimitOrderConfig memory)
-    {
-        return CopyLimitOrderConfig({
-            minTenor: config.minTenor,
-            maxTenor: config.maxTenor,
-            minAPR: config.minAPR,
-            maxAPR: config.maxAPR,
-            offsetAPR: config.offsetAPR
-        });
     }
 
     function _offerFromTenors(uint256[] memory tenors, uint256[] memory aprs)
