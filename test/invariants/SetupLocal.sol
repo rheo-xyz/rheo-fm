@@ -10,7 +10,10 @@ import {Helper} from "@rheo-fm/test/invariants/Helper.sol";
 import {DEFAULT_VAULT, ERC4626_ADAPTER_ID} from "@rheo-fm/src/market/token/NonTransferrableRebasingTokenVault.sol";
 
 abstract contract SetupLocal is Helper, BaseSetup {
+    bool internal postSetupDone;
+
     function setup() internal virtual override {
+        deferAdditionalVaultFixtures = true;
         setupLocal(address(this), address(this));
 
         address[] memory users = new address[](3);
@@ -31,5 +34,17 @@ abstract contract SetupLocal is Helper, BaseSetup {
         NonTransferrableRebasingTokenVault borrowTokenVault = size.data().borrowTokenVault;
         borrowTokenVault.setVaultAdapter(address(vaultSolady), bytes32(ERC4626_ADAPTER_ID));
         borrowTokenVault.setVaultAdapter(address(vaultOpenZeppelin), bytes32(ERC4626_ADAPTER_ID));
+    }
+
+    function _postSetupOnce() internal {
+        if (postSetupDone) {
+            return;
+        }
+        postSetupDone = true;
+        _deployAdditionalVaultFixtures();
+    }
+
+    function post_setup() public {
+        _postSetupOnce();
     }
 }

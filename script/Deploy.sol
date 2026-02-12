@@ -328,6 +328,14 @@ abstract contract Deploy {
         vaultOpenZeppelin = IERC4626(address(new ERC4626OpenZeppelin(address(usdc))));
         vaultSolmate =
             IERC4626(address(new ERC4626Solmate(ERC20Solmate(address(usdc)), "VaultSolmate", "VAULTSOLMATE")));
+        if (!deferAdditionalVaultFixtures) {
+            _deployAdditionalVaultFixtures();
+        }
+    }
+
+    bool internal deferAdditionalVaultFixtures;
+
+    function _deployAdditionalVaultFixtures() internal {
         vaultMaliciousWithdrawNotAllowed = IERC4626(
             address(
                 new MaliciousERC4626WithdrawNotAllowed(

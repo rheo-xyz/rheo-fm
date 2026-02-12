@@ -37,6 +37,7 @@ abstract contract VaultsTargetFunctions is Asserts, Deploy, SetupLocal {
 
     function setup() internal override {
         super.setup();
+        _postSetupOnce();
         _deployRheoMarket2();
 
         borrowTokenVault = size.data().borrowTokenVault;
