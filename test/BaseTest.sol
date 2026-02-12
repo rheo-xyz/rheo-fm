@@ -47,7 +47,6 @@ import {SetVaultParams} from "@rheo-fm/src/market/libraries/actions/SetVault.sol
 import {UserView} from "@rheo-fm/src/market/RheoView.sol";
 import {CopyLimitOrderConfig} from "@rheo-fm/src/market/libraries/OfferLibrary.sol";
 import {SetCopyLimitOrderConfigsParams} from "@rheo-fm/src/market/libraries/actions/SetCopyLimitOrderConfigs.sol";
-import {CopyLimitOrderConfig as CopyLimitOrderConfigSize} from "@rheo-solidity/src/market/libraries/OfferLibrary.sol";
 
 import {DataView} from "@rheo-fm/src/market/RheoViewData.sol";
 import {IRheoView} from "@rheo-fm/src/market/interfaces/IRheoView.sol";
@@ -578,31 +577,12 @@ contract BaseTest is Test, Deploy, AssertsHelper {
         CopyLimitOrderConfig memory copyBorrowOfferConfig
     ) internal {
         vm.prank(user);
-        sizeFactory.setUserCollectionCopyLimitOrderConfigs(
-            collectionId,
-            _toFactoryCopyLimitOrderConfig(copyLoanOfferConfig),
-            _toFactoryCopyLimitOrderConfig(copyBorrowOfferConfig)
-        );
+        sizeFactory.setUserCollectionCopyLimitOrderConfigs(collectionId, copyLoanOfferConfig, copyBorrowOfferConfig);
     }
 
     function _setAuthorization(address user, address operator, ActionsBitmap actionsBitmap) internal {
         vm.prank(user);
         sizeFactory.setAuthorization(operator, actionsBitmap);
-    }
-
-    function _toFactoryCopyLimitOrderConfig(CopyLimitOrderConfig memory config)
-        internal
-        pure
-        returns (CopyLimitOrderConfigSize memory)
-    {
-        // Same fields, but Solidity treats structs from different imports as distinct types.
-        return CopyLimitOrderConfigSize({
-            minTenor: config.minTenor,
-            maxTenor: config.maxTenor,
-            minAPR: config.minAPR,
-            maxAPR: config.maxAPR,
-            offsetAPR: config.offsetAPR
-        });
     }
 
     function _offerFromTenors(uint256[] memory tenors, uint256[] memory aprs)

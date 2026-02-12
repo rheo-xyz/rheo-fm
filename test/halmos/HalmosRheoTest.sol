@@ -117,7 +117,7 @@ contract HalmosRheoTest is Test, HalmosHelpers {
             address(new ERC1967Proxy(address(new SizeFactory()), abi.encodeCall(SizeFactory.initialize, (deployer))))
         );
         token.initialize(
-            sizeFactory,
+            ISizeFactory(address(sizeFactory)),
             variablePool,
             usdc,
             address(deployer),

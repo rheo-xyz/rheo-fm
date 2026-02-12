@@ -69,6 +69,12 @@ contract AuthorizationSetAuthorizationTest is BaseTest {
         assertFalse(Authorization.isValid(ActionsBitmap.wrap(invalidActionsBitmap)));
     }
 
+    function test_AuthorizationSetAuthorization_isActionSet() public pure {
+        ActionsBitmap actionsBitmap = Authorization.getActionsBitmap(Action.SELL_CREDIT_MARKET);
+        assertTrue(Authorization.isActionSet(actionsBitmap, Action.SELL_CREDIT_MARKET));
+        assertFalse(Authorization.isActionSet(actionsBitmap, Action.BUY_CREDIT_MARKET));
+    }
+
     /// forge-config: default.allow_internal_expect_revert = true
     function test_AuthorizationSetAuthorization_validation() public {
         vm.expectRevert(abi.encodeWithSelector(Errors.NULL_ADDRESS.selector));
