@@ -14,7 +14,7 @@ import {
     BuyCreditMarketOnBehalfOfParams,
     BuyCreditMarketParams
 } from "@rheo-fm/src/market/libraries/actions/BuyCreditMarket.sol";
-import {Action, Authorization} from "@rheo-solidity/src/factory/libraries/Authorization.sol";
+import {Action, Authorization} from "@rheo-fm/src/factory/libraries/Authorization.sol";
 
 contract AuthorizationBuyCreditMarketTest is BaseTest {
     function test_AuthorizationBuyCreditMarket_buyCreditMarketOnBehalfOf() public {

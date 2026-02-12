@@ -7,7 +7,7 @@ import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet
 
 import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
 import {CopyLimitOrderConfig} from "@rheo-fm/src/market/libraries/OfferLibrary.sol";
-import {ISizeFactory} from "@rheo-solidity/src/factory/interfaces/ISizeFactory.sol";
+import {IRheoFactory} from "@rheo-fm/src/factory/interfaces/IRheoFactory.sol";
 
 struct MarketInformation {
     bool initialized;
@@ -29,7 +29,7 @@ abstract contract CollectionsManagerBase {
     //////////////////////////////////////////////////////////////*/
 
     // size factory
-    ISizeFactory sizeFactory;
+    IRheoFactory sizeFactory;
     // collection Id counter
     uint256 collectionIdCounter;
     // mapping of collection Id to collection

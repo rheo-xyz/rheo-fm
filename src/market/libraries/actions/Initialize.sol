@@ -4,7 +4,7 @@ pragma solidity 0.8.23;
 import {IAToken} from "@aave/interfaces/IAToken.sol";
 import {IPool} from "@aave/interfaces/IPool.sol";
 
-import {ISizeFactory} from "@rheo-solidity/src/factory/interfaces/ISizeFactory.sol";
+import {IRheoFactory} from "@rheo-fm/src/factory/interfaces/IRheoFactory.sol";
 
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
@@ -282,7 +282,7 @@ library Initialize {
             string.concat("szDebt", IERC20Metadata(state.data.underlyingBorrowToken).symbol()),
             IERC20Metadata(state.data.underlyingBorrowToken).decimals()
         );
-        state.data.sizeFactory = ISizeFactory(d.sizeFactory);
+        state.data.sizeFactory = IRheoFactory(d.sizeFactory);
         state.data.borrowTokenVault = NonTransferrableRebasingTokenVault(d.borrowTokenVault);
         state.data.debtTokenCap = type(uint256).max;
         state.data.overdueLiquidationRewardPercent = state.feeConfig.liquidationRewardPercent;

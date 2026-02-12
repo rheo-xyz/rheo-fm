@@ -85,7 +85,7 @@ import {IRheoV1_7} from "@rheo-fm/src/market/interfaces/v1.7/IRheoV1_7.sol";
 import {IRheoV1_8} from "@rheo-fm/src/market/interfaces/v1.8/IRheoV1_8.sol";
 import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
 
-import {PAUSER_ROLE} from "@rheo-solidity/src/factory/interfaces/ISizeFactory.sol";
+import {PAUSER_ROLE} from "@rheo-fm/src/factory/interfaces/IRheoFactory.sol";
 
 import {UserView} from "@rheo-fm/src/market/RheoViewData.sol";
 import {IRheoView} from "@rheo-fm/src/market/interfaces/IRheoView.sol";

@@ -22,7 +22,7 @@ import {
 import {NonTransferrableRebasingTokenVault} from "@rheo-fm/src/market/token/NonTransferrableRebasingTokenVault.sol";
 import {AaveAdapter} from "@rheo-fm/src/market/token/adapters/AaveAdapter.sol";
 import {ERC4626Adapter} from "@rheo-fm/src/market/token/adapters/ERC4626Adapter.sol";
-import {ISizeFactory} from "@rheo-solidity/src/factory/interfaces/ISizeFactory.sol";
+import {IRheoFactory} from "@rheo-fm/src/factory/interfaces/IRheoFactory.sol";
 
 import {HalmosNonTransferrableRebasingTokenVaultGhost} from
     "@rheo-fm/test/mocks/HalmosNonTransferrableRebasingTokenVaultGhost.sol";
@@ -55,7 +55,7 @@ contract HalmosVaultsTester is Test, PropertiesConstants, PropertiesSpecificatio
 
         token = new HalmosNonTransferrableRebasingTokenVaultGhost();
         token.initialize(
-            ISizeFactory(address(sizeFactory)),
+            IRheoFactory(address(sizeFactory)),
             variablePool,
             usdc,
             address(this),

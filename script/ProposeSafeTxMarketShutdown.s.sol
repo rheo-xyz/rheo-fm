@@ -141,7 +141,7 @@ contract ProposeSafeTxMarketShutdownScript is BaseScript, Networks {
         view
         returns (IRheo)
     {
-        return difference(getUnpausedMarkets(sizeFactory), marketsToShutdown)[0];
+        return difference(getUnpausedMarkets(address(sizeFactory)), marketsToShutdown)[0];
     }
 
     function _buildMarketShutdownAndOrPauseCall(GetMarketShutdownCalldataScript script, IRheo market)

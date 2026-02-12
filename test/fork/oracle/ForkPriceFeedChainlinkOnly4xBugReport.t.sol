@@ -11,7 +11,7 @@ import {MainnetAddresses} from "@rheo-fm/script/MainnetAddresses.s.sol";
 import {Contract, Networks} from "@rheo-fm/script/Networks.sol";
 
 import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
-import {ISizeFactory} from "@rheo-solidity/src/factory/interfaces/ISizeFactory.sol";
+import {IRheoFactory} from "@rheo-fm/src/factory/interfaces/IRheoFactory.sol";
 
 import {Math} from "@rheo-fm/src/market/libraries/Math.sol";
 
@@ -40,7 +40,7 @@ contract ForkPriceFeedChainlinkOnly4xBugReportTest is ForkTest, MainnetAddresses
     function setUp() public override(ForkTest) {
         vm.createSelectFork("mainnet", 24_343_753);
 
-        sizeFactory = ISizeFactory(Networks.contracts[block.chainid][Contract.RHEO_FACTORY]);
+        sizeFactory = IRheoFactory(Networks.contracts[block.chainid][Contract.RHEO_FACTORY]);
     }
 
     function testFork_PriceFeedChainlinkOnly4xBugReport_misprices_when_quote_is_non_pegged() public {
@@ -150,7 +150,7 @@ contract ForkPriceFeedChainlinkOnly4xBugReportTest is ForkTest, MainnetAddresses
         }
     }
 
-    function _findMarketBySymbols(ISizeFactory sizeFactory, string memory collateralSymbol, string memory borrowSymbol)
+    function _findMarketBySymbols(IRheoFactory sizeFactory, string memory collateralSymbol, string memory borrowSymbol)
         internal
         view
         returns (IRheo)

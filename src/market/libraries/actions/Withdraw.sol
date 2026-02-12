@@ -12,7 +12,7 @@ import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
 import {Events} from "@rheo-fm/src/market/libraries/Events.sol";
 
 import {RiskLibrary} from "@rheo-fm/src/market/libraries/RiskLibrary.sol";
-import {Action} from "@rheo-solidity/src/factory/libraries/Authorization.sol";
+import {Action} from "@rheo-fm/src/factory/libraries/Authorization.sol";
 
 struct WithdrawParams {
     // The token to withdraw
