@@ -14,7 +14,6 @@ import {Deploy} from "@rheo-fm/script/Deploy.sol";
 import {MockERC4626 as ERC4626Solmate} from "@solmate/src/test/utils/mocks/MockERC4626.sol";
 import {ERC20 as ERC20Solmate} from "@solmate/src/tokens/ERC20.sol";
 
-import {IRheoFactory} from "@rheo-fm/src/factory-compat/interfaces/IRheoFactory.sol";
 import {
     AAVE_ADAPTER_ID,
     DEFAULT_VAULT,
@@ -23,6 +22,7 @@ import {
 import {NonTransferrableRebasingTokenVault} from "@rheo-fm/src/market/token/NonTransferrableRebasingTokenVault.sol";
 import {AaveAdapter} from "@rheo-fm/src/market/token/adapters/AaveAdapter.sol";
 import {ERC4626Adapter} from "@rheo-fm/src/market/token/adapters/ERC4626Adapter.sol";
+import {ISizeFactory} from "@rheo-solidity/src/factory/interfaces/ISizeFactory.sol";
 
 import {HalmosNonTransferrableRebasingTokenVaultGhost} from
     "@rheo-fm/test/mocks/HalmosNonTransferrableRebasingTokenVaultGhost.sol";
@@ -55,7 +55,7 @@ contract HalmosVaultsTester is Test, PropertiesConstants, PropertiesSpecificatio
 
         token = new HalmosNonTransferrableRebasingTokenVaultGhost();
         token.initialize(
-            IRheoFactory(address(sizeFactory)),
+            ISizeFactory(address(sizeFactory)),
             variablePool,
             usdc,
             address(this),

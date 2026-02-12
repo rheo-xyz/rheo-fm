@@ -49,9 +49,9 @@ import {RheoMock} from "@rheo-fm/test/mocks/RheoMock.sol";
 import {USDC} from "@rheo-fm/test/mocks/USDC.sol";
 import {WETH} from "@rheo-fm/test/mocks/WETH.sol";
 
-import {IRheoFactory} from "@rheo-fm/src/factory-compat/interfaces/IRheoFactory.sol";
 import {NonTransferrableRebasingTokenVault} from "@rheo-fm/src/market/token/NonTransferrableRebasingTokenVault.sol";
 import {NonTransferrableRebasingTokenVaultGhost} from "@rheo-fm/test/mocks/NonTransferrableRebasingTokenVaultGhost.sol";
+import {ISizeFactory} from "@rheo-solidity/src/factory/interfaces/ISizeFactory.sol";
 
 import {ERC20Mock} from "@openzeppelin/contracts/mocks/token/ERC20Mock.sol";
 
@@ -90,7 +90,7 @@ abstract contract Deploy {
     IERC20Metadata internal collateralToken;
     IERC20Metadata internal borrowToken;
 
-    IRheoFactory internal sizeFactory;
+    ISizeFactory internal sizeFactory;
     CollectionsManager internal collectionsManager;
 
     bool internal shouldDeploySizeFactory = true;
@@ -135,7 +135,7 @@ abstract contract Deploy {
         PoolMock(address(variablePool)).setLiquidityIndex(address(usdc), WadRayMath.RAY);
 
         if (shouldDeploySizeFactory) {
-            sizeFactory = IRheoFactory(
+            sizeFactory = ISizeFactory(
                 address(new ERC1967Proxy(address(new SizeFactory()), abi.encodeCall(SizeFactory.initialize, (owner))))
             );
 
@@ -237,7 +237,7 @@ abstract contract Deploy {
         PoolMock(address(variablePool)).setLiquidityIndex(address(borrowToken), 1.234567e27);
 
         if (shouldDeploySizeFactory) {
-            sizeFactory = IRheoFactory(
+            sizeFactory = ISizeFactory(
                 address(new ERC1967Proxy(address(new SizeFactory()), abi.encodeCall(SizeFactory.initialize, (owner))))
             );
 

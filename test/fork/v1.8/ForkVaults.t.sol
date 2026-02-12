@@ -18,11 +18,11 @@ import {IERC4626Morpho} from "@rheo-fm/test/fork/v1.8/interfaces/IERC4626Morpho.
 import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
 import {ClaimParams} from "@rheo-fm/src/market/libraries/actions/Claim.sol";
 
-import {IRheoFactory} from "@rheo-fm/src/factory-compat/interfaces/IRheoFactory.sol";
 import {Rheo} from "@rheo-fm/src/market/Rheo.sol";
 import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
 import {NonTransferrableRebasingTokenVault} from "@rheo-fm/src/market/token/NonTransferrableRebasingTokenVault.sol";
 import {ERC4626_ADAPTER_ID} from "@rheo-fm/src/market/token/NonTransferrableRebasingTokenVault.sol";
+import {ISizeFactory} from "@rheo-solidity/src/factory/interfaces/ISizeFactory.sol";
 
 import {Math} from "@rheo-fm/src/market/libraries/Math.sol";
 
@@ -37,7 +37,7 @@ contract ForkVaultsTest is ForkTest, Networks {
         // 2025-10-21 13h00 UTC
         vm.rollFork(23626090);
 
-        sizeFactory = IRheoFactory(contracts[block.chainid][Contract.RHEO_FACTORY]);
+        sizeFactory = ISizeFactory(contracts[block.chainid][Contract.RHEO_FACTORY]);
         size = RheoMock(address(sizeFactory.getMarket(0)));
         usdc = USDC(address(size.data().underlyingBorrowToken));
         weth = WETH(payable(address(size.data().underlyingCollateralToken)));

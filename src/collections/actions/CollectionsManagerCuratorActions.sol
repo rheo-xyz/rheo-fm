@@ -13,8 +13,8 @@ import {CollectionsManagerBase} from "@rheo-fm/src/collections/CollectionsManage
 import {ICollectionsManagerCuratorActions} from
     "@rheo-fm/src/collections/interfaces/ICollectionsManagerCuratorActions.sol";
 
-import {IRheoFactory} from "@rheo-fm/src/factory-compat/interfaces/IRheoFactory.sol";
 import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
+import {ISizeFactory} from "@rheo-solidity/src/factory/interfaces/ISizeFactory.sol";
 
 import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
 

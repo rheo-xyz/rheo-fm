@@ -44,7 +44,6 @@ import {BuyCreditMarketParams} from "@rheo-fm/src/market/libraries/actions/BuyCr
 import {SetUserConfigurationParams} from "@rheo-fm/src/market/libraries/actions/SetUserConfiguration.sol";
 import {SetVaultParams} from "@rheo-fm/src/market/libraries/actions/SetVault.sol";
 
-import {FactoryCopyLimitOrderConfig} from "@rheo-fm/src/factory-compat/interfaces/IRheoFactory.sol";
 import {UserView} from "@rheo-fm/src/market/RheoView.sol";
 import {CopyLimitOrderConfig} from "@rheo-fm/src/market/libraries/OfferLibrary.sol";
 import {SetCopyLimitOrderConfigsParams} from "@rheo-fm/src/market/libraries/actions/SetCopyLimitOrderConfigs.sol";
@@ -593,9 +592,9 @@ contract BaseTest is Test, Deploy, AssertsHelper {
     function _toFactoryCopyLimitOrderConfig(CopyLimitOrderConfig memory config)
         internal
         pure
-        returns (FactoryCopyLimitOrderConfig memory)
+        returns (CopyLimitOrderConfig memory)
     {
-        return FactoryCopyLimitOrderConfig({
+        return CopyLimitOrderConfig({
             minTenor: config.minTenor,
             maxTenor: config.maxTenor,
             minAPR: config.minAPR,

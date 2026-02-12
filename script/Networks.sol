@@ -4,8 +4,8 @@ pragma solidity 0.8.23;
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
-import {IRheoFactory} from "@rheo-fm/src/factory-compat/interfaces/IRheoFactory.sol";
 import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
+import {ISizeFactory} from "@rheo-solidity/src/factory/interfaces/ISizeFactory.sol";
 
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
@@ -268,7 +268,7 @@ abstract contract Networks {
     {
         NetworkConfiguration memory cfg = params(networkConfiguration);
 
-        address[] memory markets = IRheoFactory(factory).getMarkets();
+        address[] memory markets = ISizeFactory(factory).getMarkets();
         for (uint256 i = 0; i < markets.length; i++) {
             IRheo market = IRheo(markets[i]);
             if (
@@ -542,7 +542,7 @@ abstract contract Networks {
     }
 
     function getUnpausedMarkets(address _sizeFactory) public view returns (IRheo[] memory markets) {
-        address[] memory marketAddresses = IRheoFactory(_sizeFactory).getMarkets();
+        address[] memory marketAddresses = ISizeFactory(_sizeFactory).getMarkets();
         markets = new IRheo[](marketAddresses.length);
         uint256 j = 0;
         for (uint256 i = 0; i < marketAddresses.length; i++) {
