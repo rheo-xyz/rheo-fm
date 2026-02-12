@@ -52,8 +52,6 @@ import {WETH} from "@rheo-fm/test/mocks/WETH.sol";
 import {IRheoFactory} from "@rheo-fm/src/factory-compat/interfaces/IRheoFactory.sol";
 import {NonTransferrableRebasingTokenVault} from "@rheo-fm/src/market/token/NonTransferrableRebasingTokenVault.sol";
 import {NonTransferrableRebasingTokenVaultGhost} from "@rheo-fm/test/mocks/NonTransferrableRebasingTokenVaultGhost.sol";
-import {ICollectionsManager as ISizeCollectionsManager} from
-    "@rheo-solidity/src/collections/interfaces/ICollectionsManager.sol";
 
 import {ERC20Mock} from "@openzeppelin/contracts/mocks/token/ERC20Mock.sol";
 
@@ -149,9 +147,7 @@ abstract contract Deploy {
                 )
             );
             hevm.prank(owner);
-            SizeFactory(payable(address(sizeFactory))).setCollectionsManager(
-                ISizeCollectionsManager(address(collectionsManager))
-            );
+            SizeFactory(payable(address(sizeFactory))).setCollectionsManager(collectionsManager);
         }
 
         address borrowTokenVaultImplementation = address(new NonTransferrableRebasingTokenVaultGhost());
@@ -253,9 +249,7 @@ abstract contract Deploy {
                 )
             );
             hevm.prank(owner);
-            SizeFactory(payable(address(sizeFactory))).setCollectionsManager(
-                ISizeCollectionsManager(address(collectionsManager))
-            );
+            SizeFactory(payable(address(sizeFactory))).setCollectionsManager(collectionsManager);
         }
 
         address borrowTokenVaultImplementation = address(new NonTransferrableRebasingTokenVaultGhost());

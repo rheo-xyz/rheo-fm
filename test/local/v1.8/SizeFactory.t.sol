@@ -6,14 +6,15 @@ import {RheoMock} from "@rheo-fm/test/mocks/RheoMock.sol";
 import {SizeFactory} from "@rheo-solidity/src/factory/SizeFactory.sol";
 
 contract SizeFactoryTest is BaseTest {
-    function test_SizeFactory_setSizeImplementation_updates_aliases() public {
+    function test_SizeFactory_setSizeImplementation_does_not_change_rheoImplementation() public {
         SizeFactory factory = SizeFactory(payable(address(sizeFactory)));
+        address oldRheoImplementation = factory.rheoImplementation();
         address newImplementation = address(new RheoMock());
 
         factory.setSizeImplementation(newImplementation);
 
         assertEq(factory.sizeImplementation(), newImplementation);
-        assertEq(factory.rheoImplementation(), newImplementation);
+        assertEq(factory.rheoImplementation(), oldRheoImplementation);
     }
 
     function test_SizeFactory_markets_registry_helpers() public {
