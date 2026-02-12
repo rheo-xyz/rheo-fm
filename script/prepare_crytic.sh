@@ -42,7 +42,7 @@ else
 fi
 
 if [ -n "$LEGACY_SOLIDITY_FILES" ] && [ -n "$BASE_SOLIDITY_FILES" ]; then
-    # Keep local Rheo libraries authoritative and only import additional legacy libs.
+    # Keep local Rheo libraries authoritative and only import additional legacy-only libs.
     LEGACY_SOLIDITY_FILES=$(grep -vxF -f <(printf "%s\n" "$BASE_SOLIDITY_FILES") <(printf "%s\n" "$LEGACY_SOLIDITY_FILES") || true)
 fi
 
@@ -51,7 +51,11 @@ if [ -n "$SOLIDITY_FILES" ]; then
     SOLIDITY_FILES=$(printf "%s\n" "$SOLIDITY_FILES" | sort -u)
 fi
 
-# Only keep libraries that are actually present in Crytic's compilation unit.
+# Foundry specific imports. Do this before Crytic introspection so
+# `crytic-compile --print-libraries` works on a fresh checkout.
+sed -i "s|\"src/|\"./|" lib/ERC-7540-Reference/src/*.sol
+
+# Keep only libraries present in Crytic's compilation unit.
 # Include names from both "## <contract>" headers and transitive "uses: [...]" deps.
 CRYTIC_LINK_NAMES=$(
     crytic-compile --print-libraries test/invariants/crytic/CryticTester.sol 2>/dev/null \
@@ -72,6 +76,9 @@ CRYTIC_LINK_NAMES=$(
 )
 if [ -n "$CRYTIC_LINK_NAMES" ] && [ -n "$SOLIDITY_FILES" ]; then
     SOLIDITY_FILES=$(grep -xF -f <(printf "%s\n" "$CRYTIC_LINK_NAMES") <(printf "%s\n" "$SOLIDITY_FILES") || true)
+elif [ -n "$BASE_SOLIDITY_FILES" ]; then
+    # If Crytic introspection returns nothing, prefer local Rheo libraries.
+    SOLIDITY_FILES=$(printf "%s\n" "$BASE_SOLIDITY_FILES" | sort -u)
 fi
 
 rm COMPILE_LIBRARIES.txt || true
@@ -101,9 +108,6 @@ sed -i "s/cryticArgs.*/cryticArgs: [\"--compile-libraries=$COMPILE_LIBRARIES\"]/
 sed -i "s/\"args\".*/\"args\": [\"--compile-libraries=$COMPILE_LIBRARIES\"]/" medusa.json
 sed -i "s/deployContracts.*/deployContracts: [$DEPLOY_CONTRACTS]/g" echidna.yaml
 sed -i "s/\"predeployedContracts\".*/\"predeployedContracts\": {$PREDEPLOYED_CONTRACTS},/g" medusa.json
-
-# Foundry specific imports
-sed -i "s|\"src/|\"./|" lib/ERC-7540-Reference/src/*.sol
 
 rm COMPILE_LIBRARIES.txt || true
 rm DEPLOY_CONTRACTS.txt || true
