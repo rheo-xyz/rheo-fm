@@ -35,6 +35,8 @@ import {AaveAdapter} from "@rheo-fm/src/market/token/adapters/AaveAdapter.sol";
 import {ERC4626Adapter} from "@rheo-fm/src/market/token/adapters/ERC4626Adapter.sol";
 
 import {NetworkConfiguration} from "@rheo-fm/script/Networks.sol";
+
+import {SizeFactory} from "@rheo-fm/src/factory/SizeFactory.sol";
 import {
     Initialize,
     InitializeDataParams,
@@ -42,15 +44,14 @@ import {
     InitializeOracleParams,
     InitializeRiskConfigParams
 } from "@rheo-fm/src/market/libraries/actions/Initialize.sol";
-import {SizeFactory} from "@rheo-fm/src/factory/SizeFactory.sol";
 
 import {RheoMock} from "@rheo-fm/test/mocks/RheoMock.sol";
 import {USDC} from "@rheo-fm/test/mocks/USDC.sol";
 import {WETH} from "@rheo-fm/test/mocks/WETH.sol";
 
+import {IRheoFactory} from "@rheo-fm/src/factory/interfaces/IRheoFactory.sol";
 import {NonTransferrableRebasingTokenVault} from "@rheo-fm/src/market/token/NonTransferrableRebasingTokenVault.sol";
 import {NonTransferrableRebasingTokenVaultGhost} from "@rheo-fm/test/mocks/NonTransferrableRebasingTokenVaultGhost.sol";
-import {IRheoFactory} from "@rheo-fm/src/factory/interfaces/IRheoFactory.sol";
 
 import {ERC20Mock} from "@openzeppelin/contracts/mocks/token/ERC20Mock.sol";
 

@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
+import {Action} from "@rheo-fm/src/factory/libraries/Authorization.sol";
 import {AccountingLibrary} from "@rheo-fm/src/market/libraries/AccountingLibrary.sol";
 import {CreditPosition, DebtPosition, LoanLibrary} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
 import {RiskLibrary} from "@rheo-fm/src/market/libraries/RiskLibrary.sol";
-import {Action} from "@rheo-fm/src/factory/libraries/Authorization.sol";
 
 import {State} from "@rheo-fm/src/market/RheoStorage.sol";
 
