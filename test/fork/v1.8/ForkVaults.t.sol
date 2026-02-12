@@ -18,11 +18,11 @@ import {IERC4626Morpho} from "@rheo-fm/test/fork/v1.8/interfaces/IERC4626Morpho.
 import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
 import {ClaimParams} from "@rheo-fm/src/market/libraries/actions/Claim.sol";
 
+import {IRheoFactory} from "@rheo-fm/src/factory/interfaces/IRheoFactory.sol";
 import {Rheo} from "@rheo-fm/src/market/Rheo.sol";
 import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
 import {NonTransferrableRebasingTokenVault} from "@rheo-fm/src/market/token/NonTransferrableRebasingTokenVault.sol";
 import {ERC4626_ADAPTER_ID} from "@rheo-fm/src/market/token/NonTransferrableRebasingTokenVault.sol";
-import {IRheoFactory} from "@rheo-fm/src/factory/interfaces/IRheoFactory.sol";
 
 import {Math} from "@rheo-fm/src/market/libraries/Math.sol";
 

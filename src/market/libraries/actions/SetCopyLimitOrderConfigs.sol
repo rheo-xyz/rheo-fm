@@ -3,10 +3,10 @@ pragma solidity 0.8.23;
 
 import {State, UserCopyLimitOrderConfigs} from "@rheo-fm/src/market/RheoStorage.sol";
 
+import {Action} from "@rheo-fm/src/factory/libraries/Authorization.sol";
 import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
 import {Events} from "@rheo-fm/src/market/libraries/Events.sol";
 import {CopyLimitOrderConfig, OfferLibrary} from "@rheo-fm/src/market/libraries/OfferLibrary.sol";
-import {Action} from "@rheo-fm/src/factory/libraries/Authorization.sol";
 
 struct SetCopyLimitOrderConfigsParams {
     // the loan offer copy config parameters

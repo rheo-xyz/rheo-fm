@@ -12,8 +12,8 @@ import {
     SellCreditLimitParams
 } from "@rheo-fm/src/market/libraries/actions/SellCreditLimit.sol";
 
-import {BaseTest} from "@rheo-fm/test/BaseTest.sol";
 import {Action, Authorization} from "@rheo-fm/src/factory/libraries/Authorization.sol";
+import {BaseTest} from "@rheo-fm/test/BaseTest.sol";
 
 contract AuthorizationSellCreditLimitTest is BaseTest {
     using OfferLibrary for FixedMaturityLimitOrder;

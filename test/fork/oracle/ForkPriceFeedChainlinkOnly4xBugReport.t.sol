@@ -10,8 +10,8 @@ import {PriceFeedChainlinkOnly4x} from "@rheo-fm/deprecated/oracle/v1.8/PriceFee
 import {MainnetAddresses} from "@rheo-fm/script/MainnetAddresses.s.sol";
 import {Contract, Networks} from "@rheo-fm/script/Networks.sol";
 
-import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
 import {IRheoFactory} from "@rheo-fm/src/factory/interfaces/IRheoFactory.sol";
+import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
 
 import {Math} from "@rheo-fm/src/market/libraries/Math.sol";
 

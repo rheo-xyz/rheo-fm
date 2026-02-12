@@ -12,9 +12,9 @@ import {
     SetUserConfigurationParams
 } from "@rheo-fm/src/market/libraries/actions/SetUserConfiguration.sol";
 
+import {Action, Authorization} from "@rheo-fm/src/factory/libraries/Authorization.sol";
 import {BaseTest} from "@rheo-fm/test/BaseTest.sol";
 import {FixedMaturityLimitOrderHelper} from "@rheo-fm/test/helpers/libraries/FixedMaturityLimitOrderHelper.sol";
-import {Action, Authorization} from "@rheo-fm/src/factory/libraries/Authorization.sol";
 
 contract AuthorizationSetUserConfigurationTest is BaseTest {
     function test_AuthorizationSetUserConfiguration_setUserConfigurationOnBehalfOf() public {

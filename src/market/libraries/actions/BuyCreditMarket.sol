@@ -3,6 +3,7 @@ pragma solidity 0.8.23;
 
 import {State, User} from "@rheo-fm/src/market/RheoStorage.sol";
 
+import {Action} from "@rheo-fm/src/factory/libraries/Authorization.sol";
 import {AccountingLibrary} from "@rheo-fm/src/market/libraries/AccountingLibrary.sol";
 import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
 import {Events} from "@rheo-fm/src/market/libraries/Events.sol";
@@ -10,7 +11,6 @@ import {CreditPosition, DebtPosition, LoanLibrary, RESERVED_ID} from "@rheo-fm/s
 import {Math, PERCENT} from "@rheo-fm/src/market/libraries/Math.sol";
 import {FixedMaturityLimitOrder, OfferLibrary} from "@rheo-fm/src/market/libraries/OfferLibrary.sol";
 import {RiskLibrary} from "@rheo-fm/src/market/libraries/RiskLibrary.sol";
-import {Action} from "@rheo-fm/src/factory/libraries/Authorization.sol";
 
 struct BuyCreditMarketParams {
     // The borrower

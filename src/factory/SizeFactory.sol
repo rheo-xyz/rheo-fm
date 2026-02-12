@@ -12,6 +12,8 @@ import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 import {ICollectionsManager} from "@rheo-fm/src/collections/interfaces/ICollectionsManager.sol";
+
+import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
 import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
 import {CopyLimitOrderConfig} from "@rheo-fm/src/market/libraries/OfferLibrary.sol";
 import {
@@ -20,7 +22,6 @@ import {
     InitializeOracleParams,
     InitializeRiskConfigParams
 } from "@rheo-fm/src/market/libraries/actions/Initialize.sol";
-import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
 import {NonTransferrableRebasingTokenVault} from "@rheo-fm/src/market/token/NonTransferrableRebasingTokenVault.sol";
 
 enum Action {
@@ -55,7 +56,6 @@ contract SizeFactory is MulticallUpgradeable, AccessControlUpgradeable, UUPSUpgr
     bytes32 public constant KEEPER_ROLE = keccak256("KEEPER_ROLE");
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
     bytes32 public constant BORROW_RATE_UPDATER_ROLE = keccak256("BORROW_RATE_UPDATER_ROLE");
-
 
     address public sizeImplementation;
     address public rheoImplementation;
@@ -205,7 +205,11 @@ contract SizeFactory is MulticallUpgradeable, AccessControlUpgradeable, UUPSUpgr
         return _isActionSet(authorizations[nonce][operator][onBehalfOf], action);
     }
 
-    function isAuthorizedAll(address operator, address onBehalfOf, uint256 actionsBitmap) external view returns (bool) {
+    function isAuthorizedAll(address operator, address onBehalfOf, uint256 actionsBitmap)
+        external
+        view
+        returns (bool)
+    {
         if (operator == onBehalfOf) return true;
         uint256 nonce = authorizationNonces[onBehalfOf];
         uint256 authorized = authorizations[nonce][operator][onBehalfOf];

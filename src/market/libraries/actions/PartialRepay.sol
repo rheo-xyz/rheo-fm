@@ -17,8 +17,8 @@ import {
     RESERVED_ID
 } from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
 
-import {RiskLibrary} from "@rheo-fm/src/market/libraries/RiskLibrary.sol";
 import {Action} from "@rheo-fm/src/factory/libraries/Authorization.sol";
+import {RiskLibrary} from "@rheo-fm/src/market/libraries/RiskLibrary.sol";
 
 struct PartialRepayParams {
     // The credit position ID with debt to repay

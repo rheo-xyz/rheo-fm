@@ -3,13 +3,14 @@ pragma solidity 0.8.23;
 
 import {IPool} from "@aave/interfaces/IPool.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
+
+import {Action, ActionsBitmap} from "@rheo-fm/src/factory/libraries/Authorization.sol";
 import {
     InitializeDataParams,
     InitializeFeeConfigParams,
     InitializeOracleParams,
     InitializeRiskConfigParams
 } from "@rheo-fm/src/market/libraries/actions/Initialize.sol";
-import {Action, ActionsBitmap} from "@rheo-fm/src/factory/libraries/Authorization.sol";
 
 bytes32 constant KEEPER_ROLE = keccak256("KEEPER_ROLE");
 bytes32 constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
