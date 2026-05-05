@@ -1,0 +1,1544 @@
+[
+  {
+    "type": "constructor",
+    "inputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "DEFAULT_ADMIN_ROLE",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "UPGRADE_INTERFACE_VERSION",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "string",
+        "internalType": "string"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "authorizationNonces",
+    "inputs": [
+      {
+        "name": "onBehalfOf",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "nonce",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "authorizations",
+    "inputs": [
+      {
+        "name": "nonce",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "operator",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "onBehalfOf",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "authorizedActionsBitmap",
+        "type": "uint256",
+        "internalType": "ActionsBitmap"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "callMarket",
+    "inputs": [
+      {
+        "name": "market",
+        "type": "address",
+        "internalType": "contract ISize"
+      },
+      {
+        "name": "data",
+        "type": "bytes",
+        "internalType": "bytes"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "result",
+        "type": "bytes",
+        "internalType": "bytes"
+      }
+    ],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "collectionsManager",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "contract ICollectionsManager"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "createBorrowTokenVault",
+    "inputs": [
+      {
+        "name": "variablePool",
+        "type": "address",
+        "internalType": "contract IPool"
+      },
+      {
+        "name": "underlyingBorrowToken",
+        "type": "address",
+        "internalType": "contract IERC20Metadata"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "borrowTokenVault",
+        "type": "address",
+        "internalType": "contract NonTransferrableRebasingTokenVault"
+      }
+    ],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "createMarket",
+    "inputs": [
+      {
+        "name": "feeConfigParams",
+        "type": "tuple",
+        "internalType": "struct InitializeFeeConfigParams",
+        "components": [
+          {
+            "name": "swapFeeAPR",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "fragmentationFee",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "liquidationRewardPercent",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "overdueCollateralProtocolPercent",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "collateralProtocolPercent",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "feeRecipient",
+            "type": "address",
+            "internalType": "address"
+          }
+        ]
+      },
+      {
+        "name": "riskConfigParams",
+        "type": "tuple",
+        "internalType": "struct InitializeRiskConfigParams",
+        "components": [
+          {
+            "name": "crOpening",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "crLiquidation",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "minimumCreditBorrowToken",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "minTenor",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "maxTenor",
+            "type": "uint256",
+            "internalType": "uint256"
+          }
+        ]
+      },
+      {
+        "name": "oracleParams",
+        "type": "tuple",
+        "internalType": "struct InitializeOracleParams",
+        "components": [
+          {
+            "name": "priceFeed",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "variablePoolBorrowRateStaleRateInterval",
+            "type": "uint64",
+            "internalType": "uint64"
+          }
+        ]
+      },
+      {
+        "name": "dataParams",
+        "type": "tuple",
+        "internalType": "struct InitializeDataParams",
+        "components": [
+          {
+            "name": "weth",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "underlyingCollateralToken",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "underlyingBorrowToken",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "variablePool",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "borrowTokenVault",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "sizeFactory",
+            "type": "address",
+            "internalType": "address"
+          }
+        ]
+      }
+    ],
+    "outputs": [
+      {
+        "name": "market",
+        "type": "address",
+        "internalType": "contract ISize"
+      }
+    ],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "createPriceFeed",
+    "inputs": [
+      {
+        "name": "_priceFeedParams",
+        "type": "tuple",
+        "internalType": "struct PriceFeedParams",
+        "components": [
+          {
+            "name": "uniswapV3Pool",
+            "type": "address",
+            "internalType": "contract IUniswapV3Pool"
+          },
+          {
+            "name": "twapWindow",
+            "type": "uint32",
+            "internalType": "uint32"
+          },
+          {
+            "name": "averageBlockTime",
+            "type": "uint32",
+            "internalType": "uint32"
+          },
+          {
+            "name": "baseToken",
+            "type": "address",
+            "internalType": "contract IERC20Metadata"
+          },
+          {
+            "name": "quoteToken",
+            "type": "address",
+            "internalType": "contract IERC20Metadata"
+          },
+          {
+            "name": "baseAggregator",
+            "type": "address",
+            "internalType": "contract AggregatorV3Interface"
+          },
+          {
+            "name": "quoteAggregator",
+            "type": "address",
+            "internalType": "contract AggregatorV3Interface"
+          },
+          {
+            "name": "baseStalePriceInterval",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "quoteStalePriceInterval",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "sequencerUptimeFeed",
+            "type": "address",
+            "internalType": "contract AggregatorV3Interface"
+          }
+        ]
+      }
+    ],
+    "outputs": [
+      {
+        "name": "priceFeed",
+        "type": "address",
+        "internalType": "contract PriceFeed"
+      }
+    ],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "getBorrowOfferAPR",
+    "inputs": [
+      {
+        "name": "user",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "collectionId",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "market",
+        "type": "address",
+        "internalType": "contract ISize"
+      },
+      {
+        "name": "rateProvider",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "tenor",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getLoanOfferAPR",
+    "inputs": [
+      {
+        "name": "user",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "collectionId",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "market",
+        "type": "address",
+        "internalType": "contract ISize"
+      },
+      {
+        "name": "rateProvider",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "tenor",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getMarket",
+    "inputs": [
+      {
+        "name": "index",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "contract ISize"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getMarketDescriptions",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "descriptions",
+        "type": "string[]",
+        "internalType": "string[]"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getMarkets",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "_markets",
+        "type": "address[]",
+        "internalType": "contract ISize[]"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getMarketsCount",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getRoleAdmin",
+    "inputs": [
+      {
+        "name": "role",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "grantRole",
+    "inputs": [
+      {
+        "name": "role",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      },
+      {
+        "name": "account",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "hasRole",
+    "inputs": [
+      {
+        "name": "role",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      },
+      {
+        "name": "account",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "initialize",
+    "inputs": [
+      {
+        "name": "_owner",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "isAuthorized",
+    "inputs": [
+      {
+        "name": "operator",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "onBehalfOf",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "action",
+        "type": "uint8",
+        "internalType": "enum Action"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "isAuthorizedAll",
+    "inputs": [
+      {
+        "name": "operator",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "onBehalfOf",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "actionsBitmap",
+        "type": "uint256",
+        "internalType": "ActionsBitmap"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "isBorrowAPRLowerThanLoanOfferAPRs",
+    "inputs": [
+      {
+        "name": "user",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "borrowAPR",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "market",
+        "type": "address",
+        "internalType": "contract ISize"
+      },
+      {
+        "name": "tenor",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "isLoanAPRGreaterThanBorrowOfferAPRs",
+    "inputs": [
+      {
+        "name": "user",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "loanAPR",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "market",
+        "type": "address",
+        "internalType": "contract ISize"
+      },
+      {
+        "name": "tenor",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "isMarket",
+    "inputs": [
+      {
+        "name": "candidate",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "multicall",
+    "inputs": [
+      {
+        "name": "data",
+        "type": "bytes[]",
+        "internalType": "bytes[]"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "results",
+        "type": "bytes[]",
+        "internalType": "bytes[]"
+      }
+    ],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "nonTransferrableTokenVaultImplementation",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "proxiableUUID",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "removeMarket",
+    "inputs": [
+      {
+        "name": "market",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "renounceRole",
+    "inputs": [
+      {
+        "name": "role",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      },
+      {
+        "name": "callerConfirmation",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "revokeAllAuthorizations",
+    "inputs": [],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "revokeRole",
+    "inputs": [
+      {
+        "name": "role",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      },
+      {
+        "name": "account",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "setAuthorization",
+    "inputs": [
+      {
+        "name": "operator",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "actionsBitmap",
+        "type": "uint256",
+        "internalType": "ActionsBitmap"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "setCollectionsManager",
+    "inputs": [
+      {
+        "name": "_collectionsManager",
+        "type": "address",
+        "internalType": "contract ICollectionsManager"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "setNonTransferrableRebasingTokenVaultImplementation",
+    "inputs": [
+      {
+        "name": "_nonTransferrableTokenVaultImplementation",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "setSizeImplementation",
+    "inputs": [
+      {
+        "name": "_sizeImplementation",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "setUserCollectionCopyLimitOrderConfigs",
+    "inputs": [
+      {
+        "name": "collectionId",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "copyLoanOfferConfig",
+        "type": "tuple",
+        "internalType": "struct CopyLimitOrderConfig",
+        "components": [
+          {
+            "name": "minTenor",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "maxTenor",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "minAPR",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "maxAPR",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "offsetAPR",
+            "type": "int256",
+            "internalType": "int256"
+          }
+        ]
+      },
+      {
+        "name": "copyBorrowOfferConfig",
+        "type": "tuple",
+        "internalType": "struct CopyLimitOrderConfig",
+        "components": [
+          {
+            "name": "minTenor",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "maxTenor",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "minAPR",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "maxAPR",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "offsetAPR",
+            "type": "int256",
+            "internalType": "int256"
+          }
+        ]
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "setUserCollectionCopyLimitOrderConfigsOnBehalfOf",
+    "inputs": [
+      {
+        "name": "collectionId",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "copyLoanOfferConfig",
+        "type": "tuple",
+        "internalType": "struct CopyLimitOrderConfig",
+        "components": [
+          {
+            "name": "minTenor",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "maxTenor",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "minAPR",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "maxAPR",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "offsetAPR",
+            "type": "int256",
+            "internalType": "int256"
+          }
+        ]
+      },
+      {
+        "name": "copyBorrowOfferConfig",
+        "type": "tuple",
+        "internalType": "struct CopyLimitOrderConfig",
+        "components": [
+          {
+            "name": "minTenor",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "maxTenor",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "minAPR",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "maxAPR",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "offsetAPR",
+            "type": "int256",
+            "internalType": "int256"
+          }
+        ]
+      },
+      {
+        "name": "onBehalfOf",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "sizeImplementation",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "subscribeToCollections",
+    "inputs": [
+      {
+        "name": "collectionIds",
+        "type": "uint256[]",
+        "internalType": "uint256[]"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "subscribeToCollectionsOnBehalfOf",
+    "inputs": [
+      {
+        "name": "collectionIds",
+        "type": "uint256[]",
+        "internalType": "uint256[]"
+      },
+      {
+        "name": "onBehalfOf",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "supportsInterface",
+    "inputs": [
+      {
+        "name": "interfaceId",
+        "type": "bytes4",
+        "internalType": "bytes4"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "unsubscribeFromCollections",
+    "inputs": [
+      {
+        "name": "collectionIds",
+        "type": "uint256[]",
+        "internalType": "uint256[]"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "unsubscribeFromCollectionsOnBehalfOf",
+    "inputs": [
+      {
+        "name": "collectionIds",
+        "type": "uint256[]",
+        "internalType": "uint256[]"
+      },
+      {
+        "name": "onBehalfOf",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "upgradeToAndCall",
+    "inputs": [
+      {
+        "name": "newImplementation",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "data",
+        "type": "bytes",
+        "internalType": "bytes"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "payable"
+  },
+  {
+    "type": "function",
+    "name": "version",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "string",
+        "internalType": "string"
+      }
+    ],
+    "stateMutability": "pure"
+  },
+  {
+    "type": "event",
+    "name": "CollectionsManagerSet",
+    "inputs": [
+      {
+        "name": "oldCollectionsManager",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "newCollectionsManager",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "CreateBorrowTokenVault",
+    "inputs": [
+      {
+        "name": "borrowTokenVault",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "CreateMarket",
+    "inputs": [
+      {
+        "name": "market",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "CreatePriceFeed",
+    "inputs": [
+      {
+        "name": "priceFeed",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "Initialized",
+    "inputs": [
+      {
+        "name": "version",
+        "type": "uint64",
+        "indexed": false,
+        "internalType": "uint64"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "NonTransferrableRebasingTokenVaultImplementationSet",
+    "inputs": [
+      {
+        "name": "oldNonTransferrableRebasingTokenVaultImplementation",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "newNonTransferrableRebasingTokenVaultImplementation",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "RemoveMarket",
+    "inputs": [
+      {
+        "name": "market",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "RevokeAllAuthorizations",
+    "inputs": [
+      {
+        "name": "sender",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "RoleAdminChanged",
+    "inputs": [
+      {
+        "name": "role",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
+      },
+      {
+        "name": "previousAdminRole",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
+      },
+      {
+        "name": "newAdminRole",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "RoleGranted",
+    "inputs": [
+      {
+        "name": "role",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
+      },
+      {
+        "name": "account",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "sender",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "RoleRevoked",
+    "inputs": [
+      {
+        "name": "role",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
+      },
+      {
+        "name": "account",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "sender",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "SetAuthorization",
+    "inputs": [
+      {
+        "name": "sender",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "operator",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "actionsBitmap",
+        "type": "uint256",
+        "indexed": true,
+        "internalType": "uint256"
+      },
+      {
+        "name": "nonce",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "SizeImplementationSet",
+    "inputs": [
+      {
+        "name": "oldSizeImplementation",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "newSizeImplementation",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "Upgraded",
+    "inputs": [
+      {
+        "name": "implementation",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "error",
+    "name": "AccessControlBadConfirmation",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "AccessControlUnauthorizedAccount",
+    "inputs": [
+      {
+        "name": "account",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "neededRole",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "AddressEmptyCode",
+    "inputs": [
+      {
+        "name": "target",
+        "type": "address",
+        "internalType": "address"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "ERC1967InvalidImplementation",
+    "inputs": [
+      {
+        "name": "implementation",
+        "type": "address",
+        "internalType": "address"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "ERC1967NonPayable",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "FailedCall",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "INVALID_ACTIONS_BITMAP",
+    "inputs": [
+      {
+        "name": "actionsBitmap",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "INVALID_MARKET",
+    "inputs": [
+      {
+        "name": "market",
+        "type": "address",
+        "internalType": "address"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "InsufficientBalance",
+    "inputs": [
+      {
+        "name": "balance",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "needed",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "InvalidInitialization",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "NULL_ADDRESS",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "NotInitializing",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "UNAUTHORIZED_ACTION",
+    "inputs": [
+      {
+        "name": "account",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "onBehalfOf",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "action",
+        "type": "uint8",
+        "internalType": "uint8"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "UUPSUnauthorizedCallContext",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "UUPSUnsupportedProxiableUUID",
+    "inputs": [
+      {
+        "name": "slot",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ]
+  }
+]

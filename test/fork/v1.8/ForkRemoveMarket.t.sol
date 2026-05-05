@@ -1,12 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
+import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
+import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import {ProposeSafeTxUpgradeSizeFactoryRemoveMarketScript} from
     "@script/ProposeSafeTxUpgradeSizeFactoryRemoveMarket.s.sol";
 import {Contract, Networks} from "@script/Networks.sol";
 import {SizeFactory} from "@src/factory/SizeFactory.sol";
 import {ISize} from "@src/market/interfaces/ISize.sol";
+import {ISizeAdmin} from "@src/market/interfaces/ISizeAdmin.sol";
 import {Errors} from "@src/market/libraries/Errors.sol";
+import {DepositParams} from "@src/market/libraries/actions/Deposit.sol";
+import {WithdrawParams} from "@src/market/libraries/actions/Withdraw.sol";
 import {ForkTest} from "@test/fork/ForkTest.sol";
 import {console} from "forge-std/console.sol";
 
@@ -88,6 +93,78 @@ contract ForkRemoveMarketTest is ForkTest, Networks {
         factory.removeMarket(invalidMarket);
     }
 
+    function testFork_removeMarket_withdrawFromRemovedMarketReverts() public {
+        // Perform the upgrade first
+        _upgradeSizeFactory();
+
+        // Find a paused market (expired PT market)
+        ISize pausedMarket = _findPausedMarket();
+        if (address(pausedMarket) == address(0)) {
+            console.log("No paused market found, skipping test");
+            return;
+        }
+
+        address marketAddress = address(pausedMarket);
+        console.log("Found paused market:", marketAddress);
+
+        address testUser = address(0x1234);
+        IERC20Metadata underlyingBorrowToken = pausedMarket.data().underlyingBorrowToken;
+        uint256 depositAmount = 100 * 10 ** underlyingBorrowToken.decimals();
+
+        // First, unpause the market temporarily to deposit funds
+        vm.prank(factoryOwner);
+        ISizeAdmin(marketAddress).unpause();
+        console.log("Market temporarily unpaused for deposit");
+
+        // Deal tokens to test user and deposit into the market
+        deal(address(underlyingBorrowToken), testUser, depositAmount);
+
+        vm.startPrank(testUser);
+        underlyingBorrowToken.approve(marketAddress, depositAmount);
+        pausedMarket.deposit(
+            DepositParams({token: address(underlyingBorrowToken), amount: depositAmount, to: testUser})
+        );
+        vm.stopPrank();
+        console.log("Deposited into market");
+
+        // Verify user has balance in the vault
+        uint256 vaultBalance = pausedMarket.data().borrowTokenVault.balanceOf(testUser);
+        console.log("User vault balance:", vaultBalance);
+        assertTrue(vaultBalance > 0, "User should have vault balance after deposit");
+
+        // Now pause the market again (simulating expired PT market state)
+        vm.prank(factoryOwner);
+        ISizeAdmin(marketAddress).pause();
+        console.log("Market re-paused");
+
+        // Remove the market from factory
+        vm.prank(factoryOwner);
+        factory.removeMarket(marketAddress);
+        console.log("Market removed from factory");
+
+        // Verify market is no longer registered
+        assertFalse(factory.isMarket(marketAddress), "Market should not be registered after removal");
+
+        // Unpause the market (this is the scenario: admin unpauases removed market)
+        vm.prank(factoryOwner);
+        ISizeAdmin(marketAddress).unpause();
+        console.log("Market unpaused after removal");
+
+        // Verify market is unpaused
+        assertFalse(PausableUpgradeable(marketAddress).paused(), "Market should be unpaused");
+
+        // Try to withdraw from the removed market
+        // This should revert with UNAUTHORIZED because the vault's onlyMarket modifier
+        // checks sizeFactory.isMarket(msg.sender) which returns false
+        vm.prank(testUser);
+        vm.expectRevert(abi.encodeWithSelector(Errors.UNAUTHORIZED.selector, marketAddress));
+        pausedMarket.withdraw(
+            WithdrawParams({token: address(underlyingBorrowToken), amount: depositAmount, to: testUser})
+        );
+
+        console.log("testFork_removeMarket_withdrawFromRemovedMarketReverts: PASSED");
+    }
+
     function _upgradeSizeFactory() internal {
         ProposeSafeTxUpgradeSizeFactoryRemoveMarketScript script =
             new ProposeSafeTxUpgradeSizeFactoryRemoveMarketScript();
@@ -98,6 +175,17 @@ contract ForkRemoveMarketTest is ForkTest, Networks {
             (bool ok,) = targets[i].call(datas[i]);
             assertTrue(ok, "Upgrade call should succeed");
         }
+    }
+
+    function _findPausedMarket() internal view returns (ISize) {
+        uint256 marketsCount = factory.getMarketsCount();
+        for (uint256 i = 0; i < marketsCount; i++) {
+            ISize market = factory.getMarket(i);
+            if (PausableUpgradeable(address(market)).paused()) {
+                return market;
+            }
+        }
+        return ISize(address(0));
     }
 }
 
