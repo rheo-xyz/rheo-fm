@@ -254,6 +254,7 @@ Ensure your `.env` file in the root directory of your project contains the follo
 ```bash
 API_KEY_ALCHEMY=<Your Alchemy API Key>
 API_KEY_ETHERSCAN=<Your Etherscan API Key>
+API_KEY_ARBISCAN=<Your Arbiscan API Key (only required for Arbitrum deployments)>
 DEPLOYER_ADDRESS=<Deployer's Ethereum Address>
 DEPLOYER_ACCOUNT=<Name of the Deployer's Account in Foundry>
 OWNER=<Owner's Address>
@@ -283,6 +284,32 @@ forge script script/Deploy.s.sol --rpc-url $RPC_URL --gas-limit 30000000 --sende
 ```
 
 If it does not work, try removing `--verify`
+
+### Arbitrum mainnet — first WETH/USDC market
+
+After Phase 1 (`SizeFactory` + impls deployed via `lib/rheo-solidity/script/DeploySizeFactory.s.sol`), Phase 2 (USDC `BorrowTokenVault` + adapters), and Phase 3 (`PriceFeed`):
+
+```bash
+source .env
+export RPC_URL=arbitrum-production
+export NETWORK_CONFIGURATION=arbitrum-production-weth-usdc
+export OWNER=0x462B545e8BBb6f9E5860928748Bfe9eCC712c3a7  # Safe + fee recipient
+export PRICE_FEED=<address from Phase 3>
+export BORROW_TOKEN_VAULT=<address from Phase 2>
+
+forge script script/ProposeSafeTxDeployFirstMarketArbitrum.s.sol \
+  --rpc-url $RPC_URL --sender $SIGNER --account $DEPLOYER_ACCOUNT --ffi -vvv
+```
+
+Verify deployed contracts on Arbiscan with `--verify --verifier etherscan` on the deploying scripts (Phases 1-3). For the market proxy created by `SizeFactory.createMarketRheo`, manual verification:
+
+```bash
+forge verify-contract <market-proxy-address> \
+  lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol:ERC1967Proxy \
+  --chain 42161 --etherscan-api-key $API_KEY_ARBISCAN --watch
+```
+
+Dry run before launch: `FOUNDRY_PROFILE=fork forge test --mc ArbitrumDeployFirstMarketForkTest -vv` runs Phases 1-3-5 against forked Arbitrum and asserts the resulting market matches the proposal.
 
 ### Deployment checklist
 

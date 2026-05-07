@@ -49,6 +49,7 @@ abstract contract Networks {
     uint256 public constant ETHEREUM_MAINNET = 1;
     uint256 public constant BASE_MAINNET = 8453;
     uint256 public constant BASE_SEPOLIA = 84532;
+    uint256 public constant ARBITRUM_MAINNET = 42161;
 
     mapping(uint256 => mapping(Contract => address)) public contracts;
 
@@ -56,19 +57,24 @@ abstract contract Networks {
         contracts[ETHEREUM_MAINNET][Contract.WETH] = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
         contracts[BASE_MAINNET][Contract.WETH] = 0x4200000000000000000000000000000000000006;
         contracts[BASE_SEPOLIA][Contract.WETH] = 0x4200000000000000000000000000000000000006;
+        contracts[ARBITRUM_MAINNET][Contract.WETH] = 0x82aF49447D8a07e3bd95BD0d56f35241523fBab1;
 
         contracts[ETHEREUM_MAINNET][Contract.RHEO_FACTORY] = 0x3A9C05c3Da48E6E26f39928653258D7D4Eb594C1;
         contracts[BASE_MAINNET][Contract.RHEO_FACTORY] = 0x330Dc31dB45672c1F565cf3EC91F9a01f8f3DF0b;
         contracts[BASE_SEPOLIA][Contract.RHEO_FACTORY] = 0x1bC2Aa26D4F3eCD612ddC4aB2518B59E04468191;
+        // Set after Phase 1 (DeploySizeFactory.s.sol against Arbitrum)
+        contracts[ARBITRUM_MAINNET][Contract.RHEO_FACTORY] = address(0);
 
         contracts[ETHEREUM_MAINNET][Contract.RHEO_GOVERNANCE] = 0x462B545e8BBb6f9E5860928748Bfe9eCC712c3a7;
         contracts[BASE_MAINNET][Contract.RHEO_GOVERNANCE] = 0x462B545e8BBb6f9E5860928748Bfe9eCC712c3a7;
         contracts[BASE_SEPOLIA][Contract.RHEO_GOVERNANCE] = 0xf7164d2fC05350C75387Fa6C0Cc4F97634cA9451;
+        contracts[ARBITRUM_MAINNET][Contract.RHEO_GOVERNANCE] = 0x462B545e8BBb6f9E5860928748Bfe9eCC712c3a7;
 
         contracts[ETHEREUM_MAINNET][Contract.MORPHO_CHAINLINK_ORACLE_V2_FACTORY] =
             0x3A7bB36Ee3f3eE32A60e9f2b33c1e5f2E83ad766;
         contracts[BASE_MAINNET][Contract.MORPHO_CHAINLINK_ORACLE_V2_FACTORY] = address(0);
         contracts[BASE_SEPOLIA][Contract.MORPHO_CHAINLINK_ORACLE_V2_FACTORY] = address(0);
+        contracts[ARBITRUM_MAINNET][Contract.MORPHO_CHAINLINK_ORACLE_V2_FACTORY] = address(0);
     }
 
     function params(string memory networkConfiguration) public pure returns (NetworkConfiguration memory) {
@@ -231,6 +237,29 @@ abstract contract Networks {
                     baseStalePriceInterval: 86400 * 1.1e18 / 1e18,
                     quoteStalePriceInterval: 86400 * 1.1e18 / 1e18,
                     sequencerUptimeFeed: AggregatorV3Interface(0xBCF85224fc0756B9Fa45aA7892530B47e10b6433)
+                })
+            });
+        } else if (Strings.equal(networkConfiguration, "arbitrum-production-weth-usdc")) {
+            return NetworkConfiguration({
+                weth: 0x82aF49447D8a07e3bd95BD0d56f35241523fBab1,
+                underlyingCollateralToken: 0x82aF49447D8a07e3bd95BD0d56f35241523fBab1,
+                underlyingBorrowToken: 0xaf88d065e77c8cC2239327C5EDb3A432268e5831,
+                variablePool: 0x794a61358D6845594F94dc1DB02A252b5b4814aD,
+                fragmentationFee: 1e6,
+                crOpening: 1.5e18,
+                crLiquidation: 1.3e18,
+                minimumCreditBorrowToken: 10e6,
+                priceFeedParams: PriceFeedParams({
+                    twapWindow: 10 minutes,
+                    averageBlockTime: 1 seconds,
+                    uniswapV3Pool: IUniswapV3Pool(0xC6962004f452bE9203591991D15f6b388e09E8D0),
+                    baseToken: IERC20Metadata(0x82aF49447D8a07e3bd95BD0d56f35241523fBab1),
+                    quoteToken: IERC20Metadata(0xaf88d065e77c8cC2239327C5EDb3A432268e5831),
+                    baseAggregator: AggregatorV3Interface(0x639Fe6ab55C921f74e7fac1ee960C0B6293ba612),
+                    quoteAggregator: AggregatorV3Interface(0x50834F3163758fcC1Df9973b6e91f0F0F0434aD3),
+                    baseStalePriceInterval: 86400 * 1.1e18 / 1e18,
+                    quoteStalePriceInterval: 86400 * 1.1e18 / 1e18,
+                    sequencerUptimeFeed: AggregatorV3Interface(0xFdB631F5EE196F0ed6FAa767959853A9F217697D)
                 })
             });
         } else if (Strings.equal(networkConfiguration, "arbitrum-production-susde-usdc")) {
