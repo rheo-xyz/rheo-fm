@@ -38,11 +38,20 @@ contract ProposeSafeTxWireRheoArbitrumFactoryScript is BaseScript, Networks {
     using Safe for *;
     using Tenderly for *;
 
-    function run() external deleteVirtualTestnets {
+    address private signer;
+    string private derivationPath;
+    ISizeFactory private sizeFactory;
+    address private rheoImplementation;
+    address private vaultImplementation;
+    ICollectionsManager private collectionsManager;
+
+    /// @dev parseEnv runs BEFORE deleteVirtualTestnets so tenderly is initialized when the latter
+    ///      reads from storage. Reversing the order causes a panic(0x11) inside getVirtualTestnets.
+    modifier parseEnv() {
         if (block.chainid != ARBITRUM_MAINNET) revert InvalidChainId(block.chainid);
 
-        address signer = vm.envAddress("SIGNER");
-        string memory derivationPath = vm.envString("LEDGER_PATH");
+        signer = vm.envAddress("SIGNER");
+        derivationPath = vm.envString("LEDGER_PATH");
 
         tenderly.initialize(
             vm.envString("TENDERLY_ACCOUNT_NAME"),
@@ -51,13 +60,17 @@ contract ProposeSafeTxWireRheoArbitrumFactoryScript is BaseScript, Networks {
         );
         safe.initialize(vm.envAddress("OWNER"));
 
-        ISizeFactory sizeFactory = ISizeFactory(contracts[block.chainid][Contract.RHEO_FACTORY]);
+        sizeFactory = ISizeFactory(contracts[block.chainid][Contract.RHEO_FACTORY]);
         require(address(sizeFactory) != address(0), "RHEO_FACTORY not set in Networks.sol for Arbitrum");
 
-        address rheoImplementation = vm.envAddress("RHEO_IMPLEMENTATION");
-        address vaultImplementation = vm.envAddress("VAULT_IMPLEMENTATION");
-        ICollectionsManager collectionsManager = ICollectionsManager(vm.envAddress("COLLECTIONS_MANAGER"));
+        rheoImplementation = vm.envAddress("RHEO_IMPLEMENTATION");
+        vaultImplementation = vm.envAddress("VAULT_IMPLEMENTATION");
+        collectionsManager = ICollectionsManager(vm.envAddress("COLLECTIONS_MANAGER"));
 
+        _;
+    }
+
+    function run() external parseEnv deleteVirtualTestnets {
         address[] memory targets = new address[](3);
         bytes[] memory datas = new bytes[](3);
 
