@@ -62,8 +62,7 @@ abstract contract Networks {
         contracts[ETHEREUM_MAINNET][Contract.RHEO_FACTORY] = 0x3A9C05c3Da48E6E26f39928653258D7D4Eb594C1;
         contracts[BASE_MAINNET][Contract.RHEO_FACTORY] = 0x330Dc31dB45672c1F565cf3EC91F9a01f8f3DF0b;
         contracts[BASE_SEPOLIA][Contract.RHEO_FACTORY] = 0x1bC2Aa26D4F3eCD612ddC4aB2518B59E04468191;
-        // Set after Phase 1 (DeploySizeFactory.s.sol against Arbitrum)
-        contracts[ARBITRUM_MAINNET][Contract.RHEO_FACTORY] = address(0);
+        contracts[ARBITRUM_MAINNET][Contract.RHEO_FACTORY] = 0x63CF5fc3dD8bc915056854053774FD28947Deb64;
 
         contracts[ETHEREUM_MAINNET][Contract.RHEO_GOVERNANCE] = 0x462B545e8BBb6f9E5860928748Bfe9eCC712c3a7;
         contracts[BASE_MAINNET][Contract.RHEO_GOVERNANCE] = 0x462B545e8BBb6f9E5860928748Bfe9eCC712c3a7;
