@@ -120,14 +120,18 @@ contract ProposeSafeTxDeployFirstMarketArbitrumScript is BaseScript, Networks {
         tenderly.sendTransaction(vnet.id, signer, safe.instance().safe, execTransactionData);
     }
 
-    /// @dev Quarter-end maturities for the WETH/USDC market launch:
-    ///        1782460800 → 2026-06-26 00:00:00 UTC (Q2 2026)
-    ///        1790323200 → 2026-09-25 00:00:00 UTC (Q3 2026)
-    ///        1798704000 → 2026-12-30 00:00:00 UTC (Q4 2026)
+    /// @dev Quarter-end maturities for the WETH/USDC market launch. Pattern: last Friday of the
+    ///      quarter at 08:00 UTC, falling back to the last weekday if the last Friday is a holiday
+    ///      (Q4 2026 → 2026-12-31 because Christmas Day fell on the last Friday).
+    ///        1782460800 → 2026-06-26 08:00 UTC (Q2 2026 — Friday)
+    ///        1790323200 → 2026-09-25 08:00 UTC (Q3 2026 — Friday)
+    ///        1798704000 → 2026-12-31 08:00 UTC (Q4 2026 — Thursday, last weekday)
+    ///        1806048000 → 2027-03-26 08:00 UTC (Q1 2027 — Friday)
     function _maturities() internal pure returns (uint256[] memory maturities) {
-        maturities = new uint256[](3);
+        maturities = new uint256[](4);
         maturities[0] = 1782460800;
         maturities[1] = 1790323200;
         maturities[2] = 1798704000;
+        maturities[3] = 1806048000;
     }
 }

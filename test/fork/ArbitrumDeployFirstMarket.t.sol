@@ -123,10 +123,11 @@ contract ArbitrumDeployFirstMarketForkTest is Test, Networks {
             feeRecipient: SAFE_AND_FEE_RECIPIENT
         });
 
-        uint256[] memory maturities = new uint256[](3);
-        maturities[0] = 1782460800; // 2026-06-26
-        maturities[1] = 1790323200; // 2026-09-25
-        maturities[2] = 1798704000; // 2026-12-30
+        uint256[] memory maturities = new uint256[](4);
+        maturities[0] = 1782460800; // 2026-06-26 08:00 UTC (Q2 2026)
+        maturities[1] = 1790323200; // 2026-09-25 08:00 UTC (Q3 2026)
+        maturities[2] = 1798704000; // 2026-12-31 08:00 UTC (Q4 2026)
+        maturities[3] = 1806048000; // 2027-03-26 08:00 UTC (Q1 2027)
 
         InitializeRiskConfigParams memory riskConfigParams = InitializeRiskConfigParams({
             crOpening: cfg.crOpening,
@@ -179,10 +180,11 @@ contract ArbitrumDeployFirstMarketForkTest is Test, Networks {
         assertEq(r.minimumCreditBorrowToken, cfg.minimumCreditBorrowToken, "minimumCreditBorrowToken");
         assertEq(r.minTenor, 1 hours, "minTenor");
         assertEq(r.maxTenor, 5 * 365 days, "maxTenor");
-        assertEq(r.maturities.length, 3, "maturities length");
+        assertEq(r.maturities.length, 4, "maturities length");
         assertEq(r.maturities[0], 1782460800, "maturity Q2 2026");
         assertEq(r.maturities[1], 1790323200, "maturity Q3 2026");
         assertEq(r.maturities[2], 1798704000, "maturity Q4 2026");
+        assertEq(r.maturities[3], 1806048000, "maturity Q1 2027");
     }
 
     function testFork_ArbitrumDeployFirstMarket_feeConfigMatchesProposal() public view {
