@@ -249,7 +249,7 @@ abstract contract Networks {
                 crLiquidation: 1.3e18,
                 minimumCreditBorrowToken: 10e6,
                 priceFeedParams: PriceFeedParams({
-                    twapWindow: 10 minutes,
+                    twapWindow: 60 seconds,
                     averageBlockTime: 1 seconds,
                     uniswapV3Pool: IUniswapV3Pool(0xC6962004f452bE9203591991D15f6b388e09E8D0),
                     baseToken: IERC20Metadata(0x82aF49447D8a07e3bd95BD0d56f35241523fBab1),
