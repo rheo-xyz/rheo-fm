@@ -20,6 +20,8 @@ import {ISizeFactoryV1_9} from "@rheo-solidity/src/factory/interfaces/ISizeFacto
 import {Safe} from "@safe-utils/Safe.sol";
 import {Tenderly} from "@tenderly-utils/Tenderly.sol";
 
+import {console2 as console} from "forge-std/console2.sol";
+
 /// @notice Proposes a Safe transaction to create the FIRST WETH/USDC market on Arbitrum mainnet.
 /// @dev Run after Phases 1-3 are complete:
 ///        Phase 1: SizeFactory + CollectionsManager + impls deployed (from `lib/rheo-solidity/script/DeploySizeFactory.s.sol`)
@@ -74,6 +76,50 @@ contract ProposeSafeTxDeployFirstMarketArbitrumScript is BaseScript, Networks {
     }
 
     function run() external parseEnv deleteVirtualTestnets {
+        (address target, bytes memory data) = _buildCall();
+
+        safe.proposeTransaction(target, data, signer, derivationPath);
+
+        Tenderly.VirtualTestnet memory vnet =
+            tenderly.createVirtualTestnet("arbitrum-weth-usdc-vnet", block.chainid);
+        bytes memory execTransactionData = safe.getExecTransactionData(target, data, signer, derivationPath);
+        // Override Safe `threshold` (storage slot 4) to 1 so Tenderly can execute the simulated tx with a single signer.
+        tenderly.setStorageAt(vnet, safe.instance().safe, bytes32(uint256(4)), bytes32(uint256(1)));
+        tenderly.sendTransaction(vnet.id, signer, safe.instance().safe, execTransactionData);
+    }
+
+    /// @notice Prints the createMarketRheo calldata so the Safe tx can be built manually in the
+    ///         Safe Web UI. Skips Ledger, Tenderly, and the Safe API. Requires PRICE_FEED,
+    ///         BORROW_TOKEN_VAULT (used to assemble the data) — same env vars as `run()` minus the
+    ///         signing-related ones.
+    ///         Run:
+    ///           forge script script/ProposeSafeTxDeployFirstMarketArbitrum.s.sol \
+    ///             --rpc-url arbitrum-production --sig "printCalldata()" -vvv
+    function printCalldata() external {
+        if (block.chainid != ARBITRUM_MAINNET) revert InvalidChainId(block.chainid);
+
+        sizeFactory = ISizeFactory(contracts[block.chainid][Contract.RHEO_FACTORY]);
+        require(address(sizeFactory) != address(0), "RHEO_FACTORY not set in Networks.sol for Arbitrum");
+        priceFeed = IPriceFeed(vm.envAddress("PRICE_FEED"));
+        borrowTokenVault = vm.envAddress("BORROW_TOKEN_VAULT");
+
+        (address target, bytes memory data) = _buildCall();
+
+        console.log("==============================================================================");
+        console.log("Phase 5: SizeFactory.createMarketRheo(fee, risk, oracle, data)");
+        console.log("         One transaction. Operation = Call");
+        console.log("==============================================================================");
+        console.log("");
+        console.log("  To:        %s", target);
+        console.log("  Value:     0");
+        console.log("  Operation: Call");
+        console.log("  Data:");
+        console.logBytes(data);
+        console.log("");
+        console.log("After execution, the market proxy address is in the CreateMarket event log.");
+    }
+
+    function _buildCall() private view returns (address target, bytes memory data) {
         NetworkConfiguration memory cfg = params("arbitrum-production-weth-usdc");
 
         InitializeFeeConfigParams memory feeConfigParams = InitializeFeeConfigParams({
@@ -105,19 +151,10 @@ contract ProposeSafeTxDeployFirstMarketArbitrumScript is BaseScript, Networks {
             sizeFactory: address(sizeFactory)
         });
 
-        bytes memory data = abi.encodeCall(
+        target = address(sizeFactory);
+        data = abi.encodeCall(
             ISizeFactoryV1_9.createMarketRheo, (feeConfigParams, riskConfigParams, oracleParams, dataParams)
         );
-        address target = address(sizeFactory);
-
-        safe.proposeTransaction(target, data, signer, derivationPath);
-
-        Tenderly.VirtualTestnet memory vnet =
-            tenderly.createVirtualTestnet("arbitrum-weth-usdc-vnet", block.chainid);
-        bytes memory execTransactionData = safe.getExecTransactionData(target, data, signer, derivationPath);
-        // Override Safe `threshold` (storage slot 4) to 1 so Tenderly can execute the simulated tx with a single signer.
-        tenderly.setStorageAt(vnet, safe.instance().safe, bytes32(uint256(4)), bytes32(uint256(1)));
-        tenderly.sendTransaction(vnet.id, signer, safe.instance().safe, execTransactionData);
     }
 
     /// @dev Quarter-end maturities for the WETH/USDC market launch. Pattern: last Friday of the
