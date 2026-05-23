@@ -39,7 +39,11 @@ enum Contract {
     WETH,
     RHEO_FACTORY,
     RHEO_GOVERNANCE,
-    MORPHO_CHAINLINK_ORACLE_V2_FACTORY
+    MORPHO_CHAINLINK_ORACLE_V2_FACTORY,
+    // F9: tracked here so Phase 2a (createBorrowTokenVault) can refuse to double-create.
+    //     SizeFactory itself does not enforce uniqueness on (variablePool, underlyingToken).
+    //     Populate after Phase 2a executes; before that it MUST be address(0).
+    RHEO_BORROW_VAULT_USDC
 }
 
 abstract contract Networks {
@@ -74,6 +78,12 @@ abstract contract Networks {
         contracts[BASE_MAINNET][Contract.MORPHO_CHAINLINK_ORACLE_V2_FACTORY] = address(0);
         contracts[BASE_SEPOLIA][Contract.MORPHO_CHAINLINK_ORACLE_V2_FACTORY] = address(0);
         contracts[ARBITRUM_MAINNET][Contract.MORPHO_CHAINLINK_ORACLE_V2_FACTORY] = address(0);
+
+        // F9: borrow-vault tracking. Populated after Phase 2a executes on the corresponding chain.
+        contracts[ETHEREUM_MAINNET][Contract.RHEO_BORROW_VAULT_USDC] = address(0);
+        contracts[BASE_MAINNET][Contract.RHEO_BORROW_VAULT_USDC] = address(0);
+        contracts[BASE_SEPOLIA][Contract.RHEO_BORROW_VAULT_USDC] = address(0);
+        contracts[ARBITRUM_MAINNET][Contract.RHEO_BORROW_VAULT_USDC] = address(0);
     }
 
     function params(string memory networkConfiguration) public pure returns (NetworkConfiguration memory) {

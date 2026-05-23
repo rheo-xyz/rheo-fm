@@ -2,6 +2,8 @@
 pragma solidity 0.8.23;
 
 import {IPool} from "@aave/interfaces/IPool.sol";
+import {ReserveConfiguration} from "@aave/protocol/libraries/configuration/ReserveConfiguration.sol";
+import {DataTypes} from "@aave/protocol/libraries/types/DataTypes.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
 import {BaseScript} from "@rheo-fm/script/BaseScript.sol";
@@ -37,6 +39,7 @@ import {console2 as console} from "forge-std/console2.sol";
 contract ProposeSafeTxCreateBorrowVaultArbitrumScript is BaseScript, Networks {
     using Safe for *;
     using Tenderly for *;
+    using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
 
     address private signer;
     string private derivationPath;
@@ -54,11 +57,19 @@ contract ProposeSafeTxCreateBorrowVaultArbitrumScript is BaseScript, Networks {
             vm.envString("TENDERLY_PROJECT_NAME"),
             vm.envString("TENDERLY_ACCESS_KEY")
         );
-        safe.initialize(vm.envAddress("OWNER"));
+        address ownerEnv = vm.envAddress("OWNER");
+        // F6: defense against .env typo that would sign from a non-canonical Safe.
+        require(
+            ownerEnv == contracts[block.chainid][Contract.RHEO_GOVERNANCE],
+            "OWNER must equal contracts[ARBITRUM_MAINNET][RHEO_GOVERNANCE]"
+        );
+        safe.initialize(ownerEnv);
 
         sizeFactory = ISizeFactory(contracts[block.chainid][Contract.RHEO_FACTORY]);
         require(address(sizeFactory) != address(0), "RHEO_FACTORY not set in Networks.sol for Arbitrum");
         cfg = params("arbitrum-production-weth-usdc");
+
+        _runPreflightChecks();
 
         _;
     }
@@ -82,6 +93,8 @@ contract ProposeSafeTxCreateBorrowVaultArbitrumScript is BaseScript, Networks {
         require(address(sizeFactory) != address(0), "RHEO_FACTORY not set in Networks.sol for Arbitrum");
         cfg = params("arbitrum-production-weth-usdc");
 
+        _runPreflightChecks();
+
         (address target, bytes memory data) = _buildCall();
 
         console.log("==============================================================================");
@@ -103,5 +116,27 @@ contract ProposeSafeTxCreateBorrowVaultArbitrumScript is BaseScript, Networks {
         data = abi.encodeCall(
             ISizeFactory.createBorrowTokenVault, (IPool(cfg.variablePool), IERC20Metadata(cfg.underlyingBorrowToken))
         );
+    }
+
+    /// @dev F8 + F9 pre-flight checks. View-only — runs in both `run()` and `printCalldata()` so the
+    ///      Safe ceremony refuses to even proceed if the underlying assumptions are wrong.
+    function _runPreflightChecks() private view {
+        // F9: refuse to propose if a borrow vault is already tracked for this chain.
+        // SizeFactory itself does NOT enforce uniqueness on (variablePool, underlyingToken), so the
+        // guard lives here. After Phase 2a executes, commit the new vault address to
+        // `contracts[ARBITRUM_MAINNET][Contract.RHEO_BORROW_VAULT_USDC]` in Networks.sol so a
+        // double-ceremony cannot accidentally spin up a second canonical vault.
+        require(
+            contracts[block.chainid][Contract.RHEO_BORROW_VAULT_USDC] == address(0),
+            "RHEO_BORROW_VAULT_USDC already set in Networks.sol; refusing to create another"
+        );
+
+        // F8: Aave v3 USDC reserve health. Catches the "governance changed config between dev and
+        // prod" footgun where a frozen/paused reserve would silently break user deposits.
+        DataTypes.ReserveData memory r = IPool(cfg.variablePool).getReserveData(cfg.underlyingBorrowToken);
+        require(r.configuration.getActive(), "Aave USDC reserve is inactive");
+        require(!r.configuration.getPaused(), "Aave USDC reserve is paused");
+        require(!r.configuration.getFrozen(), "Aave USDC reserve is frozen");
+        require(r.aTokenAddress != address(0), "Aave USDC reserve has no aToken");
     }
 }

@@ -41,9 +41,6 @@ contract ProposeSafeTxDeployFirstMarketArbitrumScript is BaseScript, Networks {
     using Tenderly for *;
     using Safe for *;
 
-    /// @dev The Safe multisig is also the protocol fee recipient on Arbitrum.
-    address private constant FEE_RECIPIENT = 0x462B545e8BBb6f9E5860928748Bfe9eCC712c3a7;
-
     address signer;
     string derivationPath;
 
@@ -61,12 +58,25 @@ contract ProposeSafeTxDeployFirstMarketArbitrumScript is BaseScript, Networks {
         sizeFactory = ISizeFactory(contracts[block.chainid][Contract.RHEO_FACTORY]);
         require(address(sizeFactory) != address(0), "RHEO_FACTORY not set in Networks.sol for Arbitrum");
 
+        // F4: probe the live factory for v1.9-compatibility before we encode a v1.9-only call.
+        // `rheoImplementation()` was introduced in v1.9 (SizeFactoryStorage:35); a pre-v1.9
+        // factory has no such selector and the staticcall returns empty.
+        (bool factoryV1_9Ok, bytes memory factoryV1_9Ret) =
+            address(sizeFactory).staticcall(abi.encodeWithSignature("rheoImplementation()"));
+        require(factoryV1_9Ok && factoryV1_9Ret.length == 32, "live SizeFactory is not v1.9-compatible");
+        require(abi.decode(factoryV1_9Ret, (address)) != address(0), "live SizeFactory has no Rheo impl wired (Phase 1.2 incomplete?)");
+
         string memory accountSlug = vm.envString("TENDERLY_ACCOUNT_NAME");
         string memory projectSlug = vm.envString("TENDERLY_PROJECT_NAME");
         string memory accessKey = vm.envString("TENDERLY_ACCESS_KEY");
         tenderly.initialize(accountSlug, projectSlug, accessKey);
 
         safeAddress = vm.envAddress("OWNER");
+        // F6: defense against .env typo that would sign from a non-canonical Safe.
+        require(
+            safeAddress == contracts[block.chainid][Contract.RHEO_GOVERNANCE],
+            "OWNER must equal contracts[ARBITRUM_MAINNET][RHEO_GOVERNANCE]"
+        );
         safe.initialize(safeAddress);
 
         priceFeed = IPriceFeed(vm.envAddress("PRICE_FEED"));
@@ -100,6 +110,13 @@ contract ProposeSafeTxDeployFirstMarketArbitrumScript is BaseScript, Networks {
 
         sizeFactory = ISizeFactory(contracts[block.chainid][Contract.RHEO_FACTORY]);
         require(address(sizeFactory) != address(0), "RHEO_FACTORY not set in Networks.sol for Arbitrum");
+
+        // F4: same v1.9 probe as run() — fail fast if the live factory predates the v1.9 ABI.
+        (bool factoryV1_9Ok, bytes memory factoryV1_9Ret) =
+            address(sizeFactory).staticcall(abi.encodeWithSignature("rheoImplementation()"));
+        require(factoryV1_9Ok && factoryV1_9Ret.length == 32, "live SizeFactory is not v1.9-compatible");
+        require(abi.decode(factoryV1_9Ret, (address)) != address(0), "live SizeFactory has no Rheo impl wired");
+
         priceFeed = IPriceFeed(vm.envAddress("PRICE_FEED"));
         borrowTokenVault = vm.envAddress("BORROW_TOKEN_VAULT");
 
@@ -128,7 +145,9 @@ contract ProposeSafeTxDeployFirstMarketArbitrumScript is BaseScript, Networks {
             liquidationRewardPercent: 0.05e18,
             overdueCollateralProtocolPercent: 0.01e18,
             collateralProtocolPercent: 0.1e18,
-            feeRecipient: FEE_RECIPIENT
+            // F5: single source of truth — fee recipient = the governance Safe from Networks.sol.
+            // Rotating the Safe in Networks.sol now also rotates the fee recipient automatically.
+            feeRecipient: contracts[block.chainid][Contract.RHEO_GOVERNANCE]
         });
 
         InitializeRiskConfigParams memory riskConfigParams = InitializeRiskConfigParams({

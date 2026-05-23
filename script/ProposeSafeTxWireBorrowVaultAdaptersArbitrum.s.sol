@@ -2,7 +2,7 @@
 pragma solidity 0.8.23;
 
 import {BaseScript} from "@rheo-fm/script/BaseScript.sol";
-import {Networks} from "@rheo-fm/script/Networks.sol";
+import {Contract, Networks} from "@rheo-fm/script/Networks.sol";
 
 import {IAdapter} from "@rheo-fm/src/market/token/adapters/IAdapter.sol";
 import {
@@ -58,7 +58,13 @@ contract ProposeSafeTxWireBorrowVaultAdaptersArbitrumScript is BaseScript, Netwo
             vm.envString("TENDERLY_PROJECT_NAME"),
             vm.envString("TENDERLY_ACCESS_KEY")
         );
-        safe.initialize(vm.envAddress("OWNER"));
+        address ownerEnv = vm.envAddress("OWNER");
+        // F6: defense against .env typo that would sign from a non-canonical Safe.
+        require(
+            ownerEnv == contracts[block.chainid][Contract.RHEO_GOVERNANCE],
+            "OWNER must equal contracts[ARBITRUM_MAINNET][RHEO_GOVERNANCE]"
+        );
+        safe.initialize(ownerEnv);
 
         vault = NonTransferrableRebasingTokenVault(payable(vm.envAddress("BORROW_TOKEN_VAULT")));
         aaveAdapter = IAdapter(vm.envAddress("AAVE_ADAPTER"));
@@ -82,7 +88,13 @@ contract ProposeSafeTxWireBorrowVaultAdaptersArbitrumScript is BaseScript, Netwo
     function printCalldata() external {
         if (block.chainid != ARBITRUM_MAINNET) revert InvalidChainId(block.chainid);
 
-        safe.initialize(vm.envAddress("OWNER"));
+        address ownerEnv = vm.envAddress("OWNER");
+        // F6: defense against .env typo that would sign from a non-canonical Safe.
+        require(
+            ownerEnv == contracts[block.chainid][Contract.RHEO_GOVERNANCE],
+            "OWNER must equal contracts[ARBITRUM_MAINNET][RHEO_GOVERNANCE]"
+        );
+        safe.initialize(ownerEnv);
 
         vault = NonTransferrableRebasingTokenVault(payable(vm.envAddress("BORROW_TOKEN_VAULT")));
         aaveAdapter = IAdapter(vm.envAddress("AAVE_ADAPTER"));

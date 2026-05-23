@@ -14,7 +14,7 @@ import {console2 as console} from "forge-std/console2.sol";
 /// @dev    The PriceFeed constructor internally deploys three sub-contracts:
 ///           - ChainlinkSequencerUptimeFeed  (Arbitrum L2 sequencer guard)
 ///           - ChainlinkPriceFeed             (primary: ETH/USD x USDC/USD aggregators)
-///           - UniswapV3PriceFeed             (fallback: WETH/USDC 0.05% TWAP, 10 min window)
+///           - UniswapV3PriceFeed             (fallback: WETH/USDC 0.05% TWAP, 15 min window)
 ///         `forge --verify` will verify the top-level PriceFeed but NOT the sub-contracts. Use the
 ///         logged addresses + `forge verify-contract` to verify those three manually on Arbiscan.
 ///

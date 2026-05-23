@@ -60,7 +60,13 @@ contract ProposeSafeTxWireRheoArbitrumFactoryScript is BaseScript, Networks {
             vm.envString("TENDERLY_PROJECT_NAME"),
             vm.envString("TENDERLY_ACCESS_KEY")
         );
-        safe.initialize(vm.envAddress("OWNER"));
+        address ownerEnv = vm.envAddress("OWNER");
+        // F6: defense against .env typo that would sign from a non-canonical Safe.
+        require(
+            ownerEnv == contracts[block.chainid][Contract.RHEO_GOVERNANCE],
+            "OWNER must equal contracts[ARBITRUM_MAINNET][RHEO_GOVERNANCE]"
+        );
+        safe.initialize(ownerEnv);
 
         sizeFactory = ISizeFactory(contracts[block.chainid][Contract.RHEO_FACTORY]);
         require(address(sizeFactory) != address(0), "RHEO_FACTORY not set in Networks.sol for Arbitrum");
@@ -93,7 +99,13 @@ contract ProposeSafeTxWireRheoArbitrumFactoryScript is BaseScript, Networks {
         if (block.chainid != ARBITRUM_MAINNET) revert InvalidChainId(block.chainid);
 
         // safe.initialize() populates the chainId → MultiSendCallOnly address map used below
-        safe.initialize(vm.envAddress("OWNER"));
+        address ownerEnv = vm.envAddress("OWNER");
+        // F6: defense against .env typo that would sign from a non-canonical Safe.
+        require(
+            ownerEnv == contracts[block.chainid][Contract.RHEO_GOVERNANCE],
+            "OWNER must equal contracts[ARBITRUM_MAINNET][RHEO_GOVERNANCE]"
+        );
+        safe.initialize(ownerEnv);
 
         sizeFactory = ISizeFactory(contracts[block.chainid][Contract.RHEO_FACTORY]);
         require(address(sizeFactory) != address(0), "RHEO_FACTORY not set in Networks.sol for Arbitrum");

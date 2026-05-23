@@ -215,4 +215,41 @@ contract ArbitrumLiveMarketDeploymentForkTest is Test, Networks {
             "default vault adapter should be Aave"
         );
     }
+
+    /// @dev F11 — wiring assertions on every PriceFeed sub-contract. A passing `getPrice()` sanity
+    ///      check doesn't tell you the wiring is right (Chainlink could be wrong and Uniswap could
+    ///      coincidentally produce a similar price). Pin every immutable.
+    function testFork_ArbitrumLive_priceFeedSubContractsCorrectlyWired() public view {
+        PriceFeed pf = PriceFeed(address(priceFeed));
+
+        // Sequencer guard wiring
+        assertEq(
+            address(pf.chainlinkSequencerUptimeFeed().sequencerUptimeFeed()),
+            0xFdB631F5EE196F0ed6FAa767959853A9F217697D,
+            "sequencer feed wiring"
+        );
+
+        // Chainlink primary wiring
+        assertEq(
+            address(pf.chainlinkPriceFeed().baseAggregator()),
+            0x639Fe6ab55C921f74e7fac1ee960C0B6293ba612,
+            "ETH/USD base aggregator"
+        );
+        assertEq(
+            address(pf.chainlinkPriceFeed().quoteAggregator()),
+            0x50834F3163758fcC1Df9973b6e91f0F0F0434aD3,
+            "USDC/USD quote aggregator"
+        );
+        assertEq(pf.chainlinkPriceFeed().baseStalePriceInterval(), 95040, "base stale interval");
+        assertEq(pf.chainlinkPriceFeed().quoteStalePriceInterval(), 95040, "quote stale interval");
+
+        // Uniswap fallback wiring
+        assertEq(
+            address(pf.uniswapV3PriceFeed().uniswapV3Pool()),
+            0xC6962004f452bE9203591991D15f6b388e09E8D0,
+            "Uniswap V3 pool"
+        );
+        assertEq(pf.uniswapV3PriceFeed().twapWindow(), 15 minutes, "TWAP window");
+        assertEq(pf.uniswapV3PriceFeed().averageBlockTime(), 1, "average block time");
+    }
 }
