@@ -82,6 +82,11 @@ contract ProposeSafeTxDeployFirstMarketArbitrumScript is BaseScript, Networks {
         priceFeed = IPriceFeed(vm.envAddress("PRICE_FEED"));
         borrowTokenVault = vm.envAddress("BORROW_TOKEN_VAULT");
 
+        require(
+            contracts[block.chainid][Contract.RHEO_FEE_RECIPIENT] != address(0),
+            "RHEO_FEE_RECIPIENT not set in Networks.sol for Arbitrum"
+        );
+
         _;
     }
 
@@ -120,6 +125,11 @@ contract ProposeSafeTxDeployFirstMarketArbitrumScript is BaseScript, Networks {
         priceFeed = IPriceFeed(vm.envAddress("PRICE_FEED"));
         borrowTokenVault = vm.envAddress("BORROW_TOKEN_VAULT");
 
+        require(
+            contracts[block.chainid][Contract.RHEO_FEE_RECIPIENT] != address(0),
+            "RHEO_FEE_RECIPIENT not set in Networks.sol for Arbitrum"
+        );
+
         (address target, bytes memory data) = _buildCall();
 
         console.log("==============================================================================");
@@ -143,11 +153,16 @@ contract ProposeSafeTxDeployFirstMarketArbitrumScript is BaseScript, Networks {
             swapFeeAPR: 0.005e18,
             fragmentationFee: cfg.fragmentationFee,
             liquidationRewardPercent: 0.05e18,
-            overdueCollateralProtocolPercent: 0.01e18,
+            // Aligned to Ethereum mainnet's live value (0.001e18 = 0.1 %) rather than the legacy
+            // 0.01e18 baked into rheo-solidity's deploy scripts. The team updated Ethereum's
+            // setting post-deploy via `updateConfig`; we set the right value at init here so no
+            // follow-up Safe tx is required.
+            overdueCollateralProtocolPercent: 0.001e18,
             collateralProtocolPercent: 0.1e18,
-            // F5: single source of truth — fee recipient = the governance Safe from Networks.sol.
-            // Rotating the Safe in Networks.sol now also rotates the fee recipient automatically.
-            feeRecipient: contracts[block.chainid][Contract.RHEO_GOVERNANCE]
+            // Single source of truth — fee recipient lives in Networks.sol under
+            // Contract.RHEO_FEE_RECIPIENT. Distinct from RHEO_GOVERNANCE (the admin Safe);
+            // rotating either is independent.
+            feeRecipient: contracts[block.chainid][Contract.RHEO_FEE_RECIPIENT]
         });
 
         InitializeRiskConfigParams memory riskConfigParams = InitializeRiskConfigParams({

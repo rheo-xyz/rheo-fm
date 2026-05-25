@@ -44,7 +44,8 @@ import {Test} from "forge-std/Test.sol";
 ///
 ///         Run: FOUNDRY_PROFILE=fork forge test --mc ArbitrumLiveMarketDeploymentForkTest -vvv
 contract ArbitrumLiveMarketDeploymentForkTest is Test, Networks {
-    address private constant SAFE_AND_FEE_RECIPIENT = 0x462B545e8BBb6f9E5860928748Bfe9eCC712c3a7;
+    address private constant SAFE = 0x462B545e8BBb6f9E5860928748Bfe9eCC712c3a7;
+    address private constant FEE_RECIPIENT = 0x12328eA44AB6D7B18aa9Cc030714763734b625dB;
 
     SizeFactory private sizeFactory;
     CollectionsManager private collectionsManager;
@@ -85,7 +86,7 @@ contract ArbitrumLiveMarketDeploymentForkTest is Test, Networks {
             )
         );
 
-        vm.startPrank(SAFE_AND_FEE_RECIPIENT);
+        vm.startPrank(SAFE);
         sizeFactory.setRheoImplementation(address(rheoImpl));
         sizeFactory.setNonTransferrableRebasingTokenVaultImplementation(address(vaultImpl));
         sizeFactory.setCollectionsManager(collectionsManager);
@@ -94,7 +95,7 @@ contract ArbitrumLiveMarketDeploymentForkTest is Test, Networks {
 
     function _phase2_CreateBorrowVaultAndAdapters() internal {
         // Phase 2a: Safe creates the vault
-        vm.prank(SAFE_AND_FEE_RECIPIENT);
+        vm.prank(SAFE);
         borrowTokenVault = NonTransferrableRebasingTokenVault(
             address(
                 sizeFactory.createBorrowTokenVault(IPool(cfg.variablePool), IERC20Metadata(cfg.underlyingBorrowToken))
@@ -106,7 +107,7 @@ contract ArbitrumLiveMarketDeploymentForkTest is Test, Networks {
         erc4626Adapter = new ERC4626Adapter(borrowTokenVault);
 
         // Phase 2c: Safe wires adapters on the vault (matches the batched setters in the proposal script)
-        vm.startPrank(SAFE_AND_FEE_RECIPIENT);
+        vm.startPrank(SAFE);
         borrowTokenVault.setAdapter(AAVE_ADAPTER_ID, aaveAdapter);
         borrowTokenVault.setVaultAdapter(DEFAULT_VAULT, AAVE_ADAPTER_ID);
         borrowTokenVault.setAdapter(ERC4626_ADAPTER_ID, erc4626Adapter);
@@ -122,9 +123,9 @@ contract ArbitrumLiveMarketDeploymentForkTest is Test, Networks {
             swapFeeAPR: 0.005e18,
             fragmentationFee: cfg.fragmentationFee,
             liquidationRewardPercent: 0.05e18,
-            overdueCollateralProtocolPercent: 0.01e18,
+            overdueCollateralProtocolPercent: 0.001e18,
             collateralProtocolPercent: 0.1e18,
-            feeRecipient: SAFE_AND_FEE_RECIPIENT
+            feeRecipient: FEE_RECIPIENT
         });
 
         uint256[] memory maturities = new uint256[](4);
@@ -153,7 +154,7 @@ contract ArbitrumLiveMarketDeploymentForkTest is Test, Networks {
             sizeFactory: address(sizeFactory)
         });
 
-        vm.prank(SAFE_AND_FEE_RECIPIENT);
+        vm.prank(SAFE);
         market = IRheo(sizeFactory.createMarketRheo(feeConfig, riskConfig, oracle, data));
     }
 
@@ -200,9 +201,9 @@ contract ArbitrumLiveMarketDeploymentForkTest is Test, Networks {
         assertEq(f.swapFeeAPR, 0.005e18, "swapFeeAPR");
         assertEq(f.fragmentationFee, 1e6, "fragmentationFee");
         assertEq(f.liquidationRewardPercent, 0.05e18, "liquidationRewardPercent");
-        assertEq(f.overdueCollateralProtocolPercent, 0.01e18, "overdueCollateralProtocolPercent");
+        assertEq(f.overdueCollateralProtocolPercent, 0.001e18, "overdueCollateralProtocolPercent");
         assertEq(f.collateralProtocolPercent, 0.1e18, "collateralProtocolPercent");
-        assertEq(f.feeRecipient, SAFE_AND_FEE_RECIPIENT, "feeRecipient");
+        assertEq(f.feeRecipient, FEE_RECIPIENT, "feeRecipient");
     }
 
     function testFork_ArbitrumLive_defaultVaultAdapterIsAave() public view {

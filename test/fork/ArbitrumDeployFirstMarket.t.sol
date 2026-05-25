@@ -44,7 +44,8 @@ import {console} from "forge-std/console.sol";
 ///      Run with: FOUNDRY_PROFILE=fork forge test --mc ArbitrumDeployFirstMarketForkTest -vvv
 contract ArbitrumDeployFirstMarketForkTest is Test, Networks {
     /// Mirrors the constant in ProposeSafeTxDeployFirstMarketArbitrum.s.sol
-    address private constant SAFE_AND_FEE_RECIPIENT = 0x462B545e8BBb6f9E5860928748Bfe9eCC712c3a7;
+    address private constant SAFE = 0x462B545e8BBb6f9E5860928748Bfe9eCC712c3a7;
+    address private constant FEE_RECIPIENT = 0x12328eA44AB6D7B18aa9Cc030714763734b625dB;
 
     ISizeFactory private sizeFactory;
     CollectionsManager private collectionsManager;
@@ -72,7 +73,7 @@ contract ArbitrumDeployFirstMarketForkTest is Test, Networks {
         // SizeFactory proxy + impl, owner = SAFE
         SizeFactory factoryImpl = new SizeFactory();
         sizeFactory = ISizeFactory(
-            address(new ERC1967Proxy(address(factoryImpl), abi.encodeCall(SizeFactory.initialize, (SAFE_AND_FEE_RECIPIENT))))
+            address(new ERC1967Proxy(address(factoryImpl), abi.encodeCall(SizeFactory.initialize, (SAFE))))
         );
 
         // CollectionsManager proxy + impl
@@ -82,7 +83,7 @@ contract ArbitrumDeployFirstMarketForkTest is Test, Networks {
         );
 
         // Wire CollectionsManager and implementations onto factory (Safe-owned ops)
-        vm.startPrank(SAFE_AND_FEE_RECIPIENT);
+        vm.startPrank(SAFE);
         SizeFactory(payable(address(sizeFactory))).setCollectionsManager(collectionsManager);
         sizeFactory.setNonTransferrableRebasingTokenVaultImplementation(address(new NonTransferrableRebasingTokenVault()));
         sizeFactory.setRheoImplementation(address(new Rheo()));
@@ -90,7 +91,7 @@ contract ArbitrumDeployFirstMarketForkTest is Test, Networks {
     }
 
     function _phase2_CreateBorrowTokenVault() internal {
-        vm.startPrank(SAFE_AND_FEE_RECIPIENT);
+        vm.startPrank(SAFE);
         // Cast through `address` because SizeFactory returns the rheo-solidity flavor of the vault type,
         // while the rest of this test (and the production market) wires the rheo-fm flavor — same
         // bytecode, distinct Solidity types. Mirrors script/Deploy.sol#162.
@@ -118,9 +119,9 @@ contract ArbitrumDeployFirstMarketForkTest is Test, Networks {
             swapFeeAPR: 0.005e18,
             fragmentationFee: cfg.fragmentationFee,
             liquidationRewardPercent: 0.05e18,
-            overdueCollateralProtocolPercent: 0.01e18,
+            overdueCollateralProtocolPercent: 0.001e18,
             collateralProtocolPercent: 0.1e18,
-            feeRecipient: SAFE_AND_FEE_RECIPIENT
+            feeRecipient: FEE_RECIPIENT
         });
 
         uint256[] memory maturities = new uint256[](4);
@@ -149,7 +150,7 @@ contract ArbitrumDeployFirstMarketForkTest is Test, Networks {
             sizeFactory: address(sizeFactory)
         });
 
-        vm.prank(SAFE_AND_FEE_RECIPIENT);
+        vm.prank(SAFE);
         market =
             IRheo(sizeFactory.createMarketRheo(feeConfigParams, riskConfigParams, oracleParams, dataParams));
     }
@@ -192,9 +193,9 @@ contract ArbitrumDeployFirstMarketForkTest is Test, Networks {
         assertEq(f.swapFeeAPR, 0.005e18, "swapFeeAPR");
         assertEq(f.fragmentationFee, cfg.fragmentationFee, "fragmentationFee");
         assertEq(f.liquidationRewardPercent, 0.05e18, "liquidationRewardPercent");
-        assertEq(f.overdueCollateralProtocolPercent, 0.01e18, "overdueCollateralProtocolPercent");
+        assertEq(f.overdueCollateralProtocolPercent, 0.001e18, "overdueCollateralProtocolPercent");
         assertEq(f.collateralProtocolPercent, 0.1e18, "collateralProtocolPercent");
-        assertEq(f.feeRecipient, SAFE_AND_FEE_RECIPIENT, "feeRecipient");
+        assertEq(f.feeRecipient, FEE_RECIPIENT, "feeRecipient");
     }
 
     function testFork_ArbitrumDeployFirstMarket_marketIsRegisteredOnFactory() public view {

@@ -50,6 +50,7 @@ import {Test} from "forge-std/Test.sol";
 ///         Run: `FOUNDRY_PROFILE=fork forge test --mc ArbitrumWethUsdcLifecycleForkTest -vvv`
 contract ArbitrumWethUsdcLifecycleForkTest is Test, Networks {
     address private constant SAFE = 0x462B545e8BBb6f9E5860928748Bfe9eCC712c3a7;
+    address private constant FEE_RECIPIENT = 0x12328eA44AB6D7B18aa9Cc030714763734b625dB;
     AggregatorV3Interface private constant ETH_USD_FEED =
         AggregatorV3Interface(0x639Fe6ab55C921f74e7fac1ee960C0B6293ba612);
 
@@ -223,9 +224,9 @@ contract ArbitrumWethUsdcLifecycleForkTest is Test, Networks {
             swapFeeAPR: 0.005e18,
             fragmentationFee: cfg.fragmentationFee,
             liquidationRewardPercent: 0.05e18,
-            overdueCollateralProtocolPercent: 0.01e18,
+            overdueCollateralProtocolPercent: 0.001e18,
             collateralProtocolPercent: 0.1e18,
-            feeRecipient: SAFE
+            feeRecipient: FEE_RECIPIENT
         });
 
         uint256[] memory maturities = new uint256[](4);

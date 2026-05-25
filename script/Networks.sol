@@ -43,7 +43,10 @@ enum Contract {
     // F9: tracked here so Phase 2a (createBorrowTokenVault) can refuse to double-create.
     //     SizeFactory itself does not enforce uniqueness on (variablePool, underlyingToken).
     //     Populate after Phase 2a executes; before that it MUST be address(0).
-    RHEO_BORROW_VAULT_USDC
+    RHEO_BORROW_VAULT_USDC,
+    // Canonical protocol fee recipient. Distinct from RHEO_GOVERNANCE (the admin Safe). Stays
+    // settable per-chain so non-Arbitrum chains aren't forced to use the same address.
+    RHEO_FEE_RECIPIENT
 }
 
 abstract contract Networks {
@@ -84,6 +87,15 @@ abstract contract Networks {
         contracts[BASE_MAINNET][Contract.RHEO_BORROW_VAULT_USDC] = address(0);
         contracts[BASE_SEPOLIA][Contract.RHEO_BORROW_VAULT_USDC] = address(0);
         contracts[ARBITRUM_MAINNET][Contract.RHEO_BORROW_VAULT_USDC] = 0x8AC402918518eEaC1c22EA5f49dcea6Ab2f84F2A;
+
+        // Canonical protocol fee recipient on Arbitrum — matches the address used by the existing
+        // Base WETH/USDC market (lib/rheo-solidity/deployments/base-production-weth-usdc.json).
+        // Other chains left as address(0) here; backfill if/when a fresh deploy on those chains
+        // routes through this script.
+        contracts[ETHEREUM_MAINNET][Contract.RHEO_FEE_RECIPIENT] = address(0);
+        contracts[BASE_MAINNET][Contract.RHEO_FEE_RECIPIENT] = address(0);
+        contracts[BASE_SEPOLIA][Contract.RHEO_FEE_RECIPIENT] = address(0);
+        contracts[ARBITRUM_MAINNET][Contract.RHEO_FEE_RECIPIENT] = 0x12328eA44AB6D7B18aa9Cc030714763734b625dB;
     }
 
     function params(string memory networkConfiguration) public pure returns (NetworkConfiguration memory) {
