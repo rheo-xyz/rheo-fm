@@ -83,7 +83,7 @@ abstract contract Networks {
         contracts[ETHEREUM_MAINNET][Contract.RHEO_BORROW_VAULT_USDC] = address(0);
         contracts[BASE_MAINNET][Contract.RHEO_BORROW_VAULT_USDC] = address(0);
         contracts[BASE_SEPOLIA][Contract.RHEO_BORROW_VAULT_USDC] = address(0);
-        contracts[ARBITRUM_MAINNET][Contract.RHEO_BORROW_VAULT_USDC] = address(0);
+        contracts[ARBITRUM_MAINNET][Contract.RHEO_BORROW_VAULT_USDC] = 0x8AC402918518eEaC1c22EA5f49dcea6Ab2f84F2A;
     }
 
     function params(string memory networkConfiguration) public pure returns (NetworkConfiguration memory) {
