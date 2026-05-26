@@ -46,7 +46,10 @@ enum Contract {
     RHEO_BORROW_VAULT_USDC,
     // Canonical protocol fee recipient. Distinct from RHEO_GOVERNANCE (the admin Safe). Stays
     // settable per-chain so non-Arbitrum chains aren't forced to use the same address.
-    RHEO_FEE_RECIPIENT
+    RHEO_FEE_RECIPIENT,
+    // PauseAll kill-switch contract; deployed in Phase 7 then granted PAUSER_ROLE on the factory
+    // in Phase 8. Populate after Phase 7 executes; before that it MUST be address(0).
+    RHEO_PAUSE_ALL
 }
 
 abstract contract Networks {
@@ -96,6 +99,12 @@ abstract contract Networks {
         contracts[BASE_MAINNET][Contract.RHEO_FEE_RECIPIENT] = address(0);
         contracts[BASE_SEPOLIA][Contract.RHEO_FEE_RECIPIENT] = address(0);
         contracts[ARBITRUM_MAINNET][Contract.RHEO_FEE_RECIPIENT] = 0x12328eA44AB6D7B18aa9Cc030714763734b625dB;
+
+        // PauseAll kill-switch. Populated after Phase 7 executes on each chain.
+        contracts[ETHEREUM_MAINNET][Contract.RHEO_PAUSE_ALL] = address(0);
+        contracts[BASE_MAINNET][Contract.RHEO_PAUSE_ALL] = address(0);
+        contracts[BASE_SEPOLIA][Contract.RHEO_PAUSE_ALL] = address(0);
+        contracts[ARBITRUM_MAINNET][Contract.RHEO_PAUSE_ALL] = address(0);
     }
 
     function params(string memory networkConfiguration) public pure returns (NetworkConfiguration memory) {
