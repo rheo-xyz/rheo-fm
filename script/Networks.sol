@@ -104,7 +104,7 @@ abstract contract Networks {
         contracts[ETHEREUM_MAINNET][Contract.RHEO_PAUSE_ALL] = address(0);
         contracts[BASE_MAINNET][Contract.RHEO_PAUSE_ALL] = address(0);
         contracts[BASE_SEPOLIA][Contract.RHEO_PAUSE_ALL] = address(0);
-        contracts[ARBITRUM_MAINNET][Contract.RHEO_PAUSE_ALL] = address(0);
+        contracts[ARBITRUM_MAINNET][Contract.RHEO_PAUSE_ALL] = 0xC16D1399B75bCC7aC6744491f4A596a7bd648C77;
     }
 
     function params(string memory networkConfiguration) public pure returns (NetworkConfiguration memory) {
