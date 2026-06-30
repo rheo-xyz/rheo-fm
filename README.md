@@ -254,6 +254,7 @@ Ensure your `.env` file in the root directory of your project contains the follo
 ```bash
 API_KEY_ALCHEMY=<Your Alchemy API Key>
 API_KEY_ETHERSCAN=<Your Etherscan API Key>
+API_KEY_ARBISCAN=<Your Arbiscan API Key (only required for Arbitrum deployments)>
 DEPLOYER_ADDRESS=<Deployer's Ethereum Address>
 DEPLOYER_ACCOUNT=<Name of the Deployer's Account in Foundry>
 OWNER=<Owner's Address>
@@ -283,6 +284,12 @@ forge script script/Deploy.s.sol --rpc-url $RPC_URL --gas-limit 30000000 --sende
 ```
 
 If it does not work, try removing `--verify`
+
+### Arbitrum mainnet — first WETH/USDC market
+
+See [`ARBITRUM_LAUNCH_RUNBOOK.md`](./ARBITRUM_LAUNCH_RUNBOOK.md) for the full step-by-step deployment checklist (Phase 2a → Hypernative pause-all → smoke test). Each phase is annotated with who runs it (deployer EOA vs Safe ceremony), pre-flight assertions, the exact `forge`/`cast` command, what to capture, and post-flight verification.
+
+Dry run before any on-chain step: `FOUNDRY_PROFILE=fork forge test --mc Arbitrum -vv` runs 26 assertions across configuration correctness (params match, sub-contracts wired) and behavioral correctness (sequencer-down reverts, Chainlink-stale fallback, borrow→liquidate lifecycle).
 
 ### Deployment checklist
 
