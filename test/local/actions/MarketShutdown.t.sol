@@ -194,6 +194,73 @@ contract MarketShutdownTest is BaseTest {
         );
     }
 
+    function test_MarketShutdown_claims_repaid_but_unclaimed_credit_positions() public {
+        _setPrice(1e18);
+        _deposit(alice, usdc, 500e6);
+        _deposit(bob, weth, 200e18);
+
+        _buyCreditLimit(alice, block.timestamp + 150 days, _pointOfferAtIndex(4, 0.03e18));
+        uint256 debtPositionId = _sellCreditMarket(bob, alice, RESERVED_ID, 100e6, _maturity(150 days), false);
+        uint256 creditPositionId = size.getCreditPositionIdsByDebtPositionId(debtPositionId)[0];
+        uint256 futureValue = size.getDebtPosition(debtPositionId).futureValue;
+
+        _deposit(bob, usdc, futureValue);
+        _repay(bob, debtPositionId, bob);
+
+        // the loan is repaid, but the lender has not claimed yet, so the repayment assets belong to the market
+        assertEq(size.data().debtToken.totalSupply(), 0);
+        assertEq(size.getCreditPosition(creditPositionId).credit, futureValue);
+        assertGe(size.data().borrowTokenVault.balanceOf(address(size)), futureValue);
+
+        uint256 aliceBalanceBefore = size.data().borrowTokenVault.balanceOf(alice);
+
+        address[] memory usersToForceWithdraw = new address[](1);
+        usersToForceWithdraw[0] = bob;
+
+        // the credit position is not passed in the params, it must be claimed by the shutdown itself
+        size.marketShutdown(
+            MarketShutdownParams({
+                debtPositionIdsToForceLiquidate: new uint256[](0),
+                creditPositionIdsToClaim: new uint256[](0),
+                usersToForceWithdraw: usersToForceWithdraw,
+                shouldCheckSupply: true
+            })
+        );
+
+        assertEq(size.getCreditPosition(creditPositionId).credit, 0);
+        assertEq(size.data().borrowTokenVault.balanceOf(address(size)), 0);
+        assertGe(size.data().borrowTokenVault.balanceOf(alice) - aliceBalanceBefore, futureValue);
+
+        // the claimed assets are the lender's own, so they survive the removal of the market
+        sizeFactory.removeMarket(address(size1));
+
+        uint256 usdcBalanceBefore = usdc.balanceOf(alice);
+        size = size2;
+        _withdraw(alice, usdc, type(uint256).max);
+        assertGe(usdc.balanceOf(alice) - usdcBalanceBefore, futureValue);
+    }
+
+    function test_MarketShutdown_reverts_if_credit_positions_cannot_be_settled() public {
+        _setPrice(1e18);
+        _deposit(alice, usdc, 500e6);
+        _deposit(bob, weth, 200e18);
+
+        _buyCreditLimit(alice, block.timestamp + 150 days, _pointOfferAtIndex(4, 0.03e18));
+        uint256 debtPositionId = _sellCreditMarket(bob, alice, RESERVED_ID, 100e6, _maturity(150 days), false);
+        uint256 futureValue = size.getDebtPosition(debtPositionId).futureValue;
+
+        // the active loan is not force liquidated, so its credit cannot be claimed
+        vm.expectRevert(abi.encodeWithSelector(Errors.INVALID_AMOUNT.selector, futureValue));
+        size.marketShutdown(
+            MarketShutdownParams({
+                debtPositionIdsToForceLiquidate: new uint256[](0),
+                creditPositionIdsToClaim: new uint256[](0),
+                usersToForceWithdraw: new address[](0),
+                shouldCheckSupply: true
+            })
+        );
+    }
+
     function test_MarketShutdown_can_withdraw_borrow_tokens_via_other_market() public {
         uint256 usdcAmount = 200e6;
 

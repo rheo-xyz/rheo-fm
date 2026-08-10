@@ -11,6 +11,8 @@ import {Withdraw, WithdrawOnBehalfOfParams, WithdrawParams} from "@rheo-fm/src/m
 
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 
+import {CREDIT_POSITION_ID_START, CreditPosition} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
+
 import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
 import {Events} from "@rheo-fm/src/market/libraries/Events.sol";
 
@@ -86,12 +88,47 @@ library MarketShutdown {
         }
 
         if (params.shouldCheckSupply) {
+            uint256 unsettledCredit = claimAllRemainingCreditPositions(state);
+            if (unsettledCredit > 0) {
+                revert Errors.INVALID_AMOUNT(unsettledCredit);
+            }
             if (state.data.debtToken.totalSupply() > 0) {
                 revert Errors.INVALID_AMOUNT(state.data.debtToken.totalSupply());
             }
             if (state.data.collateralToken.totalSupply() > 0) {
                 revert Errors.INVALID_AMOUNT(state.data.collateralToken.totalSupply());
             }
+        }
+    }
+
+    /// @notice Claims every credit position that is still outstanding after the force liquidation and claim loops
+    /// @dev A repaid loan keeps a nonzero `CreditPosition.credit` until it is claimed, while the repayment assets
+    ///        stay assigned to the market in the shared `borrowTokenVault`. Since the market can be removed from
+    ///        the factory after the shutdown, which revokes its `onlyMarket` authorization on the vault, those
+    ///        assets would otherwise become unclaimable. Claiming here moves them to the lenders' own vault
+    ///        balances, which remain withdrawable through any other market sharing the same vault
+    /// @dev Credit that cannot be claimed because the loan is not REPAID is returned instead of reverting here,
+    ///        so that the caller can report the total amount that is still unsettled
+    /// @param state The state of the protocol
+    /// @return unsettledCredit The sum of the credit of the positions that could not be claimed
+    function claimAllRemainingCreditPositions(State storage state) internal returns (uint256 unsettledCredit) {
+        uint256 nextCreditPositionId = state.data.nextCreditPositionId;
+        for (
+            uint256 creditPositionId = CREDIT_POSITION_ID_START;
+            creditPositionId < nextCreditPositionId;
+            creditPositionId++
+        ) {
+            CreditPosition storage creditPosition = state.data.creditPositions[creditPositionId];
+            uint256 credit = creditPosition.credit;
+            if (credit == 0) {
+                continue;
+            }
+            // a loan is REPAID if and only if its future value is 0, see `LoanLibrary.getLoanStatus`
+            if (state.data.debtPositions[creditPosition.debtPositionId].futureValue > 0) {
+                unsettledCredit += credit;
+                continue;
+            }
+            Claim.executeClaim(state, ClaimParams({creditPositionId: creditPositionId}));
         }
     }
 }

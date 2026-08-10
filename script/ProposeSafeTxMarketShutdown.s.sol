@@ -149,12 +149,16 @@ contract ProposeSafeTxMarketShutdownScript is BaseScript, Networks {
         returns (bytes memory)
     {
         DataView memory dataView = IRheoView(address(market)).data();
-        bool isEmptyMarket = dataView.debtToken.totalSupply() == 0 && dataView.collateralToken.totalSupply() == 0;
+        MarketShutdownParams memory params = script.collectPositions(market);
+        // a market with no debt and no collateral may still owe repaid but unclaimed credit to lenders,
+        //   whose assets are held by the market in the shared borrow token vault and become unclaimable
+        //   once the market is removed from the factory
+        bool isEmptyMarket = dataView.debtToken.totalSupply() == 0 && dataView.collateralToken.totalSupply() == 0
+            && params.creditPositionIdsToClaim.length == 0;
 
         if (isEmptyMarket) {
             return abi.encodeCall(IRheoAdmin.pause, ());
         } else {
-            MarketShutdownParams memory params = script.collectPositions(market);
             bytes[] memory multicallDatas = new bytes[](2);
             multicallDatas[0] = abi.encodeCall(IRheoAdmin.marketShutdown, (params));
             multicallDatas[1] = abi.encodeCall(IRheoAdmin.pause, ());
