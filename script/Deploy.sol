@@ -112,6 +112,9 @@ abstract contract Deploy {
     IERC4626 internal vaultERC7540ControlledAsyncRedeem;
     IERC4626 internal vaultInvalidUnderlying;
 
+    IERC20Metadata[] internal basketTokens;
+    PriceFeedMock[] internal basketPriceFeeds;
+
     RheoMock internal size1;
     RheoMock internal size2;
     PriceFeedMock internal priceFeed2;
@@ -209,6 +212,36 @@ abstract contract Deploy {
         hevm.prank(owner);
         proxy = ERC1967Proxy(payable(_createMarketRheoFromStorage()));
         size = RheoMock(payable(proxy));
+    }
+
+    /// @notice Extends the local market with extra collateral assets, producing an N-asset basket
+    /// @dev The basket is `weth` followed by one freshly deployed token per entry, each listed through the
+    ///      admin path so that `addCollateralAsset` is exercised by every basket test
+    /// @param decimals_ The decimals of each extra collateral token
+    /// @param prices The price of each extra collateral token, in borrow token terms, 18 decimals
+    function setupLocalBasket(address owner, address feeRecipient, uint8[] memory decimals_, uint256[] memory prices)
+        internal
+    {
+        setupLocal(owner, feeRecipient);
+
+        require(decimals_.length == prices.length, "setupLocalBasket: length mismatch");
+
+        for (uint256 i = 0; i < decimals_.length; i++) {
+            MockERC20 token = new MockERC20("BasketToken", "BSKT", decimals_[i]);
+            PriceFeedMock feed = new PriceFeedMock(owner);
+            hevm.prank(owner);
+            feed.setPrice(prices[i]);
+
+            hevm.prank(owner);
+            size.addCollateralAsset(
+                InitializeCollateralAssetParams({
+                    underlying: address(token), priceFeed: address(feed), cap: type(uint256).max
+                })
+            );
+
+            basketTokens.push(IERC20Metadata(address(token)));
+            basketPriceFeeds.push(feed);
+        }
     }
 
     function setupLocalGenericMarket(
