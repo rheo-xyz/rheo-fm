@@ -21,8 +21,8 @@ contract GenericMarket_cbBTC_USDC_Test is BaseTestGenericMarket {
         assertEq(size.data().debtToken.decimals(), 6);
     }
 
-    function test_GenericMarket_cbBTC_USDC_debtTokenAmountToCollateralTokenAmount() public view {
-        assertEq(size.debtTokenAmountToCollateralTokenAmount(60576e6), 0.9999e8 + 1);
+    function test_GenericMarket_cbBTC_USDC__valueToCollateral() public view {
+        assertEq(_valueToCollateral(60576e6), 0.9999e8 + 1);
     }
 
     function test_GenericMarket_cbBTC_USDC_config() public view {
@@ -72,10 +72,10 @@ contract GenericMarket_cbBTC_USDC_Test is BaseTestGenericMarket {
         assertEqApprox(size.collateralRatio(bob), expectedCRAfter, 0.01e18);
 
         Vars memory _before = _state();
-        uint256 assignedCollateral = size.getDebtPositionAssignedCollateral(debtPositionId);
-        uint256 debtInCollateralToken = size.debtTokenAmountToCollateralTokenAmount(futureValue);
-        uint256 liquidatorProfitCollateralToken =
-            assignedCollateral > debtInCollateralToken ? debtInCollateralToken : assignedCollateral;
+        uint256 assignedValue = size.getDebtPositionAssignedCollateralValue(debtPositionId);
+        // the liquidation reward is 0 in this test, so the entitlement is the future value when profitable
+        uint256 entitlementValue = assignedValue > futureValue ? futureValue : assignedValue;
+        uint256 liquidatorProfitCollateralToken = _proRataCollateral(bob, entitlementValue, size.collateralValue(bob));
 
         _liquidate(liquidator, debtPositionId);
 

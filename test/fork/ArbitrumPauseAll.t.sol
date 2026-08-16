@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
+import {singleCollateralAsset} from "@rheo-fm/script/CollateralAssets.sol";
+
 import {IPool} from "@aave/interfaces/IPool.sol";
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
@@ -33,8 +35,8 @@ import {PriceFeed} from "@rheo-fm/src/oracle/v1.5.1/PriceFeed.sol";
 
 import {PauseAll} from "@rheo-fm/src/protection/PauseAll.sol";
 
-import {ISizeFactory, PAUSER_ROLE} from "@rheo-solidity/src/factory/interfaces/ISizeFactory.sol";
 import {SizeFactory} from "@rheo-solidity/src/factory/SizeFactory.sol";
+import {ISizeFactory, PAUSER_ROLE} from "@rheo-solidity/src/factory/interfaces/ISizeFactory.sol";
 
 import {Test} from "forge-std/Test.sol";
 
@@ -140,14 +142,14 @@ contract ArbitrumPauseAllForkTest is Test, Networks {
         InitializeOracleParams memory oracle = InitializeOracleParams({priceFeed: address(priceFeed)});
         InitializeDataParams memory data = InitializeDataParams({
             weth: cfg.weth,
-            underlyingCollateralToken: cfg.underlyingCollateralToken,
+            collateralAssets: singleCollateralAsset(cfg.underlyingCollateralToken, address(priceFeed)),
             underlyingBorrowToken: cfg.underlyingBorrowToken,
             variablePool: cfg.variablePool,
             borrowTokenVault: address(borrowTokenVault),
             sizeFactory: address(sizeFactory)
         });
         vm.prank(SAFE);
-        market = IRheo(sizeFactory.createMarketRheo(feeConfig, riskConfig, oracle, data));
+        market = IRheo(sizeFactory.createMarketRheo(feeConfig, riskConfig, data));
     }
 
     function _phase7_DeployPauseAll() internal {

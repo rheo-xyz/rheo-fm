@@ -6,7 +6,8 @@ import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
 import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
 import {RESERVED_ID} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
 import {
-    SelfLiquidateOnBehalfOfParams, SelfLiquidateParams
+    SelfLiquidateOnBehalfOfParams,
+    SelfLiquidateParams
 } from "@rheo-fm/src/market/libraries/actions/SelfLiquidate.sol";
 
 import {BaseTest, Vars} from "@rheo-fm/test/BaseTest.sol";
@@ -29,7 +30,7 @@ contract AuthorizationSelfLiquidateTest is BaseTest {
         uint256 debtPositionId = _sellCreditMarket(bob, alice, RESERVED_ID, 100e6, _maturity(150 days), false);
         uint256 creditPositionId = size.getCreditPositionIdsByDebtPositionId(debtPositionId)[0];
 
-        assertEq(size.getDebtPositionAssignedCollateral(debtPositionId), 150e18);
+        assertEq(size.getDebtPositionAssignedCollateralValue(debtPositionId), 150e6);
         assertEq(size.getDebtPosition(debtPositionId).futureValue, 100e6);
         assertEq(size.collateralRatio(bob), 1.5e18);
         assertTrue(!_isUserUnderwater(bob));
@@ -38,8 +39,7 @@ contract AuthorizationSelfLiquidateTest is BaseTest {
         _setPrice(0.5e18);
         assertEq(size.collateralRatio(bob), 0.75e18);
 
-        uint256 debtInCollateralToken =
-            size.debtTokenAmountToCollateralTokenAmount(size.getDebtPosition(debtPositionId).futureValue);
+        uint256 debtInCollateralToken = _valueToCollateral(size.getDebtPosition(debtPositionId).futureValue);
 
         vm.expectRevert();
         _liquidate(liquidator, debtPositionId, debtInCollateralToken, block.timestamp);
@@ -49,9 +49,7 @@ contract AuthorizationSelfLiquidateTest is BaseTest {
         vm.prank(candy);
         size.selfLiquidateOnBehalfOf(
             SelfLiquidateOnBehalfOfParams({
-                params: SelfLiquidateParams({creditPositionId: creditPositionId}),
-                onBehalfOf: alice,
-                recipient: candy
+                params: SelfLiquidateParams({creditPositionId: creditPositionId}), onBehalfOf: alice, recipient: candy
             })
         );
 
@@ -77,9 +75,7 @@ contract AuthorizationSelfLiquidateTest is BaseTest {
         vm.prank(alice);
         size.selfLiquidateOnBehalfOf(
             SelfLiquidateOnBehalfOfParams({
-                params: SelfLiquidateParams({creditPositionId: creditPositionId}),
-                onBehalfOf: bob,
-                recipient: candy
+                params: SelfLiquidateParams({creditPositionId: creditPositionId}), onBehalfOf: bob, recipient: candy
             })
         );
 

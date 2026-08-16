@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {RheoStorage, State, User} from "@rheo-fm/src/market/RheoStorage.sol";
+import {CollateralAsset, RheoStorage, State, User} from "@rheo-fm/src/market/RheoStorage.sol";
+import {CollateralBasketLibrary} from "@rheo-fm/src/market/libraries/CollateralBasketLibrary.sol";
 
 import {CopyLimitOrderConfig} from "@rheo-fm/src/market/libraries/OfferLibrary.sol";
 
@@ -18,12 +19,13 @@ import {
 } from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
 import {UpdateConfig} from "@rheo-fm/src/market/libraries/actions/UpdateConfig.sol";
 
-import {DataView, UserView} from "@rheo-fm/src/market/RheoViewData.sol";
+import {CollateralAssetView, DataView, UserView} from "@rheo-fm/src/market/RheoViewData.sol";
 import {AccountingLibrary} from "@rheo-fm/src/market/libraries/AccountingLibrary.sol";
 import {RiskLibrary} from "@rheo-fm/src/market/libraries/RiskLibrary.sol";
 
-import {ReentrancyGuardUpgradeableWithViewModifier} from
-    "@rheo-fm/src/helpers/ReentrancyGuardUpgradeableWithViewModifier.sol";
+import {
+    ReentrancyGuardUpgradeableWithViewModifier
+} from "@rheo-fm/src/helpers/ReentrancyGuardUpgradeableWithViewModifier.sol";
 import {IRheoView} from "@rheo-fm/src/market/interfaces/IRheoView.sol";
 import {IRheoViewV1_8} from "@rheo-fm/src/market/interfaces/v1.8/IRheoViewV1_8.sol";
 import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
@@ -59,8 +61,23 @@ abstract contract RheoView is RheoStorage, ReentrancyGuardUpgradeableWithViewMod
     }
 
     /// @inheritdoc IRheoView
-    function debtTokenAmountToCollateralTokenAmount(uint256 amount) external view returns (uint256) {
-        return state.debtTokenAmountToCollateralTokenAmount(amount);
+    function collateralValue(address user) external view returns (uint256) {
+        return CollateralBasketLibrary.collateralValue(state, user);
+    }
+
+    /// @inheritdoc IRheoView
+    function getCollateralAssetValue(address underlying, uint256 amount) external view returns (uint256) {
+        return CollateralBasketLibrary.getCollateralAssetValue(state, underlying, amount);
+    }
+
+    /// @inheritdoc IRheoView
+    function getCollateralAssets() external view returns (CollateralAssetView[] memory) {
+        return CollateralBasketLibrary.getCollateralAssets(state);
+    }
+
+    /// @inheritdoc IRheoView
+    function getUserCollateralBalances(address user) external view returns (address[] memory, uint256[] memory) {
+        return CollateralBasketLibrary.getUserCollateralBalances(state, user);
     }
 
     /// @inheritdoc IRheoView

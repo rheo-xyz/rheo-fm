@@ -6,8 +6,23 @@ import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IER
 
 import {User} from "@rheo-fm/src/market/RheoStorage.sol";
 
+import {IPriceFeed} from "@rheo-fm/src/oracle/IPriceFeed.sol";
+
 import {NonTransferrableRebasingTokenVault} from "@rheo-fm/src/market/token/NonTransferrableRebasingTokenVault.sol";
 import {NonTransferrableToken} from "@rheo-fm/src/market/token/NonTransferrableToken.sol";
+
+struct CollateralAssetView {
+    // The underlying collateral token
+    IERC20Metadata underlying;
+    // The deposit receipt for the underlying
+    NonTransferrableToken token;
+    // The price feed, in borrow token terms, with 18 decimals
+    IPriceFeed priceFeed;
+    // The maximum total deposited amount, in underlying base units
+    uint256 cap;
+    // Whether new deposits of the asset revert
+    bool depositPaused;
+}
 
 struct UserView {
     // The user struct
@@ -15,6 +30,8 @@ struct UserView {
     // The user's account address
     address account;
     // The user's collateral token balance
+    // @dev DEPRECATED in v2.0: reports the balance of the first collateral asset only,
+    //      use `getUserCollateralBalances` for the whole basket
     uint256 collateralTokenBalance;
     // The user's borrow token balance
     uint256 borrowTokenBalance;

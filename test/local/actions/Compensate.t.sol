@@ -57,8 +57,9 @@ contract CompensateTest is BaseTest {
         assertEq(compensatedLoanCreditAfter, compensatedLoanCreditBefore);
     }
 
-    function test_Compensate_compensate_CreditPosition_with_CreditPosition_reduces_DebtPosition_debt_and_CreditPosition_credit(
-    ) public {
+    function test_Compensate_compensate_CreditPosition_with_CreditPosition_reduces_DebtPosition_debt_and_CreditPosition_credit()
+        public
+    {
         _updateConfig("swapFeeAPR", 0);
         _deposit(alice, weth, 200e18);
         _deposit(alice, usdc, 200e6);
@@ -135,16 +136,17 @@ contract CompensateTest is BaseTest {
             uint256 creditPositionId2 = size.getCreditPositionIdsByDebtPositionId(debtPositionId)[1];
 
             vm.prank(alice);
-            (bool success, bytes memory err) = address(size).call(
-                abi.encodeCall(
-                    Rheo.compensate,
-                    CompensateParams({
+            (bool success, bytes memory err) = address(size)
+                .call(
+                    abi.encodeCall(
+                        Rheo.compensate,
+                        CompensateParams({
                         creditPositionWithDebtToRepayId: creditPositionId,
                         creditPositionToCompensateId: creditPositionId2,
                         amount: type(uint256).max
                     })
-                )
-            );
+                    )
+                );
             if (!success) {
                 assertIn(
                     bytes4(err),
@@ -629,8 +631,7 @@ contract CompensateTest is BaseTest {
         );
 
         Vars memory _before = _state();
-        uint256 fragmentationFeeInCollateral =
-            size.debtTokenAmountToCollateralTokenAmount(size.feeConfig().fragmentationFee);
+        uint256 fragmentationFeeInCollateral = _valueToCollateral(size.feeConfig().fragmentationFee);
         uint256 n = 10;
 
         for (uint256 i = 0; i < n - 1; ++i) {
@@ -646,9 +647,16 @@ contract CompensateTest is BaseTest {
 
         Vars memory _after = _state();
 
-        assertEq(
+        // each charge slices the basket pro-rata and rounds down, leaving up to 1 wei per charge with the borrower,
+        // where the pre-v2.0 conversion rounded the fee up instead
+        assertApproxEqAbs(
             _after.alice.collateralTokenBalance,
-            _before.alice.collateralTokenBalance - (n - 1) * fragmentationFeeInCollateral
+            _before.alice.collateralTokenBalance - (n - 1) * fragmentationFeeInCollateral,
+            n - 1
+        );
+        assertLe(
+            _after.alice.collateralTokenBalance,
+            _before.alice.collateralTokenBalance - (n - 1) * fragmentationFeeInCollateral + (n - 1)
         );
         assertEq(size.getCreditPosition(creditPositionId).credit, 10e6);
     }

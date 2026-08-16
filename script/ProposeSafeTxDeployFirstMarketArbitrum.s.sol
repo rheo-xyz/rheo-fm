@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
+import {singleCollateralAsset} from "@rheo-fm/script/CollateralAssets.sol";
+
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
 import {BaseScript} from "@rheo-fm/script/BaseScript.sol";
@@ -15,7 +17,7 @@ import {
 import {IPriceFeed} from "@rheo-fm/src/oracle/IPriceFeed.sol";
 
 import {ISizeFactory} from "@rheo-solidity/src/factory/interfaces/ISizeFactory.sol";
-import {ISizeFactoryV1_9} from "@rheo-solidity/src/factory/interfaces/ISizeFactoryV1_9.sol";
+import {ISizeFactoryV2} from "@rheo-solidity/src/factory/interfaces/ISizeFactoryV2.sol";
 
 import {Safe} from "@safe-utils/Safe.sol";
 import {Tenderly} from "@tenderly-utils/Tenderly.sol";
@@ -64,7 +66,10 @@ contract ProposeSafeTxDeployFirstMarketArbitrumScript is BaseScript, Networks {
         (bool factoryV1_9Ok, bytes memory factoryV1_9Ret) =
             address(sizeFactory).staticcall(abi.encodeWithSignature("rheoImplementation()"));
         require(factoryV1_9Ok && factoryV1_9Ret.length == 32, "live SizeFactory is not v1.9-compatible");
-        require(abi.decode(factoryV1_9Ret, (address)) != address(0), "live SizeFactory has no Rheo impl wired (Phase 1.2 incomplete?)");
+        require(
+            abi.decode(factoryV1_9Ret, (address)) != address(0),
+            "live SizeFactory has no Rheo impl wired (Phase 1.2 incomplete?)"
+        );
 
         string memory accountSlug = vm.envString("TENDERLY_ACCOUNT_NAME");
         string memory projectSlug = vm.envString("TENDERLY_PROJECT_NAME");
@@ -95,8 +100,7 @@ contract ProposeSafeTxDeployFirstMarketArbitrumScript is BaseScript, Networks {
 
         safe.proposeTransaction(target, data, signer, derivationPath);
 
-        Tenderly.VirtualTestnet memory vnet =
-            tenderly.createVirtualTestnet("arbitrum-weth-usdc-vnet", block.chainid);
+        Tenderly.VirtualTestnet memory vnet = tenderly.createVirtualTestnet("arbitrum-weth-usdc-vnet", block.chainid);
         bytes memory execTransactionData = safe.getExecTransactionData(target, data, signer, derivationPath);
         // Override Safe `threshold` (storage slot 4) to 1 so Tenderly can execute the simulated tx with a single signer.
         tenderly.setStorageAt(vnet, safe.instance().safe, bytes32(uint256(4)), bytes32(uint256(1)));
@@ -133,7 +137,7 @@ contract ProposeSafeTxDeployFirstMarketArbitrumScript is BaseScript, Networks {
         (address target, bytes memory data) = _buildCall();
 
         console.log("==============================================================================");
-        console.log("Phase 5: SizeFactory.createMarketRheo(fee, risk, oracle, data)");
+        console.log("Phase 5: SizeFactory.createMarketRheo(fee, risk, data)");
         console.log("         One transaction. Operation = Call");
         console.log("==============================================================================");
         console.log("");
@@ -178,7 +182,7 @@ contract ProposeSafeTxDeployFirstMarketArbitrumScript is BaseScript, Networks {
 
         InitializeDataParams memory dataParams = InitializeDataParams({
             weth: cfg.weth,
-            underlyingCollateralToken: cfg.underlyingCollateralToken,
+            collateralAssets: singleCollateralAsset(cfg.underlyingCollateralToken, address(priceFeed)),
             underlyingBorrowToken: cfg.underlyingBorrowToken,
             variablePool: cfg.variablePool,
             borrowTokenVault: borrowTokenVault,
@@ -186,9 +190,7 @@ contract ProposeSafeTxDeployFirstMarketArbitrumScript is BaseScript, Networks {
         });
 
         target = address(sizeFactory);
-        data = abi.encodeCall(
-            ISizeFactoryV1_9.createMarketRheo, (feeConfigParams, riskConfigParams, oracleParams, dataParams)
-        );
+        data = abi.encodeCall(ISizeFactoryV2.createMarketRheo, (feeConfigParams, riskConfigParams, dataParams));
     }
 
     /// @dev Quarter-end maturities for the WETH/USDC market launch. Pattern: last Friday of the

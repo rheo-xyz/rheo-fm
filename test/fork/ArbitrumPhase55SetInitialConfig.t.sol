@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
+import {singleCollateralAsset} from "@rheo-fm/script/CollateralAssets.sol";
+
 import {IPool} from "@aave/interfaces/IPool.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
@@ -30,8 +32,8 @@ import {ERC4626Adapter} from "@rheo-fm/src/market/token/adapters/ERC4626Adapter.
 import {IPriceFeed} from "@rheo-fm/src/oracle/IPriceFeed.sol";
 import {PriceFeed} from "@rheo-fm/src/oracle/v1.5.1/PriceFeed.sol";
 
-import {ISizeFactory} from "@rheo-solidity/src/factory/interfaces/ISizeFactory.sol";
 import {SizeFactory} from "@rheo-solidity/src/factory/SizeFactory.sol";
+import {ISizeFactory} from "@rheo-solidity/src/factory/interfaces/ISizeFactory.sol";
 
 import {Test} from "forge-std/Test.sol";
 
@@ -147,7 +149,7 @@ contract ArbitrumPhase55SetInitialConfigForkTest is Test, Networks {
 
         InitializeDataParams memory data = InitializeDataParams({
             weth: cfg.weth,
-            underlyingCollateralToken: cfg.underlyingCollateralToken,
+            collateralAssets: singleCollateralAsset(cfg.underlyingCollateralToken, address(priceFeed)),
             underlyingBorrowToken: cfg.underlyingBorrowToken,
             variablePool: cfg.variablePool,
             borrowTokenVault: address(borrowTokenVault),
@@ -155,7 +157,7 @@ contract ArbitrumPhase55SetInitialConfigForkTest is Test, Networks {
         });
 
         vm.prank(SAFE);
-        market = IRheo(sizeFactory.createMarketRheo(feeConfig, riskConfig, oracle, data));
+        market = IRheo(sizeFactory.createMarketRheo(feeConfig, riskConfig, data));
     }
 
     /// @dev Confirms the post-init default before Phase 5.5 runs: the market should already have

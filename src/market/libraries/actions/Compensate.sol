@@ -6,6 +6,7 @@ import {State} from "@rheo-fm/src/market/RheoStorage.sol";
 import {Math} from "@rheo-fm/src/market/libraries/Math.sol";
 
 import {AccountingLibrary} from "@rheo-fm/src/market/libraries/AccountingLibrary.sol";
+import {CollateralBasketLibrary} from "@rheo-fm/src/market/libraries/CollateralBasketLibrary.sol";
 
 import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
 import {Events} from "@rheo-fm/src/market/libraries/Events.sol";
@@ -37,6 +38,7 @@ struct CompensateOnBehalfOfParams {
 /// @notice Contains the logic for compensating a credit position
 library Compensate {
     using AccountingLibrary for State;
+    using CollateralBasketLibrary for State;
     using LoanLibrary for State;
     using LoanLibrary for DebtPosition;
     using LoanLibrary for CreditPosition;
@@ -139,12 +141,16 @@ library Compensate {
             forSale: creditPositionWithDebtToRepay.forSale
         });
         if (shouldChargeFragmentationFee) {
-            // charge the fragmentation fee in collateral tokens
-            uint256 fragmentationFeeInCollateral =
-                state.debtTokenAmountToCollateralTokenAmount(state.feeConfig.fragmentationFee);
-            state.data.collateralToken.transferFrom(
-                onBehalfOf, state.feeConfig.feeRecipient, fragmentationFeeInCollateral
-            );
+            // charge the fragmentation fee as a pro-rata slice of the collateral basket
+            uint256 feeValue = state.feeConfig.fragmentationFee;
+            uint256 totalValue = CollateralBasketLibrary.collateralValue(state, onBehalfOf);
+            if (totalValue < feeValue) {
+                revert Errors.NOT_ENOUGH_COLLATERAL(totalValue, feeValue);
+            }
+            (address[] memory tokens, uint256[] memory amounts,) =
+                state.transferProRata(onBehalfOf, state.feeConfig.feeRecipient, feeValue, totalValue);
+
+            emit Events.FragmentationFeeCollateralCharged(onBehalfOf, tokens, amounts);
         }
     }
 }

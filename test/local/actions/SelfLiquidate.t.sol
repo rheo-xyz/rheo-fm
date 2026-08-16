@@ -22,7 +22,7 @@ contract SelfLiquidateTest is BaseTest {
         uint256 debtPositionId = _sellCreditMarket(bob, alice, RESERVED_ID, 100e6, _maturity(150 days), false);
         uint256 creditPositionId = size.getCreditPositionIdsByDebtPositionId(debtPositionId)[0];
 
-        assertEq(size.getDebtPositionAssignedCollateral(debtPositionId), 150e18);
+        assertEq(size.getDebtPositionAssignedCollateralValue(debtPositionId), 150e6);
         assertEq(size.getDebtPosition(debtPositionId).futureValue, 100e6);
         assertEq(size.collateralRatio(bob), 1.5e18);
         assertTrue(!_isUserUnderwater(bob));
@@ -31,8 +31,7 @@ contract SelfLiquidateTest is BaseTest {
         _setPrice(0.5e18);
         assertEq(size.collateralRatio(bob), 0.75e18);
 
-        uint256 debtInCollateralToken =
-            size.debtTokenAmountToCollateralTokenAmount(size.getDebtPosition(debtPositionId).futureValue);
+        uint256 debtInCollateralToken = _valueToCollateral(size.getDebtPosition(debtPositionId).futureValue);
 
         vm.expectRevert();
         _liquidate(liquidator, debtPositionId, debtInCollateralToken, block.timestamp);
@@ -70,7 +69,7 @@ contract SelfLiquidateTest is BaseTest {
         _sellCreditMarket(candy, james, creditPositionId2, 30e6, _maturity(150 days));
         uint256 creditPositionId3 = size.getCreditPositionIdsByDebtPositionId(debtPositionId)[2];
 
-        assertEq(size.getDebtPositionAssignedCollateral(debtPositionId), 200e18);
+        assertEq(size.getDebtPositionAssignedCollateralValue(debtPositionId), 200e6);
         assertEq(size.getDebtPosition(debtPositionId).futureValue, 100e6);
         assertEq(size.collateralRatio(bob), 2.0e18);
         assertTrue(!_isUserUnderwater(bob));
@@ -120,7 +119,7 @@ contract SelfLiquidateTest is BaseTest {
         uint256 creditPositionId2 = size.getCreditPositionIdsByDebtPositionId(debtPositionId)[0];
         _sellCreditMarket(alice, james, RESERVED_ID, 100e6, _maturity(150 days), false);
 
-        assertEq(size.getDebtPositionAssignedCollateral(debtPositionId), 150e18);
+        assertEq(size.getDebtPositionAssignedCollateralValue(debtPositionId), 150e6);
         assertEq(size.getDebtPosition(debtPositionId).futureValue, 100e6);
         assertEq(size.collateralRatio(bob), 1.5e18);
         assertTrue(!_isUserUnderwater(bob));
@@ -129,8 +128,7 @@ contract SelfLiquidateTest is BaseTest {
         _setPrice(0.5e18);
         assertEq(size.collateralRatio(bob), 0.75e18);
 
-        uint256 futureValueInCollateralToken =
-            size.debtTokenAmountToCollateralTokenAmount(size.getDebtPosition(debtPositionId).futureValue);
+        uint256 futureValueInCollateralToken = _valueToCollateral(size.getDebtPosition(debtPositionId).futureValue);
 
         vm.expectRevert();
         _liquidate(liquidator, debtPositionId, futureValueInCollateralToken, block.timestamp);
@@ -251,7 +249,7 @@ contract SelfLiquidateTest is BaseTest {
         _sellCreditMarket(candy, james, creditPositionId1, 30e6, _maturity(150 days));
         uint256 creditPositionId2 = size.getCreditPositionIdsByDebtPositionId(debtPositionId1)[1];
 
-        assertEq(size.getDebtPositionAssignedCollateral(debtPositionId1), 150e18);
+        assertEq(size.getDebtPositionAssignedCollateralValue(debtPositionId1), 150e6);
         assertEq(size.getDebtPosition(debtPositionId1).futureValue, 100e6);
         assertEq(size.getCreditPosition(creditPositionId1).credit, 70e6);
         assertEq(size.collateralRatio(alice), 1.5e18);

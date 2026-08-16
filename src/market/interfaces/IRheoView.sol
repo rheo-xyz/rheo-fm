@@ -3,7 +3,7 @@ pragma solidity 0.8.23;
 
 import {UserCopyLimitOrderConfigs} from "@rheo-fm/src/market/RheoStorage.sol";
 
-import {DataView, UserView} from "@rheo-fm/src/market/RheoViewData.sol";
+import {CollateralAssetView, DataView, UserView} from "@rheo-fm/src/market/RheoViewData.sol";
 import {CreditPosition, DebtPosition, LoanStatus} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
 import {BuyCreditMarket, BuyCreditMarketParams} from "@rheo-fm/src/market/libraries/actions/BuyCreditMarket.sol";
 import {
@@ -25,10 +25,33 @@ interface IRheoView is IRheoViewV1_8 {
     /// @return The collateral ratio of the user
     function collateralRatio(address user) external view returns (uint256);
 
-    /// @notice Convert debt token amount to collateral token amount
-    /// @param amount The amount of debt tokens
-    /// @return The equivalent amount of collateral tokens
-    function debtTokenAmountToCollateralTokenAmount(uint256 amount) external view returns (uint256);
+    /// @notice Get the total value of a user's collateral basket
+    /// @dev Added in v2.0
+    /// @param user The address of the user
+    /// @return The value in borrow token base units
+    function collateralValue(address user) external view returns (uint256);
+
+    /// @notice Get the value of an amount of a listed collateral asset
+    /// @dev Added in v2.0. Rounds down, matching the valuation of a realized liquidator profit.
+    /// @param underlying The underlying collateral token
+    /// @param amount The amount of the underlying collateral token
+    /// @return The value in borrow token base units
+    function getCollateralAssetValue(address underlying, uint256 amount) external view returns (uint256);
+
+    /// @notice Get the market's collateral asset registry
+    /// @dev Added in v2.0
+    /// @return The collateral assets, in registry order
+    function getCollateralAssets() external view returns (CollateralAssetView[] memory);
+
+    /// @notice Get a user's balance of every listed collateral asset
+    /// @dev Added in v2.0
+    /// @param user The address of the user
+    /// @return underlyings The underlying collateral tokens, in registry order
+    /// @return balances The user's balances, aligned with `underlyings`
+    function getUserCollateralBalances(address user)
+        external
+        view
+        returns (address[] memory underlyings, uint256[] memory balances);
 
     /// @notice Get the fee configuration parameters
     /// @return The fee configuration parameters

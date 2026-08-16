@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
+import {InitializeCollateralAssetParams} from "@rheo-fm/src/market/libraries/actions/Initialize.sol";
 import {MarketShutdownParams} from "@rheo-fm/src/market/libraries/actions/MarketShutdown.sol";
 import {UpdateConfigParams} from "@rheo-fm/src/market/libraries/actions/UpdateConfig.sol";
 
@@ -33,6 +34,38 @@ interface IRheoAdmin {
     ///     - address[] usersToForceWithdraw: The addresses to force withdraw collateral for
     ///     - bool shouldCheckSupply: Whether to enforce zero supply checks
     function marketShutdown(MarketShutdownParams calldata params) external;
+
+    /// @notice Lists a new collateral asset in the market's basket
+    ///         Only callable by the DEFAULT_ADMIN_ROLE
+    /// @dev Added in v2.0. Listing is permanent: there is no removal function, because balances may exist and the
+    ///      price feed must keep answering until the deposit receipt supply is zero. Delist by pausing deposits and
+    ///      setting the cap to 0.
+    /// @param params InitializeCollateralAssetParams struct containing the following fields:
+    ///     - address underlying: The underlying collateral token
+    ///     - address priceFeed: The price feed, in borrow token terms, with 18 decimals
+    ///     - uint256 cap: The maximum total deposited amount, in underlying base units
+    function addCollateralAsset(InitializeCollateralAssetParams calldata params) external;
+
+    /// @notice Updates the price feed of a listed collateral asset
+    ///         Only callable by the DEFAULT_ADMIN_ROLE
+    /// @dev Added in v2.0
+    /// @param underlying The underlying collateral token
+    /// @param priceFeed The new price feed, in borrow token terms, with 18 decimals
+    function setCollateralAssetPriceFeed(address underlying, address priceFeed) external;
+
+    /// @notice Updates the deposit cap of a listed collateral asset
+    ///         Only callable by the DEFAULT_ADMIN_ROLE
+    /// @dev Added in v2.0. Lowering the cap below the current supply blocks new deposits but does not force exits.
+    /// @param underlying The underlying collateral token
+    /// @param cap The new cap, in underlying base units
+    function setCollateralAssetCap(address underlying, uint256 cap) external;
+
+    /// @notice Pauses or unpauses deposits of a listed collateral asset
+    ///         Only callable by the DEFAULT_ADMIN_ROLE
+    /// @dev Added in v2.0. Withdrawals of a deposit-paused asset remain enabled.
+    /// @param underlying The underlying collateral token
+    /// @param paused Whether new deposits of the asset should revert
+    function setCollateralAssetDepositPaused(address underlying, bool paused) external;
 
     /// @notice Pauses the protocol
     ///         Only callable by the PAUSER_ROLE

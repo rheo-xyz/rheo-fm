@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
+import {singleCollateralAsset} from "@rheo-fm/script/CollateralAssets.sol";
+
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
@@ -17,7 +19,7 @@ import {
     InitializeRiskConfigParams
 } from "@rheo-fm/src/market/libraries/actions/Initialize.sol";
 import {ISizeFactory} from "@rheo-solidity/src/factory/interfaces/ISizeFactory.sol";
-import {ISizeFactoryV1_9} from "@rheo-solidity/src/factory/interfaces/ISizeFactoryV1_9.sol";
+import {ISizeFactoryV2} from "@rheo-solidity/src/factory/interfaces/ISizeFactoryV2.sol";
 import {Safe} from "@safe-utils/Safe.sol";
 
 import {IPriceFeed} from "@rheo-fm/src/oracle/IPriceFeed.sol";
@@ -30,8 +32,9 @@ import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/Ag
 import {PendleChainlinkOracle} from "@pendle/contracts/oracles/PtYtLpOracle/chainlink/PendleChainlinkOracle.sol";
 import {PendleSparkLinearDiscountOracle} from "@pendle/contracts/oracles/internal/PendleSparkLinearDiscountOracle.sol";
 
-import {PriceFeedPendleSparkLinearDiscountChainlink} from
-    "@rheo-fm/src/oracle/v1.7.1/PriceFeedPendleSparkLinearDiscountChainlink.sol";
+import {
+    PriceFeedPendleSparkLinearDiscountChainlink
+} from "@rheo-fm/src/oracle/v1.7.1/PriceFeedPendleSparkLinearDiscountChainlink.sol";
 import {PriceFeedPendleTWAPChainlink} from "@rheo-fm/src/oracle/v1.7.2/PriceFeedPendleTWAPChainlink.sol";
 
 import {console} from "forge-std/console.sol";
@@ -81,15 +84,14 @@ contract ProposeSafeTxDeployPTMarketScript is BaseScript, Networks {
         DataView memory dataView = market.data();
         InitializeDataParams memory dataParams = InitializeDataParams({
             weth: contracts[block.chainid][Contract.WETH],
-            underlyingCollateralToken: address(underlyingCollateralToken),
+            collateralAssets: singleCollateralAsset(address(underlyingCollateralToken), oracleParams.priceFeed),
             underlyingBorrowToken: address(dataView.underlyingBorrowToken),
             variablePool: address(dataView.variablePool),
             borrowTokenVault: address(dataView.borrowTokenVault),
             sizeFactory: address(sizeFactory)
         });
-        bytes memory data = abi.encodeCall(
-            ISizeFactoryV1_9.createMarketRheo, (feeConfigParams, riskConfigParams, oracleParams, dataParams)
-        );
+        bytes memory data =
+            abi.encodeCall(ISizeFactoryV2.createMarketRheo, (feeConfigParams, riskConfigParams, dataParams));
         address target = address(sizeFactory);
         safe.proposeTransaction(target, data, signer, derivationPath);
         Tenderly.VirtualTestnet memory vnet = tenderly.createVirtualTestnet("pt-market-vnet", block.chainid);

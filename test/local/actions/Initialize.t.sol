@@ -12,7 +12,7 @@ contract InitializeTest is BaseTest {
         address owner = address(this);
         Rheo implementation = new Rheo();
         vm.expectRevert();
-        implementation.initialize(owner, f, r, o, d);
+        implementation.initialize(owner, f, r, d);
 
         assertEq(implementation.riskConfig().crLiquidation, 0);
         assertEq(Rheo(payable(proxy)).oracle().priceFeed, address(priceFeed));
@@ -21,9 +21,8 @@ contract InitializeTest is BaseTest {
     function test_Initialize_proxy_can_be_initialized() public {
         address owner = address(this);
         Rheo implementation = new Rheo();
-        ERC1967Proxy proxy = new ERC1967Proxy(
-            address(implementation), abi.encodeWithSelector(Rheo.initialize.selector, owner, f, r, o, d)
-        );
+        ERC1967Proxy proxy =
+            new ERC1967Proxy(address(implementation), abi.encodeWithSelector(Rheo.initialize.selector, owner, f, r, d));
 
         assertEq(Rheo(payable(proxy)).riskConfig().crLiquidation, 1.3e18);
     }
@@ -32,6 +31,6 @@ contract InitializeTest is BaseTest {
         Rheo implementation = new Rheo();
 
         vm.expectRevert();
-        new ERC1967Proxy(address(implementation), abi.encodeWithSelector(Rheo.initialize.selector, f, r, o, d));
+        new ERC1967Proxy(address(implementation), abi.encodeWithSelector(Rheo.initialize.selector, f, r, d));
     }
 }

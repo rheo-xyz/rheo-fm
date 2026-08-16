@@ -20,6 +20,7 @@ import {MockERC4626 as ERC4626Solady} from "@solady/test/utils/mocks/MockERC4626
 
 import {DataView} from "@rheo-fm/src/market/RheoViewData.sol";
 import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
+import {InitializeCollateralAssetParams} from "@rheo-fm/src/market/libraries/actions/Initialize.sol";
 
 import {DepositParams} from "@rheo-fm/src/market/libraries/actions/Deposit.sol";
 import {
@@ -146,24 +147,26 @@ contract HalmosRheoTest is Test, HalmosHelpers {
             maturities: maturities
         });
         o = InitializeOracleParams({priceFeed: address(priceFeed)});
-        d = InitializeDataParams({
-            weth: address(weth),
-            underlyingCollateralToken: address(weth),
-            underlyingBorrowToken: address(usdc),
-            variablePool: address(variablePool), // Aave v3
-            borrowTokenVault: address(token),
-            sizeFactory: address(sizeFactory)
-        });
+        // assigned field by field because Solidity cannot copy a memory array of structs to storage
+        d.weth = address(weth);
+        d.underlyingBorrowToken = address(usdc);
+        d.variablePool = address(variablePool); // Aave v3
+        d.borrowTokenVault = address(token);
+        d.sizeFactory = address(sizeFactory);
+        delete d.collateralAssets;
+        d.collateralAssets
+            .push(
+                InitializeCollateralAssetParams({
+                    underlying: address(weth), priceFeed: address(priceFeed), cap: type(uint256).max
+                })
+            );
 
         implementation = address(new Rheo());
         sizeFactory.setRheoImplementation(implementation);
         InitializeFeeConfigParams memory feeConfigParams = f;
         InitializeRiskConfigParams memory riskConfigParams = r;
-        InitializeOracleParams memory oracleParams = o;
         InitializeDataParams memory dataParams = d;
-        proxy = ERC1967Proxy(
-            payable(sizeFactory.createMarketRheo(feeConfigParams, riskConfigParams, oracleParams, dataParams))
-        );
+        proxy = ERC1967Proxy(payable(sizeFactory.createMarketRheo(feeConfigParams, riskConfigParams, dataParams)));
         size = Rheo(payable(proxy));
         PriceFeedMock(address(priceFeed)).setPrice(1337e18);
 
@@ -183,9 +186,9 @@ contract HalmosRheoTest is Test, HalmosHelpers {
         token.setVault(bob, address(vaultSolady), false);
         vm.stopPrank();
 
-        /* 
+        /*
         * Deposit something and leave something on actors' balances, while everything is approved
-        * to cover more scenarios 
+        * to cover more scenarios
         */
         vm.startPrank(alice);
         usdc.approve(address(size), USDC_INITIAL_BALANCE);
@@ -205,7 +208,7 @@ contract HalmosRheoTest is Test, HalmosHelpers {
 
         vm.startPrank(getConfigurer());
         halmosHelpersRegisterTargetAddress(address(size), "Rheo");
-        /* 
+        /*
         * heuristics: multicall causes path explosion and doesn't create any new coverage.
         * So I've decided to exclude this function from invariant testing.
         * TODO: enable this selector when halmos-helpers will support optimized delegatecalls handling
@@ -264,8 +267,8 @@ contract HalmosRheoTest is Test, HalmosHelpers {
         vaultSoladyBalanceNotBrokenInvarint();
     }
 
-    /* 
-    * Theoretically, this test should find 3.1.1 and 3.3.2 in all forms (via reentrancy and trivially) in some time. 
+    /*
+    * Theoretically, this test should find 3.1.1 and 3.3.2 in all forms (via reentrancy and trivially) in some time.
     * However, given that we have a lot of targets, there is no certainty that this test will be completed even in six months.
     * It is also necessary to investigate all symbolic execution bottlenecks in these contracts and handle them.
     * It should be perceived as just a way to expand the scenarios for testing, not an actual test to run.

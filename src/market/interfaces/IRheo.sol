@@ -35,7 +35,7 @@ import {IRheoAdmin} from "@rheo-fm/src/market/interfaces/IRheoAdmin.sol";
 import {IRheoV1_7} from "@rheo-fm/src/market/interfaces/v1.7/IRheoV1_7.sol";
 import {IRheoV1_8} from "@rheo-fm/src/market/interfaces/v1.8/IRheoV1_8.sol";
 
-string constant VERSION = "v1.9";
+string constant VERSION = "v2.0";
 
 /// @title IRheo
 /// @custom:security-contact security@rheo.xyz

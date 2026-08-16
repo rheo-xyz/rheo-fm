@@ -30,7 +30,7 @@ contract LiquidateValidationTest is BaseTest {
         uint256 creditId = size.getCreditPositionIdsByDebtPositionId(debtPositionId)[0];
         _sellCreditMarket(alice, james, creditId, 20e6, _maturity(30 days));
         uint256 creditPositionId = size.getCreditPositionIdsByDebtPositionId(debtPositionId)[1];
-        uint256 minimumCollateralProfit = 0;
+        uint256 minimumCollateralProfitValue = 0;
 
         _deposit(liquidator, usdc, 10_000e6);
 
@@ -39,8 +39,9 @@ contract LiquidateValidationTest is BaseTest {
         size.liquidate(
             LiquidateParams({
                 debtPositionId: creditPositionId,
-                minimumCollateralProfit: minimumCollateralProfit,
-                deadline: type(uint256).max
+                minimumCollateralProfitValue: minimumCollateralProfitValue,
+                deadline: type(uint256).max,
+                seizeCollateralAmounts: new uint256[](0)
             })
         );
         vm.stopPrank();
@@ -54,8 +55,9 @@ contract LiquidateValidationTest is BaseTest {
         size.liquidate(
             LiquidateParams({
                 debtPositionId: debtPositionId,
-                minimumCollateralProfit: minimumCollateralProfit,
-                deadline: type(uint256).max
+                minimumCollateralProfitValue: minimumCollateralProfitValue,
+                deadline: type(uint256).max,
+                seizeCollateralAmounts: new uint256[](0)
             })
         );
         vm.stopPrank();
@@ -73,8 +75,9 @@ contract LiquidateValidationTest is BaseTest {
         size.liquidate(
             LiquidateParams({
                 debtPositionId: debtPositionId,
-                minimumCollateralProfit: minimumCollateralProfit,
-                deadline: type(uint256).max
+                minimumCollateralProfitValue: minimumCollateralProfitValue,
+                deadline: type(uint256).max,
+                seizeCollateralAmounts: new uint256[](0)
             })
         );
         vm.stopPrank();
@@ -87,8 +90,9 @@ contract LiquidateValidationTest is BaseTest {
         size.liquidate(
             LiquidateParams({
                 debtPositionId: creditPositionId,
-                minimumCollateralProfit: minimumCollateralProfit,
-                deadline: type(uint256).max
+                minimumCollateralProfitValue: minimumCollateralProfitValue,
+                deadline: type(uint256).max,
+                seizeCollateralAmounts: new uint256[](0)
             })
         );
         vm.stopPrank();
@@ -109,8 +113,9 @@ contract LiquidateValidationTest is BaseTest {
         size.liquidate(
             LiquidateParams({
                 debtPositionId: debtPositionId,
-                minimumCollateralProfit: minimumCollateralProfit,
-                deadline: type(uint256).max
+                minimumCollateralProfitValue: minimumCollateralProfitValue,
+                deadline: type(uint256).max,
+                seizeCollateralAmounts: new uint256[](0)
             })
         );
         vm.stopPrank();
@@ -131,7 +136,12 @@ contract LiquidateValidationTest is BaseTest {
         vm.expectRevert(abi.encodeWithSelector(Errors.PAST_DEADLINE.selector, pastDeadline));
         vm.prank(liquidator);
         size.liquidate(
-            LiquidateParams({debtPositionId: debtPositionId, minimumCollateralProfit: 0, deadline: pastDeadline})
+            LiquidateParams({
+                debtPositionId: debtPositionId,
+                minimumCollateralProfitValue: 0,
+                deadline: pastDeadline,
+                seizeCollateralAmounts: new uint256[](0)
+            })
         );
     }
 }

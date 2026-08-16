@@ -19,23 +19,6 @@ library AccountingLibrary {
     using LoanLibrary for DebtPosition;
     using LoanLibrary for State;
 
-    /// @notice Converts debt token amount to a value in collateral tokens
-    /// @dev Rounds up the debt token amount
-    /// @param state The state object
-    /// @param debtTokenAmount The amount of debt tokens
-    /// @return collateralTokenAmount The amount of collateral tokens
-    function debtTokenAmountToCollateralTokenAmount(State storage state, uint256 debtTokenAmount)
-        internal
-        view
-        returns (uint256 collateralTokenAmount)
-    {
-        collateralTokenAmount = Math.mulDivUp(
-            debtTokenAmount * 10 ** state.oracle.priceFeed.decimals(),
-            10 ** state.data.underlyingCollateralToken.decimals(),
-            state.oracle.priceFeed.getPrice() * 10 ** state.data.underlyingBorrowToken.decimals()
-        );
-    }
-
     /// @notice Repays a debt position
     /// @dev Upon repayment, the debt position future value and the borrower's total debt tracker are updated
     /// @param state The state object
@@ -69,8 +52,9 @@ library AccountingLibrary {
         uint256 futureValue,
         uint256 dueDate
     ) external returns (CreditPosition memory creditPosition) {
-        DebtPosition memory debtPosition =
-            DebtPosition({borrower: borrower, futureValue: futureValue, dueDate: dueDate, liquidityIndexAtRepayment: 0});
+        DebtPosition memory debtPosition = DebtPosition({
+            borrower: borrower, futureValue: futureValue, dueDate: dueDate, liquidityIndexAtRepayment: 0
+        });
 
         uint256 debtPositionId = state.data.nextDebtPositionId++;
         state.data.debtPositions[debtPositionId] = debtPosition;
@@ -78,10 +62,7 @@ library AccountingLibrary {
         emit Events.CreateDebtPosition(debtPositionId, borrower, lender, futureValue, dueDate);
 
         creditPosition = CreditPosition({
-            lender: lender,
-            credit: debtPosition.futureValue,
-            debtPositionId: debtPositionId,
-            forSale: true
+            lender: lender, credit: debtPosition.futureValue, debtPositionId: debtPositionId, forSale: true
         });
 
         uint256 creditPositionId = state.data.nextCreditPositionId++;

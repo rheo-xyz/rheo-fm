@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
+import {singleCollateralAsset} from "@rheo-fm/script/CollateralAssets.sol";
+
 import {IPool} from "@aave/interfaces/IPool.sol";
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
@@ -13,6 +15,7 @@ import {CollectionsManager} from "@rheo-fm/src/collections/CollectionsManager.so
 import {Rheo} from "@rheo-fm/src/market/Rheo.sol";
 import {DataView} from "@rheo-fm/src/market/RheoViewData.sol";
 import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
+import {RESERVED_ID} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
 import {BuyCreditLimitParams} from "@rheo-fm/src/market/libraries/actions/BuyCreditLimit.sol";
 import {DepositParams} from "@rheo-fm/src/market/libraries/actions/Deposit.sol";
 import {
@@ -22,7 +25,6 @@ import {
     InitializeRiskConfigParams
 } from "@rheo-fm/src/market/libraries/actions/Initialize.sol";
 import {LiquidateParams} from "@rheo-fm/src/market/libraries/actions/Liquidate.sol";
-import {RESERVED_ID} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
 import {SellCreditMarketParams} from "@rheo-fm/src/market/libraries/actions/SellCreditMarket.sol";
 
 import {
@@ -37,8 +39,8 @@ import {ERC4626Adapter} from "@rheo-fm/src/market/token/adapters/ERC4626Adapter.
 import {IPriceFeed} from "@rheo-fm/src/oracle/IPriceFeed.sol";
 import {PriceFeed} from "@rheo-fm/src/oracle/v1.5.1/PriceFeed.sol";
 
-import {ISizeFactory} from "@rheo-solidity/src/factory/interfaces/ISizeFactory.sol";
 import {SizeFactory} from "@rheo-solidity/src/factory/SizeFactory.sol";
+import {ISizeFactory} from "@rheo-solidity/src/factory/interfaces/ISizeFactory.sol";
 
 import {Test} from "forge-std/Test.sol";
 
@@ -134,7 +136,7 @@ contract ArbitrumWethUsdcLifecycleForkTest is Test, Networks {
                 amount: 5_000e6, // borrow 5k USDC
                 maturity: maturities[0],
                 deadline: block.timestamp + 1 hours,
-                maxAPR: 0.10e18,
+                maxAPR: 0.1e18,
                 exactAmountIn: false,
                 collectionId: RESERVED_ID,
                 rateProvider: address(0)
@@ -165,7 +167,12 @@ contract ArbitrumWethUsdcLifecycleForkTest is Test, Networks {
         IERC20(cfg.underlyingBorrowToken).approve(address(market), 10_000e6);
         market.deposit(DepositParams({token: cfg.underlyingBorrowToken, amount: 10_000e6, to: liquidator}));
         uint256 liquidatorProfit = market.liquidate(
-            LiquidateParams({debtPositionId: debtPositionId, minimumCollateralProfit: 0, deadline: block.timestamp + 1 hours})
+            LiquidateParams({
+                debtPositionId: debtPositionId,
+                minimumCollateralProfitValue: 0,
+                deadline: block.timestamp + 1 hours,
+                seizeCollateralAmounts: new uint256[](0)
+            })
         );
         vm.stopPrank();
 
@@ -186,7 +193,9 @@ contract ArbitrumWethUsdcLifecycleForkTest is Test, Networks {
         CollectionsManager cmImpl = new CollectionsManager();
         CollectionsManager cmProxy = CollectionsManager(
             address(
-                new ERC1967Proxy(address(cmImpl), abi.encodeCall(CollectionsManager.initialize, (ISizeFactory(address(sizeFactory)))))
+                new ERC1967Proxy(
+                    address(cmImpl), abi.encodeCall(CollectionsManager.initialize, (ISizeFactory(address(sizeFactory))))
+                )
             )
         );
 
@@ -248,7 +257,7 @@ contract ArbitrumWethUsdcLifecycleForkTest is Test, Networks {
 
         InitializeDataParams memory dataParams = InitializeDataParams({
             weth: cfg.weth,
-            underlyingCollateralToken: cfg.underlyingCollateralToken,
+            collateralAssets: singleCollateralAsset(cfg.underlyingCollateralToken, address(priceFeed)),
             underlyingBorrowToken: cfg.underlyingBorrowToken,
             variablePool: cfg.variablePool,
             borrowTokenVault: address(borrowTokenVault),
@@ -256,6 +265,6 @@ contract ArbitrumWethUsdcLifecycleForkTest is Test, Networks {
         });
 
         vm.prank(SAFE);
-        market = IRheo(sizeFactory.createMarketRheo(feeConfig, riskConfig, oracle, dataParams));
+        market = IRheo(sizeFactory.createMarketRheo(feeConfig, riskConfig, dataParams));
     }
 }

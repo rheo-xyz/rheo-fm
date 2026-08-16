@@ -24,6 +24,7 @@ import {Contract, NetworkConfiguration, Networks} from "@rheo-fm/script/Networks
 import {DataView} from "@rheo-fm/src/market/RheoViewData.sol";
 import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
 import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
+import {RESERVED_ID} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
 import {BuyCreditLimitParams} from "@rheo-fm/src/market/libraries/actions/BuyCreditLimit.sol";
 import {DepositParams} from "@rheo-fm/src/market/libraries/actions/Deposit.sol";
 import {
@@ -31,18 +32,20 @@ import {
     InitializeRiskConfigParams
 } from "@rheo-fm/src/market/libraries/actions/Initialize.sol";
 import {LiquidateParams} from "@rheo-fm/src/market/libraries/actions/Liquidate.sol";
-import {RESERVED_ID} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
 import {SellCreditMarketParams} from "@rheo-fm/src/market/libraries/actions/SellCreditMarket.sol";
 
-import {DEFAULT_VAULT, NonTransferrableRebasingTokenVault} from "@rheo-fm/src/market/token/NonTransferrableRebasingTokenVault.sol";
+import {
+    DEFAULT_VAULT,
+    NonTransferrableRebasingTokenVault
+} from "@rheo-fm/src/market/token/NonTransferrableRebasingTokenVault.sol";
 import {IAdapter} from "@rheo-fm/src/market/token/adapters/IAdapter.sol";
 
 import {IPriceFeed} from "@rheo-fm/src/oracle/IPriceFeed.sol";
 import {PriceFeed} from "@rheo-fm/src/oracle/v1.5.1/PriceFeed.sol";
 import {PauseAll} from "@rheo-fm/src/protection/PauseAll.sol";
 
-import {ISizeFactory, PAUSER_ROLE} from "@rheo-solidity/src/factory/interfaces/ISizeFactory.sol";
 import {SizeFactory} from "@rheo-solidity/src/factory/SizeFactory.sol";
+import {ISizeFactory, PAUSER_ROLE} from "@rheo-solidity/src/factory/interfaces/ISizeFactory.sol";
 
 import {Test} from "forge-std/Test.sol";
 
@@ -256,7 +259,7 @@ contract ArbitrumLiveLifecycleForkTest is ArbitrumLiveForkBase {
                 amount: 5_000e6,
                 maturity: maturity,
                 deadline: block.timestamp + 1 hours,
-                maxAPR: 0.10e18,
+                maxAPR: 0.1e18,
                 exactAmountIn: false,
                 collectionId: RESERVED_ID,
                 rateProvider: address(0)
@@ -277,7 +280,12 @@ contract ArbitrumLiveLifecycleForkTest is ArbitrumLiveForkBase {
         IERC20(cfg.underlyingBorrowToken).approve(address(market), 10_000e6);
         market.deposit(DepositParams({token: cfg.underlyingBorrowToken, amount: 10_000e6, to: liquidator}));
         uint256 profit = market.liquidate(
-            LiquidateParams({debtPositionId: debtPositionId, minimumCollateralProfit: 0, deadline: block.timestamp + 1 hours})
+            LiquidateParams({
+                debtPositionId: debtPositionId,
+                minimumCollateralProfitValue: 0,
+                deadline: block.timestamp + 1 hours,
+                seizeCollateralAmounts: new uint256[](0)
+            })
         );
         vm.stopPrank();
 
@@ -335,7 +343,7 @@ contract ArbitrumLiveLifecycleForkTest is ArbitrumLiveForkBase {
                 amount: 6_000_000e6,
                 maturity: maturity,
                 deadline: block.timestamp + 1 hours,
-                maxAPR: 0.10e18,
+                maxAPR: 0.1e18,
                 exactAmountIn: false,
                 collectionId: RESERVED_ID,
                 rateProvider: address(0)

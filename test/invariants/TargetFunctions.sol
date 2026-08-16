@@ -92,9 +92,8 @@ abstract contract TargetFunctions is Helper, ExpectedErrors, ITargetFunctions {
         __before();
 
         hevm.prank(sender);
-        (success, returnData) = address(size).call(
-            abi.encodeCall(size.withdraw, WithdrawParams({token: token, amount: amount, to: sender}))
-        );
+        (success, returnData) = address(size)
+            .call(abi.encodeCall(size.withdraw, WithdrawParams({token: token, amount: amount, to: sender})));
         __after();
         if (success) {
             uint256 withdrawnAmount;
@@ -138,10 +137,11 @@ abstract contract TargetFunctions is Helper, ExpectedErrors, ITargetFunctions {
         maturity = _riskMaturityAtFromConfig(maturity);
 
         hevm.prank(sender);
-        (success, returnData) = address(size).call(
-            abi.encodeCall(
-                size.sellCreditMarket,
-                SellCreditMarketParams({
+        (success, returnData) = address(size)
+            .call(
+                abi.encodeCall(
+                    size.sellCreditMarket,
+                    SellCreditMarketParams({
                     lender: lender,
                     creditPositionId: creditPositionId,
                     amount: amount,
@@ -152,8 +152,8 @@ abstract contract TargetFunctions is Helper, ExpectedErrors, ITargetFunctions {
                     collectionId: RESERVED_ID,
                     rateProvider: address(0)
                 })
-            )
-        );
+                )
+            );
 
         __after();
         if (success) {
@@ -186,11 +186,12 @@ abstract contract TargetFunctions is Helper, ExpectedErrors, ITargetFunctions {
         FixedMaturityLimitOrder memory offer = _getRandomOffer(offerSeed);
 
         hevm.prank(sender);
-        (success, returnData) = address(size).call(
-            abi.encodeCall(
-                size.sellCreditLimit, SellCreditLimitParams({maturities: offer.maturities, aprs: offer.aprs})
-            )
-        );
+        (success, returnData) = address(size)
+            .call(
+                abi.encodeCall(
+                    size.sellCreditLimit, SellCreditLimitParams({maturities: offer.maturities, aprs: offer.aprs})
+                )
+            );
         __after();
     }
 
@@ -209,10 +210,11 @@ abstract contract TargetFunctions is Helper, ExpectedErrors, ITargetFunctions {
         amount = between(amount, 0, MAX_AMOUNT_USDC);
 
         hevm.prank(sender);
-        (success, returnData) = address(size).call(
-            abi.encodeCall(
-                size.buyCreditMarket,
-                BuyCreditMarketParams({
+        (success, returnData) = address(size)
+            .call(
+                abi.encodeCall(
+                    size.buyCreditMarket,
+                    BuyCreditMarketParams({
                     borrower: borrower,
                     creditPositionId: creditPositionId,
                     maturity: maturity,
@@ -223,8 +225,8 @@ abstract contract TargetFunctions is Helper, ExpectedErrors, ITargetFunctions {
                     collectionId: RESERVED_ID,
                     rateProvider: address(0)
                 })
-            )
-        );
+                )
+            );
         __after();
         if (success) {
             if (creditPositionId == RESERVED_ID) {
@@ -247,9 +249,12 @@ abstract contract TargetFunctions is Helper, ExpectedErrors, ITargetFunctions {
         FixedMaturityLimitOrder memory offer = _getRandomOffer(offerSeed);
 
         hevm.prank(sender);
-        (success, returnData) = address(size).call(
-            abi.encodeCall(size.buyCreditLimit, BuyCreditLimitParams({maturities: offer.maturities, aprs: offer.aprs}))
-        );
+        (success, returnData) = address(size)
+            .call(
+                abi.encodeCall(
+                    size.buyCreditLimit, BuyCreditLimitParams({maturities: offer.maturities, aprs: offer.aprs})
+                )
+            );
         __after();
     }
 
@@ -259,11 +264,12 @@ abstract contract TargetFunctions is Helper, ExpectedErrors, ITargetFunctions {
         __before(debtPositionId);
 
         hevm.prank(sender);
-        (success, returnData) = address(size).call(
-            abi.encodeCall(
-                size.repay, RepayParams({debtPositionId: debtPositionId, borrower: _before.borrower.account})
-            )
-        );
+        (success, returnData) = address(size)
+            .call(
+                abi.encodeCall(
+                    size.repay, RepayParams({debtPositionId: debtPositionId, borrower: _before.borrower.account})
+                )
+            );
         __after(debtPositionId);
         if (success) {
             lte(_after.sender.borrowTokenBalance, _before.sender.borrowTokenBalance, REPAY_01);
@@ -289,29 +295,32 @@ abstract contract TargetFunctions is Helper, ExpectedErrors, ITargetFunctions {
         }
     }
 
-    function liquidate(uint256 debtPositionId, uint256 minimumCollateralProfit)
+    function liquidate(uint256 debtPositionId, uint256 minimumCollateralProfitValue)
         public
         getSender
         hasLoans
         checkExpectedErrors(LIQUIDATE_ERRORS)
     {
-        debtPositionId =
-            between(debtPositionId, DEBT_POSITION_ID_START, DEBT_POSITION_ID_START + _before.debtPositionsCount - 1);
+        debtPositionId = between(
+            debtPositionId, DEBT_POSITION_ID_START, DEBT_POSITION_ID_START + _before.debtPositionsCount - 1
+        );
         __before(debtPositionId);
 
-        minimumCollateralProfit = between(minimumCollateralProfit, 0, MAX_AMOUNT_WETH);
+        minimumCollateralProfitValue = between(minimumCollateralProfitValue, 0, MAX_AMOUNT_WETH);
 
         hevm.prank(sender);
-        (success, returnData) = address(size).call(
-            abi.encodeCall(
-                size.liquidate,
-                LiquidateParams({
+        (success, returnData) = address(size)
+            .call(
+                abi.encodeCall(
+                    size.liquidate,
+                    LiquidateParams({
                     debtPositionId: debtPositionId,
-                    minimumCollateralProfit: minimumCollateralProfit,
-                    deadline: type(uint256).max
+                    minimumCollateralProfitValue: minimumCollateralProfitValue,
+                    deadline: type(uint256).max,
+                    seizeCollateralAmounts: new uint256[](0)
                 })
-            )
-        );
+                )
+            );
         __after(debtPositionId);
         if (success) {
             uint256 liquidatorProfitCollateralToken = abi.decode(returnData, (uint256));
@@ -342,9 +351,8 @@ abstract contract TargetFunctions is Helper, ExpectedErrors, ITargetFunctions {
         __before(creditPositionId);
 
         hevm.prank(sender);
-        (success, returnData) = address(size).call(
-            abi.encodeCall(size.selfLiquidate, SelfLiquidateParams({creditPositionId: creditPositionId}))
-        );
+        (success, returnData) = address(size)
+            .call(abi.encodeCall(size.selfLiquidate, SelfLiquidateParams({creditPositionId: creditPositionId})));
         __after(creditPositionId);
         if (success) {
             if (sender != _before.borrower.account) {
@@ -366,16 +374,17 @@ abstract contract TargetFunctions is Helper, ExpectedErrors, ITargetFunctions {
         __before(creditPositionWithDebtToRepayId);
 
         hevm.prank(sender);
-        (success, returnData) = address(size).call(
-            abi.encodeCall(
-                size.compensate,
-                CompensateParams({
+        (success, returnData) = address(size)
+            .call(
+                abi.encodeCall(
+                    size.compensate,
+                    CompensateParams({
                     creditPositionWithDebtToRepayId: creditPositionWithDebtToRepayId,
                     creditPositionToCompensateId: creditPositionToCompensateId,
                     amount: amount
                 })
-            )
-        );
+                )
+            );
         __after(creditPositionWithDebtToRepayId);
         if (success) {
             if (creditPositionToCompensateId == RESERVED_ID) {
@@ -394,17 +403,18 @@ abstract contract TargetFunctions is Helper, ExpectedErrors, ITargetFunctions {
         __before();
 
         hevm.prank(sender);
-        (success, returnData) = address(size).call(
-            abi.encodeCall(
-                size.setUserConfiguration,
-                SetUserConfigurationParams({
+        (success, returnData) = address(size)
+            .call(
+                abi.encodeCall(
+                    size.setUserConfiguration,
+                    SetUserConfigurationParams({
                     openingLimitBorrowCR: _openingLimitBorrowCR,
                     allCreditPositionsForSaleDisabled: _allCreditPositionsForSaleDisabled,
                     creditPositionIdsForSale: false,
                     creditPositionIds: new uint256[](0)
                 })
-            )
-        );
+                )
+            );
         __after();
     }
 
@@ -414,9 +424,8 @@ abstract contract TargetFunctions is Helper, ExpectedErrors, ITargetFunctions {
         _vault = _getRandomVault(_vault);
 
         hevm.prank(sender);
-        (success, returnData) = address(size).call(
-            abi.encodeCall(size.setVault, SetVaultParams({vault: _vault, forfeitOldShares: _forfeitOldShares}))
-        );
+        (success, returnData) = address(size)
+            .call(abi.encodeCall(size.setVault, SetVaultParams({vault: _vault, forfeitOldShares: _forfeitOldShares})));
         __after();
 
         if (success) {
@@ -437,27 +446,28 @@ abstract contract TargetFunctions is Helper, ExpectedErrors, ITargetFunctions {
         __before();
 
         hevm.prank(sender);
-        (success, returnData) = address(size).call(
-            abi.encodeCall(
-                size.setCopyLimitOrderConfigs,
-                SetCopyLimitOrderConfigsParams({
+        (success, returnData) = address(size)
+            .call(
+                abi.encodeCall(
+                    size.setCopyLimitOrderConfigs,
+                    SetCopyLimitOrderConfigsParams({
                     copyLoanOfferConfig: CopyLimitOrderConfig({
-                        minTenor: 0,
-                        maxTenor: type(uint256).max,
-                        minAPR: 0,
-                        maxAPR: type(uint256).max,
-                        offsetAPR: loanOffsetAPR
-                    }),
+                    minTenor: 0,
+                    maxTenor: type(uint256).max,
+                    minAPR: 0,
+                    maxAPR: type(uint256).max,
+                    offsetAPR: loanOffsetAPR
+                }),
                     copyBorrowOfferConfig: CopyLimitOrderConfig({
-                        minTenor: 0,
-                        maxTenor: type(uint256).max,
-                        minAPR: 0,
-                        maxAPR: type(uint256).max,
-                        offsetAPR: borrowOffsetAPR
-                    })
+                    minTenor: 0,
+                    maxTenor: type(uint256).max,
+                    minAPR: 0,
+                    maxAPR: type(uint256).max,
+                    offsetAPR: borrowOffsetAPR
                 })
-            )
-        );
+                })
+                )
+            );
         __after();
     }
 
@@ -473,16 +483,15 @@ abstract contract TargetFunctions is Helper, ExpectedErrors, ITargetFunctions {
         __before(creditPositionWithDebtToRepayId);
 
         hevm.prank(sender);
-        (success, returnData) = address(size).call(
-            abi.encodeCall(
-                size.partialRepay,
-                PartialRepayParams({
-                    creditPositionWithDebtToRepayId: creditPositionWithDebtToRepayId,
-                    amount: amount,
-                    borrower: borrower
+        (success, returnData) = address(size)
+            .call(
+                abi.encodeCall(
+                    size.partialRepay,
+                    PartialRepayParams({
+                    creditPositionWithDebtToRepayId: creditPositionWithDebtToRepayId, amount: amount, borrower: borrower
                 })
-            )
-        );
+                )
+            );
 
         __after(creditPositionWithDebtToRepayId);
         if (success) {

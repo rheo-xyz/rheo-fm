@@ -2,6 +2,7 @@
 pragma solidity 0.8.23;
 
 import {AccountingLibrary} from "@rheo-fm/src/market/libraries/AccountingLibrary.sol";
+import {CollateralBasketLibrary} from "@rheo-fm/src/market/libraries/CollateralBasketLibrary.sol";
 import {CreditPosition, DebtPosition, LoanLibrary} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
 import {RiskLibrary} from "@rheo-fm/src/market/libraries/RiskLibrary.sol";
 import {Action} from "@rheo-solidity/src/factory/libraries/Authorization.sol";
@@ -34,6 +35,7 @@ library SelfLiquidate {
     using LoanLibrary for CreditPosition;
     using LoanLibrary for State;
     using AccountingLibrary for State;
+    using CollateralBasketLibrary for State;
     using RiskLibrary for State;
 
     /// @notice Validates the input parameters for self-liquidating a credit position
@@ -86,11 +88,14 @@ library SelfLiquidate {
         CreditPosition storage creditPosition = state.getCreditPosition(params.creditPositionId);
         DebtPosition storage debtPosition = state.getDebtPositionByCreditPositionId(params.creditPositionId);
 
-        uint256 assignedCollateral = state.getCreditPositionProRataAssignedCollateral(creditPosition);
+        // the assigned collateral is a slice of the borrower's basket pro-rata to the credit and the pre-reduction debt
+        uint256 debt = state.data.debtToken.balanceOf(debtPosition.borrower);
+        (address[] memory tokens, uint256[] memory amounts,) =
+            state.transferProRata(debtPosition.borrower, recipient, creditPosition.credit, debt);
+
+        emit Events.SelfLiquidateCollateralSeized(params.creditPositionId, tokens, amounts);
 
         // debt and credit reduction
         state.reduceDebtAndCredit(creditPosition.debtPositionId, params.creditPositionId, creditPosition.credit);
-
-        state.data.collateralToken.transferFrom(debtPosition.borrower, recipient, assignedCollateral);
     }
 }

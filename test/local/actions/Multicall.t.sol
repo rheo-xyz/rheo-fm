@@ -147,7 +147,12 @@ contract MulticallTest is BaseTest {
         // liquidate profitably (but does not enforce CR)
         data[1] = abi.encodeCall(
             size.liquidate,
-            LiquidateParams({debtPositionId: debtPositionId, minimumCollateralProfit: 0, deadline: type(uint256).max})
+            LiquidateParams({
+                debtPositionId: debtPositionId,
+                minimumCollateralProfitValue: 0,
+                deadline: type(uint256).max,
+                seizeCollateralAmounts: new uint256[](0)
+            })
         );
         // withdraw everything
         data[2] = abi.encodeCall(
@@ -203,8 +208,9 @@ contract MulticallTest is BaseTest {
         _approve(bob, address(usdc), address(size), depositRequiredToRepay);
 
         bytes[] memory data = new bytes[](3);
-        data[0] =
-            abi.encodeCall(size.deposit, DepositParams({token: address(usdc), amount: depositRequiredToRepay, to: bob}));
+        data[0] = abi.encodeCall(
+            size.deposit, DepositParams({token: address(usdc), amount: depositRequiredToRepay, to: bob})
+        );
         data[1] = abi.encodeCall(size.repay, RepayParams({debtPositionId: debtPositionId, borrower: bob}));
         data[2] =
             abi.encodeCall(size.withdraw, WithdrawParams({token: address(usdc), amount: type(uint256).max, to: bob}));
@@ -238,11 +244,9 @@ contract MulticallTest is BaseTest {
         FixedMaturityLimitOrder memory offer = FixedMaturityLimitOrderHelper.flatOffer();
         data[1] = abi.encodeCall(
             size.buyCreditLimitOnBehalfOf,
-            (
-                BuyCreditLimitOnBehalfOfParams(
+            (BuyCreditLimitOnBehalfOfParams(
                     BuyCreditLimitParams({maturities: offer.maturities, aprs: offer.aprs}), alice
-                )
-            )
+                ))
         );
         bytes[] memory results = size.multicall(data);
 

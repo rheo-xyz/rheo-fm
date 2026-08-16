@@ -9,8 +9,8 @@ import {CollectionsManager} from "@rheo-fm/src/collections/CollectionsManager.so
 import {Rheo} from "@rheo-fm/src/market/Rheo.sol";
 import {NonTransferrableRebasingTokenVault} from "@rheo-fm/src/market/token/NonTransferrableRebasingTokenVault.sol";
 
-import {ISizeFactory} from "@rheo-solidity/src/factory/interfaces/ISizeFactory.sol";
 import {SizeFactory} from "@rheo-solidity/src/factory/SizeFactory.sol";
+import {ISizeFactory} from "@rheo-solidity/src/factory/interfaces/ISizeFactory.sol";
 
 import {Test} from "forge-std/Test.sol";
 

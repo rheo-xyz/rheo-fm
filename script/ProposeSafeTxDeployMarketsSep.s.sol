@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
+import {singleCollateralAsset} from "@rheo-fm/script/CollateralAssets.sol";
+
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
@@ -17,7 +19,7 @@ import {
     InitializeRiskConfigParams
 } from "@rheo-fm/src/market/libraries/actions/Initialize.sol";
 import {ISizeFactory} from "@rheo-solidity/src/factory/interfaces/ISizeFactory.sol";
-import {ISizeFactoryV1_9} from "@rheo-solidity/src/factory/interfaces/ISizeFactoryV1_9.sol";
+import {ISizeFactoryV2} from "@rheo-solidity/src/factory/interfaces/ISizeFactoryV2.sol";
 import {Safe} from "@safe-utils/Safe.sol";
 
 import {IPriceFeed} from "@rheo-fm/src/oracle/IPriceFeed.sol";
@@ -35,8 +37,9 @@ import {MainnetAddresses} from "@rheo-fm/script/MainnetAddresses.s.sol";
 import {PendleChainlinkOracle} from "@pendle/contracts/oracles/PtYtLpOracle/chainlink/PendleChainlinkOracle.sol";
 import {PendleSparkLinearDiscountOracle} from "@pendle/contracts/oracles/internal/PendleSparkLinearDiscountOracle.sol";
 
-import {PriceFeedPendleSparkLinearDiscountChainlink} from
-    "@rheo-fm/src/oracle/v1.7.1/PriceFeedPendleSparkLinearDiscountChainlink.sol";
+import {
+    PriceFeedPendleSparkLinearDiscountChainlink
+} from "@rheo-fm/src/oracle/v1.7.1/PriceFeedPendleSparkLinearDiscountChainlink.sol";
 import {PriceFeedPendleTWAPChainlink} from "@rheo-fm/src/oracle/v1.7.2/PriceFeedPendleTWAPChainlink.sol";
 
 import {console} from "forge-std/console.sol";
@@ -223,7 +226,7 @@ contract ProposeSafeTxDeployMarketsSepScript is BaseScript, Networks, MainnetAdd
 
         for (uint256 i = 0; i < underlyingCollateralTokensAndIsStable.length; i++) {
             IERC20Metadata underlyingCollateralToken =
-                underlyingCollateralTokensAndIsStable[i].underlyingCollateralToken;
+            underlyingCollateralTokensAndIsStable[i].underlyingCollateralToken;
             MarketType marketType = underlyingCollateralTokensAndIsStable[i].marketType;
             IPriceFeed priceFeed = underlyingCollateralTokensAndIsStable[i].priceFeed;
             (
@@ -234,9 +237,7 @@ contract ProposeSafeTxDeployMarketsSepScript is BaseScript, Networks, MainnetAdd
             ) = getMarketParams(underlyingCollateralToken, marketType, priceFeed);
 
             targets[i] = address(sizeFactory);
-            datas[i] = abi.encodeCall(
-                ISizeFactoryV1_9.createMarketRheo, (feeConfigParams, riskConfigParams, oracleParams, dataParams)
-            );
+            datas[i] = abi.encodeCall(ISizeFactoryV2.createMarketRheo, (feeConfigParams, riskConfigParams, dataParams));
         }
 
         vm.stopBroadcast();
@@ -277,7 +278,7 @@ contract ProposeSafeTxDeployMarketsSepScript is BaseScript, Networks, MainnetAdd
         DataView memory dataView = market.data();
         dataParams = InitializeDataParams({
             weth: contracts[block.chainid][Contract.WETH],
-            underlyingCollateralToken: address(underlyingCollateralToken), // underlyingCollateralToken replaced below
+            collateralAssets: singleCollateralAsset(address(underlyingCollateralToken), oracleParams.priceFeed), // underlyingCollateralToken replaced below
             underlyingBorrowToken: address(dataView.underlyingBorrowToken),
             variablePool: address(dataView.variablePool),
             borrowTokenVault: address(dataView.borrowTokenVault),
