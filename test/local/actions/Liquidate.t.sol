@@ -399,7 +399,7 @@ contract LiquidateTest is BaseTest {
         );
     }
 
-    function testFuzz_Liquidate_liquidate_minimumCollateralProfit(
+    function testFuzz_Liquidate_liquidate_minimumCollateralProfitValue(
         uint256 newPrice,
         uint256 interval,
         uint256 minimumCollateralProfitValue

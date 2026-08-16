@@ -124,12 +124,10 @@ interface IRheo is IRheoView, IRheoAdmin, IMulticall, IRheoV1_7, IRheoV1_8 {
     ///         If the loan is overdue, a liquidator is charged from the borrower
     /// @param params LiquidateParams struct containing the following fields:
     ///     - uint256 debtPositionId: The id of the debt position to liquidate
-    ///     - uint256 minimumCollateralProfit: The minimum collateral profit that the liquidator is willing to accept from the borrower (keepers might choose to pass a value below 100% of the cash they bring and take the risk of liquidating unprofitably)
-    /// @return liquidatorProfitCollateralToken The amount of collateral tokens the the fee recipient received from the liquidation
-    function liquidate(LiquidateParams calldata params)
-        external
-        payable
-        returns (uint256 liquidatorProfitCollateralToken);
+    ///     - uint256 minimumCollateralProfitValue: The minimum profit, in borrow token base units, that the liquidator is willing to accept from the borrower (keepers might choose to pass a value below 100% of the cash they bring and take the risk of liquidating unprofitably)
+    ///     - uint256[] seizeCollateralAmounts: The seize breakdown across the collateral basket, aligned with the registry returned by `getCollateralAssets`. An empty array seizes pro-rata across every asset the borrower holds.
+    /// @return liquidatorProfitValue The value of the collateral seized by the liquidator, in borrow token base units
+    function liquidate(LiquidateParams calldata params) external payable returns (uint256 liquidatorProfitValue);
 
     /// @notice Self liquidate a credit position that is undercollateralized
     ///         The lender cancels an amount of debt equivalent to their credit and a percentage of the protocol fees

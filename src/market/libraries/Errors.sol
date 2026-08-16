@@ -77,7 +77,7 @@ library Errors {
     error LOAN_NOT_LIQUIDATABLE(uint256 debtPositionId, uint256 cr, uint8 loanStatus);
     error LOAN_NOT_SELF_LIQUIDATABLE(uint256 creditPositionId, uint256 cr, uint8 loanStatus);
     error LIQUIDATE_PROFIT_BELOW_MINIMUM_COLLATERAL_PROFIT(
-        uint256 liquidatorProfitCollateralToken, uint256 minimumCollateralProfit
+        uint256 liquidatorProfitValue, uint256 minimumCollateralProfitValue
     );
     error CR_BELOW_OPENING_LIMIT_BORROW_CR(address account, uint256 cr, uint256 riskCollateralRatio);
 
