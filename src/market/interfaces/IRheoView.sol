@@ -33,6 +33,9 @@ interface IRheoView is IRheoViewV1_8 {
 
     /// @notice Get the value of an amount of a listed collateral asset
     /// @dev Added in v2.0. Rounds down, matching the valuation of a realized liquidator profit.
+    ///      WARNING for liquidation bots sizing an explicit seizure: `liquidate` validates the seizure with a
+    ///      round-UP valuation, so an array sized to exactly the entitlement using this view can be rejected with
+    ///      SEIZED_VALUE_GREATER_THAN_ENTITLEMENT. Leave a margin of one base unit per seized asset.
     /// @param underlying The underlying collateral token
     /// @param amount The amount of the underlying collateral token
     /// @return The value in borrow token base units

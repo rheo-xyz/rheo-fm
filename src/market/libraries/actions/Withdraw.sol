@@ -91,7 +91,10 @@ library Withdraw {
                     : state.data.borrowTokenVault.fullWithdraw(onBehalfOf, params.to);
             }
         } else {
-            (, uint256 index) = state.getCollateralAssetIndex(params.token);
+            (bool found, uint256 index) = state.getCollateralAssetIndex(params.token);
+            if (!found) {
+                revert Errors.INVALID_TOKEN(params.token);
+            }
             CollateralAsset storage asset = state.data.collateralAssets[index];
             amount = Math.min(params.amount, asset.token.balanceOf(onBehalfOf));
             if (amount > 0) {

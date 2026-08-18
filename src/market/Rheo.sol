@@ -364,11 +364,11 @@ contract Rheo is IRheo, RheoView, AccessControlUpgradeable, PausableUpgradeable,
         override(IRheo)
         nonReentrant
         whenNotPaused
-        returns (uint256 liquidatorProfitCollateralToken)
+        returns (uint256 liquidatorProfitValue)
     {
         state.validateLiquidate(params);
-        liquidatorProfitCollateralToken = state.executeLiquidate(params);
-        state.validateMinimumCollateralProfit(params, liquidatorProfitCollateralToken);
+        liquidatorProfitValue = state.executeLiquidate(params);
+        state.validateMinimumCollateralProfit(params, liquidatorProfitValue);
     }
 
     /// @inheritdoc IRheo

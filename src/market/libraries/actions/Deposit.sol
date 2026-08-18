@@ -111,8 +111,19 @@ library Deposit {
             state.data.underlyingBorrowToken.forceApprove(address(state.data.borrowTokenVault), amount);
             amount = state.data.borrowTokenVault.deposit(params.to, amount);
         } else {
-            (, uint256 index) = state.getCollateralAssetIndex(params.token);
+            (bool found, uint256 index) = state.getCollateralAssetIndex(params.token);
+            if (!found) {
+                revert Errors.INVALID_TOKEN(params.token);
+            }
             CollateralAsset storage asset = state.data.collateralAssets[index];
+
+            // the cap is enforced against the amount actually minted: on the msg.value path the deposited amount
+            // is the contract balance, which can exceed the `params.amount` checked during validation
+            uint256 supplyAfterDeposit = asset.token.totalSupply() + amount;
+            if (supplyAfterDeposit > asset.cap) {
+                revert Errors.COLLATERAL_ASSET_CAP_EXCEEDED(params.token, asset.cap, supplyAfterDeposit);
+            }
+
             asset.underlying.safeTransferFrom(from, address(this), amount);
             asset.token.mint(params.to, amount);
         }

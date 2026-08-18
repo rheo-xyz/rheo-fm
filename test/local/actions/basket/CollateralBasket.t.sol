@@ -11,6 +11,7 @@ import {RESERVED_ID} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
 import {Math, PERCENT} from "@rheo-fm/src/market/libraries/Math.sol";
 import {DepositParams} from "@rheo-fm/src/market/libraries/actions/Deposit.sol";
 import {InitializeCollateralAssetParams} from "@rheo-fm/src/market/libraries/actions/Initialize.sol";
+import {WithdrawParams} from "@rheo-fm/src/market/libraries/actions/Withdraw.sol";
 
 import {BaseTestBasket} from "@rheo-fm/test/local/actions/basket/BaseTestBasket.sol";
 import {PriceFeedMock} from "@rheo-fm/test/mocks/PriceFeedMock.sol";
@@ -185,6 +186,42 @@ contract CollateralBasketTest is BaseTestBasket {
 
         _withdraw(alice, assetA, 5e18);
         assertEq(assetA.balanceOf(alice), 5e18 + 1e18);
+    }
+
+    function test_CollateralBasket_withdraw_rejects_an_unlisted_token() public {
+        MockERC20 token = new MockERC20("Token", "TKN", 18);
+
+        vm.prank(alice);
+        vm.expectRevert(abi.encodeWithSelector(Errors.INVALID_TOKEN.selector, address(token)));
+        size.withdraw(WithdrawParams({token: address(token), amount: 1e18, to: alice}));
+    }
+
+    /// @dev The cap must bind on the amount actually minted. On the msg.value path the deposited amount is the
+    ///      contract balance, which can exceed the `params.amount` the validation sees when the market already
+    ///      holds ETH (for example force-sent).
+    function test_CollateralBasket_deposit_cap_binds_on_the_msg_value_path() public {
+        size.setCollateralAssetCap(address(weth), 10e18);
+
+        // the market already holds ETH that is not accounted for by params.amount
+        vm.deal(address(size), 5e18);
+        vm.deal(alice, 10e18);
+
+        vm.prank(alice);
+        vm.expectRevert(
+            abi.encodeWithSelector(Errors.COLLATERAL_ASSET_CAP_EXCEEDED.selector, address(weth), 10e18, 15e18)
+        );
+        size.deposit{value: 10e18}(DepositParams({token: address(weth), amount: 10e18, to: alice}));
+    }
+
+    function test_CollateralBasket_deposit_msg_value_path_mints_within_the_cap() public {
+        size.setCollateralAssetCap(address(weth), 10e18);
+        vm.deal(alice, 10e18);
+
+        vm.prank(alice);
+        size.deposit{value: 10e18}(DepositParams({token: address(weth), amount: 10e18, to: alice}));
+
+        (, uint256[] memory balances) = size.getUserCollateralBalances(alice);
+        assertEq(balances[0], 10e18);
     }
 
     // --- collateral ratio and valuation ---
