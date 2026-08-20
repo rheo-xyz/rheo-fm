@@ -113,7 +113,14 @@ contract GetMarketShutdownCalldataScript is BaseScript, Networks {
 
         for (uint256 creditPositionId = CREDIT_POSITION_ID_START; creditPositionId < creditStop; creditPositionId++) {
             CreditPosition memory creditPosition = marketView.getCreditPosition(creditPositionId);
-            if (creditPosition.credit == 0 || !debtPositionIds.contains(creditPosition.debtPositionId)) {
+            if (creditPosition.credit == 0) {
+                continue;
+            }
+            // a credit position is claimable if its debt position is force liquidated by this shutdown,
+            //   or if it is already repaid, in which case the credit is outstanding until it is claimed
+            bool isClaimable = debtPositionIds.contains(creditPosition.debtPositionId)
+                || marketView.getDebtPosition(creditPosition.debtPositionId).futureValue == 0;
+            if (!isClaimable) {
                 continue;
             }
 
