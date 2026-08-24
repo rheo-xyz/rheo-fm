@@ -10,9 +10,9 @@ import {RESERVED_ID} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
 
 import {
     Initialize,
+    InitializeCollateralAssetParams,
     InitializeDataParams,
     InitializeFeeConfigParams,
-    InitializeOracleParams,
     InitializeRiskConfigParams
 } from "@rheo-fm/src/market/libraries/actions/Initialize.sol";
 
@@ -52,7 +52,7 @@ import {
 } from "@rheo-fm/src/market/libraries/actions/BuyCreditLimit.sol";
 import {Liquidate, LiquidateParams} from "@rheo-fm/src/market/libraries/actions/Liquidate.sol";
 
-import {State} from "@rheo-fm/src/market/RheoStorage.sol";
+import {MAX_COLLATERAL_ASSETS, State} from "@rheo-fm/src/market/RheoStorage.sol";
 import {Multicall} from "@rheo-fm/src/market/libraries/Multicall.sol";
 import {
     Compensate,
@@ -60,6 +60,7 @@ import {
     CompensateParams
 } from "@rheo-fm/src/market/libraries/actions/Compensate.sol";
 import {PartialRepay, PartialRepayParams} from "@rheo-fm/src/market/libraries/actions/PartialRepay.sol";
+import {SetCollateralAsset} from "@rheo-fm/src/market/libraries/actions/SetCollateralAsset.sol";
 
 import {Repay, RepayParams} from "@rheo-fm/src/market/libraries/actions/Repay.sol";
 import {
@@ -115,6 +116,7 @@ contract Rheo is IRheo, RheoView, AccessControlUpgradeable, PausableUpgradeable,
     using Multicall for State;
     using SetCopyLimitOrderConfigs for State;
     using SetVault for State;
+    using SetCollateralAsset for State;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -125,17 +127,16 @@ contract Rheo is IRheo, RheoView, AccessControlUpgradeable, PausableUpgradeable,
         address owner,
         InitializeFeeConfigParams calldata f,
         InitializeRiskConfigParams calldata r,
-        InitializeOracleParams calldata o,
         InitializeDataParams calldata d
     ) external initializer {
-        state.validateInitialize(owner, f, r, o, d);
+        state.validateInitialize(owner, f, r, d);
 
         __AccessControl_init();
         __Pausable_init();
         __ReentrancyGuard_init();
         __UUPSUpgradeable_init();
 
-        state.executeInitialize(f, r, o, d);
+        state.executeInitialize(f, r, d);
         _grantRole(DEFAULT_ADMIN_ROLE, owner);
         _grantRole(PAUSER_ROLE, owner);
     }
@@ -179,6 +180,42 @@ contract Rheo is IRheo, RheoView, AccessControlUpgradeable, PausableUpgradeable,
     {
         // state.validateUpdateConfig(params); // no-op
         state.executeUpdateConfig(params);
+    }
+
+    /// @inheritdoc IRheoAdmin
+    function addCollateralAsset(InitializeCollateralAssetParams calldata params)
+        external
+        override(IRheoAdmin)
+        onlyRoleOrRheoFactoryHasRole(DEFAULT_ADMIN_ROLE)
+    {
+        SetCollateralAsset.executeAddCollateralAsset(state, params);
+    }
+
+    /// @inheritdoc IRheoAdmin
+    function setCollateralAssetPriceFeed(address underlying, address priceFeed)
+        external
+        override(IRheoAdmin)
+        onlyRoleOrRheoFactoryHasRole(DEFAULT_ADMIN_ROLE)
+    {
+        state.executeSetCollateralAssetPriceFeed(underlying, priceFeed);
+    }
+
+    /// @inheritdoc IRheoAdmin
+    function setCollateralAssetCap(address underlying, uint256 cap)
+        external
+        override(IRheoAdmin)
+        onlyRoleOrRheoFactoryHasRole(DEFAULT_ADMIN_ROLE)
+    {
+        state.executeSetCollateralAssetCap(underlying, cap);
+    }
+
+    /// @inheritdoc IRheoAdmin
+    function setCollateralAssetDepositPaused(address underlying, bool paused)
+        external
+        override(IRheoAdmin)
+        onlyRoleOrRheoFactoryHasRole(DEFAULT_ADMIN_ROLE)
+    {
+        state.executeSetCollateralAssetDepositPaused(underlying, paused);
     }
 
     /// @inheritdoc IRheoAdmin
@@ -327,11 +364,11 @@ contract Rheo is IRheo, RheoView, AccessControlUpgradeable, PausableUpgradeable,
         override(IRheo)
         nonReentrant
         whenNotPaused
-        returns (uint256 liquidatorProfitCollateralToken)
+        returns (uint256 liquidatorProfitValue)
     {
         state.validateLiquidate(params);
-        liquidatorProfitCollateralToken = state.executeLiquidate(params);
-        state.validateMinimumCollateralProfit(params, liquidatorProfitCollateralToken);
+        liquidatorProfitValue = state.executeLiquidate(params);
+        state.validateMinimumCollateralProfit(params, liquidatorProfitValue);
     }
 
     /// @inheritdoc IRheo
@@ -409,11 +446,7 @@ contract Rheo is IRheo, RheoView, AccessControlUpgradeable, PausableUpgradeable,
     }
 
     /// @inheritdoc IRheo
-    function setCopyLimitOrderConfigs(SetCopyLimitOrderConfigsParams calldata params)
-        external
-        payable
-        override(IRheo)
-    {
+    function setCopyLimitOrderConfigs(SetCopyLimitOrderConfigsParams calldata params) external payable override(IRheo) {
         setCopyLimitOrderConfigsOnBehalfOf(
             SetCopyLimitOrderConfigsOnBehalfOfParams({params: params, onBehalfOf: msg.sender})
         );

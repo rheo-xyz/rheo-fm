@@ -26,8 +26,8 @@ contract GenericMarket_wstETH_ETH_Test is BaseTestGenericMarket {
         assertEqApprox(size.riskConfig().minimumCreditBorrowToken, 0.00377e18, 0.0001e18);
     }
 
-    function test_GenericMarket_wstETH_ETH_debtTokenAmountToCollateralTokenAmount() public view {
-        assertEqApprox(size.debtTokenAmountToCollateralTokenAmount(1e18), 0.848e18, 0.001e18);
+    function test_GenericMarket_wstETH_ETH__valueToCollateral() public view {
+        assertEqApprox(_valueToCollateral(1e18), 0.848e18, 0.001e18);
     }
 
     function test_GenericMarket_wstETH_ETH_deposit_eth_does_not_revert() public {
@@ -76,10 +76,10 @@ contract GenericMarket_wstETH_ETH_Test is BaseTestGenericMarket {
         assertEqApprox(size.collateralRatio(bob), expectedCRAfter, 0.01e18);
 
         Vars memory _before = _state();
-        uint256 assignedCollateral = size.getDebtPositionAssignedCollateral(debtPositionId);
-        uint256 debtInCollateralToken = size.debtTokenAmountToCollateralTokenAmount(futureValue);
-        uint256 liquidatorProfitCollateralToken =
-            assignedCollateral > debtInCollateralToken ? debtInCollateralToken : assignedCollateral;
+        uint256 assignedValue = size.getDebtPositionAssignedCollateralValue(debtPositionId);
+        // the liquidation reward is 0 in this test, so the entitlement is the future value when profitable
+        uint256 entitlementValue = assignedValue > futureValue ? futureValue : assignedValue;
+        uint256 liquidatorProfitCollateralToken = _proRataCollateral(bob, entitlementValue, size.collateralValue(bob));
 
         _liquidate(liquidator, debtPositionId);
 

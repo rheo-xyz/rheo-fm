@@ -17,6 +17,22 @@ import {NonTransferrableToken} from "@rheo-fm/src/market/token/NonTransferrableT
 
 import {ISizeFactory} from "@rheo-solidity/src/factory/interfaces/ISizeFactory.sol";
 
+// maximum number of collateral assets a market can list (added in v2.0)
+uint256 constant MAX_COLLATERAL_ASSETS = 16;
+
+struct CollateralAsset {
+    // the underlying ERC-20 users deposit (e.g. tNVDA)
+    IERC20Metadata underlying;
+    // Rheo deposit receipt for the underlying, minted/burned 1:1 (e.g. szNVDA)
+    NonTransferrableToken token;
+    // price of 1 whole underlying in borrow token terms, 18 decimals
+    IPriceFeed priceFeed;
+    // max total underlying deposited, in underlying base units (type(uint256).max = uncapped)
+    uint256 cap;
+    // when true, new deposits of this asset revert (delisting path)
+    bool depositPaused;
+}
+
 struct User {
     // The user's loan offer
     FixedMaturityLimitOrder loanOffer;
@@ -67,6 +83,7 @@ struct RiskConfig {
 
 struct Oracle {
     // price feed oracle
+    // @dev DEPRECATED in v2.0: mirrors collateralAssets[0].priceFeed, kept for view/tooling compatibility
     IPriceFeed priceFeed;
 }
 
@@ -84,10 +101,12 @@ struct Data {
     // Wrapped Ether contract address
     IWETH weth;
     // the token used by borrowers to collateralize their loans
+    // @dev DEPRECATED in v2.0: mirrors collateralAssets[0].underlying, kept for view/tooling compatibility
     IERC20Metadata underlyingCollateralToken;
     // the token lent from lenders to borrowers
     IERC20Metadata underlyingBorrowToken;
     // Rheo deposit underlying collateral token
+    // @dev DEPRECATED in v2.0: mirrors collateralAssets[0].token, kept for view/tooling compatibility
     NonTransferrableToken collateralToken;
     // Rheo tokenized debt
     NonTransferrableToken debtToken;
@@ -103,6 +122,10 @@ struct Data {
     uint256 debtTokenCap;
     // percent of the futureValue to be given to the liquidator for overdue liquidations (added in v1.8.3)
     uint256 overdueLiquidationRewardPercent;
+    // basket of collateral assets (added in v2.0)
+    CollateralAsset[] collateralAssets;
+    // underlying address => index + 1 into collateralAssets (0 = not listed) (added in v2.0)
+    mapping(address => uint256) collateralAssetIndexPlusOne;
 }
 
 struct State {

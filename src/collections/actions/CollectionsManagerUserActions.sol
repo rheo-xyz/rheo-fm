@@ -21,11 +21,7 @@ abstract contract CollectionsManagerUserActions is ICollectionsManagerUserAction
 
     function subscribeUserToCollections(address user, uint256[] memory collectionIds) external onlyRheoFactory {
         CopyLimitOrderConfig memory fullCopy = CopyLimitOrderConfig({
-            minTenor: 0,
-            maxTenor: type(uint256).max,
-            minAPR: 0,
-            maxAPR: type(uint256).max,
-            offsetAPR: 0
+            minTenor: 0, maxTenor: type(uint256).max, minAPR: 0, maxAPR: type(uint256).max, offsetAPR: 0
         });
 
         for (uint256 i = 0; i < collectionIds.length; i++) {
@@ -79,8 +75,7 @@ abstract contract CollectionsManagerUserActions is ICollectionsManagerUserAction
         OfferLibrary.validateCopyLimitOrderConfigs(copyLoanOfferConfig, copyBorrowOfferConfig);
 
         userToCollectionCopyLimitOrderConfigs[user][collectionId] = UserCollectionCopyLimitOrderConfigs({
-            copyLoanOfferConfig: copyLoanOfferConfig,
-            copyBorrowOfferConfig: copyBorrowOfferConfig
+            copyLoanOfferConfig: copyLoanOfferConfig, copyBorrowOfferConfig: copyBorrowOfferConfig
         });
         emit SetUserCollectionCopyLimitOrderConfigs(user, collectionId, copyLoanOfferConfig, copyBorrowOfferConfig);
     }

@@ -36,8 +36,10 @@ import {ERC4626Adapter} from "@rheo-fm/src/market/token/adapters/ERC4626Adapter.
 
 import {NetworkConfiguration} from "@rheo-fm/script/Networks.sol";
 
+import {singleCollateralAsset} from "@rheo-fm/script/CollateralAssets.sol";
 import {
     Initialize,
+    InitializeCollateralAssetParams,
     InitializeDataParams,
     InitializeFeeConfigParams,
     InitializeOracleParams,
@@ -110,6 +112,9 @@ abstract contract Deploy {
     IERC4626 internal vaultERC7540ControlledAsyncRedeem;
     IERC4626 internal vaultInvalidUnderlying;
 
+    IERC20Metadata[] internal basketTokens;
+    PriceFeedMock[] internal basketPriceFeeds;
+
     RheoMock internal size1;
     RheoMock internal size2;
     PriceFeedMock internal priceFeed2;
@@ -128,6 +133,9 @@ abstract contract Deploy {
     function setupLocal(address owner, address feeRecipient) internal {
         hevm.warp(INITIAL_BLOCK_TIME);
         priceFeed = new PriceFeedMock(owner);
+        // the price must be live before market creation: listing a collateral asset validates its feed
+        hevm.prank(owner);
+        PriceFeedMock(address(priceFeed)).setPrice(1337e18);
         weth = new WETH();
         usdc = new USDC(owner);
         variablePool = IPool(address(new PoolMock()));
@@ -188,13 +196,13 @@ abstract contract Deploy {
             maturities: _defaultRiskMaturities()
         });
         o = InitializeOracleParams({priceFeed: address(priceFeed)});
-        d = InitializeDataParams({
-            weth: address(weth),
-            underlyingCollateralToken: address(weth),
-            underlyingBorrowToken: address(usdc),
-            variablePool: address(variablePool), // Aave v3
-            borrowTokenVault: address(borrowTokenVault),
-            sizeFactory: address(sizeFactory)
+        _setDataParams({
+            weth_: address(weth),
+            underlyingBorrowToken_: address(usdc),
+            variablePool_: address(variablePool), // Aave v3
+            borrowTokenVault_: address(borrowTokenVault),
+            collateralUnderlying: address(weth),
+            collateralPriceFeed: address(priceFeed)
         });
 
         implementation = address(new RheoMock());
@@ -204,9 +212,36 @@ abstract contract Deploy {
         hevm.prank(owner);
         proxy = ERC1967Proxy(payable(_createMarketRheoFromStorage()));
         size = RheoMock(payable(proxy));
+    }
 
-        hevm.prank(owner);
-        PriceFeedMock(address(priceFeed)).setPrice(1337e18);
+    /// @notice Extends the local market with extra collateral assets, producing an N-asset basket
+    /// @dev The basket is `weth` followed by one freshly deployed token per entry, each listed through the
+    ///      admin path so that `addCollateralAsset` is exercised by every basket test
+    /// @param decimals_ The decimals of each extra collateral token
+    /// @param prices The price of each extra collateral token, in borrow token terms, 18 decimals
+    function setupLocalBasket(address owner, address feeRecipient, uint8[] memory decimals_, uint256[] memory prices)
+        internal
+    {
+        setupLocal(owner, feeRecipient);
+
+        require(decimals_.length == prices.length, "setupLocalBasket: length mismatch");
+
+        for (uint256 i = 0; i < decimals_.length; i++) {
+            MockERC20 token = new MockERC20("BasketToken", "BSKT", decimals_[i]);
+            PriceFeedMock feed = new PriceFeedMock(owner);
+            hevm.prank(owner);
+            feed.setPrice(prices[i]);
+
+            hevm.prank(owner);
+            size.addCollateralAsset(
+                InitializeCollateralAssetParams({
+                    underlying: address(token), priceFeed: address(feed), cap: type(uint256).max
+                })
+            );
+
+            basketTokens.push(IERC20Metadata(address(token)));
+            basketPriceFeeds.push(feed);
+        }
     }
 
     function setupLocalGenericMarket(
@@ -222,6 +257,9 @@ abstract contract Deploy {
         hevm.warp(INITIAL_BLOCK_TIME);
         priceFeed = new PriceFeedMock(owner);
         uint256 price = Math.mulDivDown(collateralTokenPriceUSD, 10 ** priceFeed.decimals(), borrowTokenPriceUSD);
+        // the price must be live before market creation: listing a collateral asset validates its feed
+        hevm.prank(owner);
+        PriceFeedMock(address(priceFeed)).setPrice(price);
 
         weth = new WETH();
         collateralToken = IERC20Metadata(address(new MockERC20("CollateralToken", "CTK", collateralTokenDecimals)));
@@ -292,13 +330,13 @@ abstract contract Deploy {
             maturities: _defaultRiskMaturities()
         });
         o = InitializeOracleParams({priceFeed: address(priceFeed)});
-        d = InitializeDataParams({
-            weth: address(weth),
-            underlyingCollateralToken: address(collateralToken),
-            underlyingBorrowToken: address(borrowToken),
-            variablePool: address(variablePool),
-            borrowTokenVault: address(borrowTokenVault),
-            sizeFactory: address(sizeFactory)
+        _setDataParams({
+            weth_: address(weth),
+            underlyingBorrowToken_: address(borrowToken),
+            variablePool_: address(variablePool),
+            borrowTokenVault_: address(borrowTokenVault),
+            collateralUnderlying: address(collateralToken),
+            collateralPriceFeed: address(priceFeed)
         });
 
         implementation = address(new RheoMock());
@@ -308,9 +346,6 @@ abstract contract Deploy {
         hevm.prank(owner);
         proxy = ERC1967Proxy(payable(_createMarketRheoFromStorage()));
         size = RheoMock(payable(proxy));
-
-        hevm.prank(owner);
-        PriceFeedMock(address(priceFeed)).setPrice(price);
     }
 
     function setupFork(address _size, address _priceFeed, address _variablePool, address _weth, address _usdc)
@@ -377,39 +412,64 @@ abstract contract Deploy {
         riskConfigParams.crOpening = 1.12e18;
         riskConfigParams.crLiquidation = 1.09e18;
 
-        InitializeOracleParams memory oracleParams = market.oracle();
-        oracleParams.priceFeed = address(priceFeed2);
-
         DataView memory dataView = market.data();
         InitializeDataParams memory dataParams = InitializeDataParams({
             weth: address(weth),
-            underlyingCollateralToken: address(collateral2),
+            collateralAssets: singleCollateralAsset(address(collateral2), address(priceFeed2)),
             underlyingBorrowToken: address(dataView.underlyingBorrowToken),
             variablePool: address(dataView.variablePool),
             borrowTokenVault: address(dataView.borrowTokenVault),
             sizeFactory: address(sizeFactory)
         });
-        size2 = RheoMock(_createMarketRheo(feeConfigParams, riskConfigParams, oracleParams, dataParams));
+        size2 = RheoMock(_createMarketRheo(feeConfigParams, riskConfigParams, dataParams));
         size1 = size;
 
         hevm.label(address(size1), "Rheo1");
         hevm.label(address(size2), "Rheo2");
     }
 
+    /// @notice Populates the `d` storage parameters with a basket of exactly one uncapped collateral asset
+    /// @dev The struct is assigned field by field because Solidity cannot copy a memory array of structs to storage.
+    ///      Keeps every single-collateral setup exercising the basket code path.
+    function _setDataParams(
+        address weth_,
+        address underlyingBorrowToken_,
+        address variablePool_,
+        address borrowTokenVault_,
+        address collateralUnderlying,
+        address collateralPriceFeed
+    ) internal {
+        d.weth = weth_;
+        d.underlyingBorrowToken = underlyingBorrowToken_;
+        d.variablePool = variablePool_;
+        d.borrowTokenVault = borrowTokenVault_;
+        d.sizeFactory = address(sizeFactory);
+        _setCollateralAssets(collateralUnderlying, collateralPriceFeed);
+    }
+
+    /// @notice Replaces the `d` collateral basket with a single uncapped asset
+    function _setCollateralAssets(address underlying, address assetPriceFeed) internal {
+        delete d.collateralAssets;
+        d.collateralAssets
+            .push(
+                InitializeCollateralAssetParams({
+                    underlying: underlying, priceFeed: assetPriceFeed, cap: type(uint256).max
+                })
+            );
+    }
+
     function _createMarketRheoFromStorage() internal returns (address market) {
         InitializeFeeConfigParams memory feeConfigParams = f;
         InitializeRiskConfigParams memory riskConfigParams = r;
-        InitializeOracleParams memory oracleParams = o;
         InitializeDataParams memory dataParams = d;
-        market = _createMarketRheo(feeConfigParams, riskConfigParams, oracleParams, dataParams);
+        market = _createMarketRheo(feeConfigParams, riskConfigParams, dataParams);
     }
 
     function _createMarketRheo(
         InitializeFeeConfigParams memory feeConfigParams,
         InitializeRiskConfigParams memory riskConfigParams,
-        InitializeOracleParams memory oracleParams,
         InitializeDataParams memory dataParams
     ) internal returns (address market) {
-        market = sizeFactory.createMarketRheo(feeConfigParams, riskConfigParams, oracleParams, dataParams);
+        market = sizeFactory.createMarketRheo(feeConfigParams, riskConfigParams, dataParams);
     }
 }

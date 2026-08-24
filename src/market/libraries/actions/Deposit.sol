@@ -5,10 +5,11 @@ import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IER
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IWETH} from "@rheo-fm/src/market/interfaces/IWETH.sol";
 
-import {State} from "@rheo-fm/src/market/RheoStorage.sol";
+import {CollateralAsset, State} from "@rheo-fm/src/market/RheoStorage.sol";
 
 import {Action} from "@rheo-solidity/src/factory/libraries/Authorization.sol";
 
+import {CollateralBasketLibrary} from "@rheo-fm/src/market/libraries/CollateralBasketLibrary.sol";
 import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
 import {Events} from "@rheo-fm/src/market/libraries/Events.sol";
 
@@ -35,6 +36,7 @@ struct DepositOnBehalfOfParams {
 library Deposit {
     using SafeERC20 for IERC20Metadata;
     using SafeERC20 for IWETH;
+    using CollateralBasketLibrary for State;
 
     /// @notice Validates the deposit parameters
     /// @param state The state of the protocol
@@ -57,11 +59,21 @@ library Deposit {
         }
 
         // validate token
-        if (
-            params.token != address(state.data.underlyingCollateralToken)
-                && params.token != address(state.data.underlyingBorrowToken)
-        ) {
-            revert Errors.INVALID_TOKEN(params.token);
+        if (params.token != address(state.data.underlyingBorrowToken)) {
+            (bool found, uint256 index) = state.getCollateralAssetIndex(params.token);
+            if (!found) {
+                revert Errors.INVALID_TOKEN(params.token);
+            }
+
+            CollateralAsset storage asset = state.data.collateralAssets[index];
+            if (asset.depositPaused) {
+                revert Errors.COLLATERAL_ASSET_DEPOSIT_PAUSED(params.token);
+            }
+
+            uint256 supplyAfterDeposit = asset.token.totalSupply() + params.amount;
+            if (supplyAfterDeposit > asset.cap) {
+                revert Errors.COLLATERAL_ASSET_CAP_EXCEEDED(params.token, asset.cap, supplyAfterDeposit);
+            }
         }
 
         // validate amount
@@ -99,8 +111,21 @@ library Deposit {
             state.data.underlyingBorrowToken.forceApprove(address(state.data.borrowTokenVault), amount);
             amount = state.data.borrowTokenVault.deposit(params.to, amount);
         } else {
-            state.data.underlyingCollateralToken.safeTransferFrom(from, address(this), amount);
-            state.data.collateralToken.mint(params.to, amount);
+            (bool found, uint256 index) = state.getCollateralAssetIndex(params.token);
+            if (!found) {
+                revert Errors.INVALID_TOKEN(params.token);
+            }
+            CollateralAsset storage asset = state.data.collateralAssets[index];
+
+            // the cap is enforced against the amount actually minted: on the msg.value path the deposited amount
+            // is the contract balance, which can exceed the `params.amount` checked during validation
+            uint256 supplyAfterDeposit = asset.token.totalSupply() + amount;
+            if (supplyAfterDeposit > asset.cap) {
+                revert Errors.COLLATERAL_ASSET_CAP_EXCEEDED(params.token, asset.cap, supplyAfterDeposit);
+            }
+
+            asset.underlying.safeTransferFrom(from, address(this), amount);
+            asset.token.mint(params.to, amount);
         }
 
         emit Events.Deposit(msg.sender, onBehalfOf, params.token, params.to, amount);

@@ -55,7 +55,7 @@ library Events {
     event Liquidate(
         address indexed sender,
         uint256 indexed debtPositionId,
-        uint256 minimumCollateralProfit,
+        uint256 minimumCollateralProfitValue,
         uint256 deadline,
         uint256 collateralRatio,
         uint8 loanStatus
@@ -144,4 +144,13 @@ library Events {
         uint256[] creditPositionIdsToClaim,
         address[] usersToForceWithdraw
     );
+
+    // introduced in v2.0
+    event CollateralAssetAdded(address indexed underlying, address token, address priceFeed, uint256 cap);
+    event CollateralAssetUpdated(address indexed underlying, address priceFeed, uint256 cap, bool depositPaused);
+    event LiquidateCollateralSeized(
+        uint256 indexed debtPositionId, address[] tokens, uint256[] liquidatorAmounts, uint256[] protocolAmounts
+    );
+    event SelfLiquidateCollateralSeized(uint256 indexed creditPositionId, address[] tokens, uint256[] amounts);
+    event FragmentationFeeCollateralCharged(address indexed borrower, address[] tokens, uint256[] amounts);
 }

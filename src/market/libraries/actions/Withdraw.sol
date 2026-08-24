@@ -1,13 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {State} from "@rheo-fm/src/market/RheoStorage.sol";
+import {CollateralAsset, State} from "@rheo-fm/src/market/RheoStorage.sol";
 
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 import {Math} from "@rheo-fm/src/market/libraries/Math.sol";
 
+import {CollateralBasketLibrary} from "@rheo-fm/src/market/libraries/CollateralBasketLibrary.sol";
 import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
 import {Events} from "@rheo-fm/src/market/libraries/Events.sol";
 
@@ -37,6 +38,7 @@ struct WithdrawOnBehalfOfParams {
 /// @notice Contains the logic for withdrawing tokens from the protocol
 library Withdraw {
     using SafeERC20 for IERC20Metadata;
+    using CollateralBasketLibrary for State;
     using RiskLibrary for State;
 
     /// @notice Validates the withdraw parameters
@@ -52,11 +54,11 @@ library Withdraw {
         }
 
         // validate token
-        if (
-            params.token != address(state.data.underlyingCollateralToken)
-                && params.token != address(state.data.underlyingBorrowToken)
-        ) {
-            revert Errors.INVALID_TOKEN(params.token);
+        if (params.token != address(state.data.underlyingBorrowToken)) {
+            (bool found,) = state.getCollateralAssetIndex(params.token);
+            if (!found) {
+                revert Errors.INVALID_TOKEN(params.token);
+            }
         }
 
         // validate amount
@@ -89,10 +91,15 @@ library Withdraw {
                     : state.data.borrowTokenVault.fullWithdraw(onBehalfOf, params.to);
             }
         } else {
-            amount = Math.min(params.amount, state.data.collateralToken.balanceOf(onBehalfOf));
+            (bool found, uint256 index) = state.getCollateralAssetIndex(params.token);
+            if (!found) {
+                revert Errors.INVALID_TOKEN(params.token);
+            }
+            CollateralAsset storage asset = state.data.collateralAssets[index];
+            amount = Math.min(params.amount, asset.token.balanceOf(onBehalfOf));
             if (amount > 0) {
-                state.data.collateralToken.burn(onBehalfOf, amount);
-                state.data.underlyingCollateralToken.safeTransfer(params.to, amount);
+                asset.token.burn(onBehalfOf, amount);
+                asset.underlying.safeTransfer(params.to, amount);
             }
             state.validateUserIsNotBelowOpeningLimitBorrowCR(onBehalfOf);
         }

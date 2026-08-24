@@ -53,7 +53,12 @@ contract MarketShutdownTest is BaseTest {
             )
         );
         size.liquidate(
-            LiquidateParams({debtPositionId: debtPositionId1, minimumCollateralProfit: 0, deadline: block.timestamp})
+            LiquidateParams({
+                debtPositionId: debtPositionId1,
+                minimumCollateralProfitValue: 0,
+                deadline: block.timestamp,
+                seizeCollateralAmounts: new uint256[](0)
+            })
         );
 
         uint256 creditPositionId2 = size.getCreditPositionIdsByDebtPositionId(debtPositionId2)[0];
@@ -62,10 +67,8 @@ contract MarketShutdownTest is BaseTest {
             size.getDebtPosition(debtPositionId1).futureValue + size.getDebtPosition(debtPositionId2).futureValue;
         _deposit(address(this), usdc, totalFutureValue);
 
-        uint256 debtInCollateral1 =
-            size.debtTokenAmountToCollateralTokenAmount(size.getDebtPosition(debtPositionId1).futureValue);
-        uint256 debtInCollateral2 =
-            size.debtTokenAmountToCollateralTokenAmount(size.getDebtPosition(debtPositionId2).futureValue);
+        uint256 debtInCollateral1 = _valueToCollateral(size.getDebtPosition(debtPositionId1).futureValue);
+        uint256 debtInCollateral2 = _valueToCollateral(size.getDebtPosition(debtPositionId2).futureValue);
 
         uint256[] memory debtPositionIds = new uint256[](2);
         debtPositionIds[0] = debtPositionId1;

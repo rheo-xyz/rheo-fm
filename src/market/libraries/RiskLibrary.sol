@@ -4,6 +4,7 @@ pragma solidity 0.8.23;
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import {State} from "@rheo-fm/src/market/RheoStorage.sol";
 
+import {CollateralBasketLibrary} from "@rheo-fm/src/market/libraries/CollateralBasketLibrary.sol";
 import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
 
 import {CreditPosition, DebtPosition, LoanLibrary, LoanStatus} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
@@ -55,23 +56,16 @@ library RiskLibrary {
     }
 
     /// @notice Calculate the collateral ratio of an account
-    /// @dev The collateral ratio is the ratio of the collateral to the debt
+    /// @dev The collateral ratio is the ratio of the collateral value to the debt, both in borrow token base units
     ///      If the debt is 0, the collateral ratio is type(uint256).max
-    ///      Note: the calculation is simplified since the collateral ratio is expressed in the same decimals as the price feed (18)
     /// @param state The state
     /// @param account The account
     /// @return The collateral ratio
     function collateralRatio(State storage state, address account) public view returns (uint256) {
-        uint256 collateral = state.data.collateralToken.balanceOf(account);
         uint256 debt = state.data.debtToken.balanceOf(account);
-        uint256 price = state.oracle.priceFeed.getPrice();
 
         if (debt != 0) {
-            return Math.mulDivDown(
-                collateral * 10 ** state.data.underlyingBorrowToken.decimals(),
-                price,
-                debt * 10 ** state.data.underlyingCollateralToken.decimals()
-            );
+            return Math.mulDivDown(CollateralBasketLibrary.collateralValue(state, account), PERCENT, debt);
         } else {
             return type(uint256).max;
         }
@@ -92,8 +86,8 @@ library RiskLibrary {
         LoanStatus status = state.getLoanStatus(creditPositionId);
         // Only CreditPositions can be self liquidated
         return state.isCreditPositionId(creditPositionId)
-        // the user must be severly underwater (CR < 100%) and the loan is not REPAID
-        && (collateralRatio(state, debtPosition.borrower) < PERCENT && status != LoanStatus.REPAID);
+            // the user must be severly underwater (CR < 100%) and the loan is not REPAID
+            && (collateralRatio(state, debtPosition.borrower) < PERCENT && status != LoanStatus.REPAID);
     }
 
     /// @notice Check if a credit position is transferrable
@@ -101,11 +95,7 @@ library RiskLibrary {
     /// @param state The state
     /// @param creditPositionId The credit position ID
     /// @return True if the credit position is transferrable, false otherwise
-    function isCreditPositionTransferrable(State storage state, uint256 creditPositionId)
-        internal
-        view
-        returns (bool)
-    {
+    function isCreditPositionTransferrable(State storage state, uint256 creditPositionId) internal view returns (bool) {
         return state.getLoanStatus(creditPositionId) == LoanStatus.ACTIVE
             && !isUserUnderwater(state, state.getDebtPositionByCreditPositionId(creditPositionId).borrower);
     }
@@ -122,12 +112,10 @@ library RiskLibrary {
         LoanStatus status = state.getLoanStatus(debtPositionId);
         // only DebtPositions can be liquidated
         return state.isDebtPositionId(debtPositionId)
-        // case 1: if the user is underwater, only ACTIVE/OVERDUE DebtPositions can be liquidated
-        && (
-            (isUserUnderwater(state, debtPosition.borrower) && status != LoanStatus.REPAID)
-            // case 2: overdue loans can always be liquidated regardless of the user's CR
-            || status == LoanStatus.OVERDUE
-        );
+            // case 1: if the user is underwater, only ACTIVE/OVERDUE DebtPositions can be liquidated
+            && ((isUserUnderwater(state, debtPosition.borrower) && status != LoanStatus.REPAID)
+                // case 2: overdue loans can always be liquidated regardless of the user's CR
+                || status == LoanStatus.OVERDUE);
     }
 
     /// @notice Check if the user is underwater

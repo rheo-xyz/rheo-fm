@@ -113,9 +113,9 @@ contract RheoMock is Rheo {
         return state.getSwapFee(cash, tenor);
     }
 
-    function getDebtPositionAssignedCollateral(uint256 debtPositionId) external view returns (uint256) {
+    function getDebtPositionAssignedCollateralValue(uint256 debtPositionId) external view returns (uint256) {
         DebtPosition memory debtPosition = state.getDebtPosition(debtPositionId);
-        return state.getDebtPositionAssignedCollateral(debtPosition);
+        return state.getDebtPositionAssignedCollateralValue(debtPosition);
     }
 
     function isDebtPositionId(uint256 debtPositionId) external view returns (bool) {

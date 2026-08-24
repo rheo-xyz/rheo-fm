@@ -11,8 +11,6 @@ import {Events} from "@rheo-fm/src/market/libraries/Events.sol";
 import {Math, PERCENT, YEAR} from "@rheo-fm/src/market/libraries/Math.sol";
 import {Initialize} from "@rheo-fm/src/market/libraries/actions/Initialize.sol";
 
-import {IPriceFeed} from "@rheo-fm/src/oracle/IPriceFeed.sol";
-
 import {
     InitializeDataParams,
     InitializeFeeConfigParams,
@@ -69,6 +67,7 @@ library UpdateConfig {
     }
 
     /// @notice Returns the current oracle configuration parameters
+    /// @dev DEPRECATED in v2.0: reports the price feed of the first collateral asset
     /// @param state The state of the protocol
     /// @return The current oracle configuration parameters
     function oracleParams(State storage state) public view returns (InitializeOracleParams memory) {
@@ -151,8 +150,6 @@ library UpdateConfig {
             state.feeConfig.collateralProtocolPercent = params.value;
         } else if (Strings.equal(params.key, "feeRecipient")) {
             state.feeConfig.feeRecipient = address(uint160(params.value));
-        } else if (Strings.equal(params.key, "priceFeed")) {
-            state.oracle.priceFeed = IPriceFeed(address(uint160(params.value)));
         } else if (Strings.equal(params.key, "debtTokenCap")) {
             state.data.debtTokenCap = params.value;
         } else {
@@ -161,6 +158,5 @@ library UpdateConfig {
 
         Initialize.validateInitializeFeeConfigParams(feeConfigParams(state));
         Initialize.validateInitializeRiskConfigParams(riskConfigParams(state));
-        Initialize.validateInitializeOracleParams(oracleParams(state));
     }
 }

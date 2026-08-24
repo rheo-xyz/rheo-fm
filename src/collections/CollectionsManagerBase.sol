@@ -33,7 +33,8 @@ abstract contract CollectionsManagerBase {
     // collection Id counter
     uint256 collectionIdCounter;
     // mapping of collection Id to collection
-    mapping(uint256 collectionId => mapping(IRheo market => MarketInformation marketInformation) collection) collections;
+    mapping(uint256 collectionId => mapping(IRheo market => MarketInformation marketInformation) collection)
+        collections;
     // mapping of user to collection Ids set
     mapping(address user => EnumerableSet.UintSet collectionIds) userToCollectionIds;
     // mapping of user to collection Ids to CopyLimitOrderConfig

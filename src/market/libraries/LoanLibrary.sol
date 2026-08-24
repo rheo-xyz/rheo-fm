@@ -4,6 +4,7 @@ pragma solidity 0.8.23;
 import {State} from "@rheo-fm/src/market/RheoStorage.sol";
 
 import {AccountingLibrary} from "@rheo-fm/src/market/libraries/AccountingLibrary.sol";
+import {CollateralBasketLibrary} from "@rheo-fm/src/market/libraries/CollateralBasketLibrary.sol";
 import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
 import {Math} from "@rheo-fm/src/market/libraries/Math.sol";
 
@@ -141,36 +142,37 @@ library LoanLibrary {
         }
     }
 
-    /// @notice Get the amount of collateral assigned to a DebtPosition
-    ///         The amount of collateral assigned to a DebtPosition is the borrower's
-    ///         collateral pro-rata to the DebtPosition's futureValue and the borrower's debt
+    /// @notice Get the value of the collateral assigned to a DebtPosition
+    ///         The value assigned to a DebtPosition is the borrower's collateral value
+    ///         pro-rata to the DebtPosition's futureValue and the borrower's debt
     /// @param state The state struct
     /// @param debtPosition The DebtPosition
-    /// @return The amount of collateral assigned to the DebtPosition
-    function getDebtPositionAssignedCollateral(State storage state, DebtPosition memory debtPosition)
+    /// @return The value of the collateral assigned to the DebtPosition, in borrow token base units
+    function getDebtPositionAssignedCollateralValue(State storage state, DebtPosition memory debtPosition)
         public
         view
         returns (uint256)
     {
         uint256 debt = state.data.debtToken.balanceOf(debtPosition.borrower);
-        uint256 collateral = state.data.collateralToken.balanceOf(debtPosition.borrower);
 
         if (debt != 0) {
-            return Math.mulDivDown(collateral, debtPosition.futureValue, debt);
+            return Math.mulDivDown(
+                CollateralBasketLibrary.collateralValue(state, debtPosition.borrower), debtPosition.futureValue, debt
+            );
         } else {
             return 0;
         }
     }
 
-    /// @notice Get the pro-rata collateral assigned to a CreditPosition
-    ///         The amount of collateral assigned to a CreditPosition is equal to
-    ///             the total borrower collateral pro-rata to the CreditPosition's credit
+    /// @notice Get the pro-rata value of the collateral assigned to a CreditPosition
+    ///         The value assigned to a CreditPosition is equal to
+    ///             the total borrower collateral value pro-rata to the CreditPosition's credit
     ///             and the total borrower debt, because of the auto-assigned collateral to individual loans
-    /// @dev If the borrower's debt is 0, the amount of collateral assigned to the CreditPosition is 0
+    /// @dev If the borrower's debt is 0, the value assigned to the CreditPosition is 0
     /// @param state The state struct
     /// @param creditPosition The CreditPosition
-    /// @return The amount of collateral assigned to the CreditPosition
-    function getCreditPositionProRataAssignedCollateral(State storage state, CreditPosition memory creditPosition)
+    /// @return The value of the collateral assigned to the CreditPosition, in borrow token base units
+    function getCreditPositionProRataAssignedCollateralValue(State storage state, CreditPosition memory creditPosition)
         public
         view
         returns (uint256)
@@ -178,10 +180,11 @@ library LoanLibrary {
         DebtPosition storage debtPosition = getDebtPosition(state, creditPosition.debtPositionId);
 
         uint256 debt = state.data.debtToken.balanceOf(debtPosition.borrower);
-        uint256 collateral = state.data.collateralToken.balanceOf(debtPosition.borrower);
 
         if (debt != 0) {
-            return Math.mulDivDown(collateral, creditPosition.credit, debt);
+            return Math.mulDivDown(
+                CollateralBasketLibrary.collateralValue(state, debtPosition.borrower), creditPosition.credit, debt
+            );
         } else {
             return 0;
         }

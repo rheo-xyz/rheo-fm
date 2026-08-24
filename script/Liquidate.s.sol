@@ -16,8 +16,12 @@ contract LiquidateScript is Script, Logger {
 
         Rheo rheo = Rheo(payable(rheoContractAddress));
 
-        LiquidateParams memory params =
-            LiquidateParams({debtPositionId: 0, minimumCollateralProfit: 0, deadline: block.timestamp});
+        LiquidateParams memory params = LiquidateParams({
+            debtPositionId: 0,
+            minimumCollateralProfitValue: 0,
+            deadline: block.timestamp,
+            seizeCollateralAmounts: new uint256[](0)
+        });
 
         vm.startBroadcast(deployerPrivateKey);
         rheo.liquidate(params);

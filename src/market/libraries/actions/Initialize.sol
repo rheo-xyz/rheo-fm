@@ -21,8 +21,9 @@ import {IPriceFeed} from "@rheo-fm/src/oracle/IPriceFeed.sol";
 import {NonTransferrableRebasingTokenVault} from "@rheo-fm/src/market/token/NonTransferrableRebasingTokenVault.sol";
 import {NonTransferrableToken} from "@rheo-fm/src/market/token/NonTransferrableToken.sol";
 
-import {State} from "@rheo-fm/src/market/RheoStorage.sol";
+import {CollateralAsset, MAX_COLLATERAL_ASSETS, State} from "@rheo-fm/src/market/RheoStorage.sol";
 
+import {PRICE_FEED_DECIMALS} from "@rheo-fm/src/market/libraries/CollateralBasketLibrary.sol";
 import {Errors} from "@rheo-fm/src/market/libraries/Errors.sol";
 import {Events} from "@rheo-fm/src/market/libraries/Events.sol";
 
@@ -45,13 +46,21 @@ struct InitializeRiskConfigParams {
     uint256[] maturities;
 }
 
+/// @dev DEPRECATED in v2.0: no longer part of `initialize`, kept so the `oracle()` view can keep reporting
+///      the price feed of the first collateral asset
 struct InitializeOracleParams {
     address priceFeed;
 }
 
+struct InitializeCollateralAssetParams {
+    address underlying;
+    address priceFeed;
+    uint256 cap;
+}
+
 struct InitializeDataParams {
     address weth;
-    address underlyingCollateralToken;
+    InitializeCollateralAssetParams[] collateralAssets;
     address underlyingBorrowToken;
     address variablePool;
     address borrowTokenVault;
@@ -148,31 +157,53 @@ library Initialize {
         }
     }
 
-    /// @notice Validates the parameters for the oracle configuration
-    /// @param o The oracle configuration parameters
-    function validateInitializeOracleParams(InitializeOracleParams memory o) internal view {
-        // validate priceFeed
-        if (o.priceFeed == address(0)) {
+    /// @notice Validates the parameters of a single collateral asset
+    /// @dev Shared by `initialize` and `addCollateralAsset`. The caller is responsible for checking that the
+    ///      registry is not already full and that the asset is not already listed.
+    /// @param state The state
+    /// @param params The collateral asset parameters
+    /// @param underlyingBorrowToken The borrow token, passed explicitly because it is not yet set during initialization
+    function validateCollateralAssetParams(
+        State storage state,
+        InitializeCollateralAssetParams memory params,
+        address underlyingBorrowToken
+    ) public view {
+        // validate underlying
+        if (params.underlying == address(0)) {
             revert Errors.NULL_ADDRESS();
         }
-        // slither-disable-next-line unused-return
-        IPriceFeed(o.priceFeed).getPrice();
+        if (params.underlying == underlyingBorrowToken) {
+            revert Errors.INVALID_TOKEN(params.underlying);
+        }
+        if (IERC20Metadata(params.underlying).decimals() > 18) {
+            revert Errors.INVALID_DECIMALS(IERC20Metadata(params.underlying).decimals());
+        }
+        if (state.data.collateralAssetIndexPlusOne[params.underlying] != 0) {
+            revert Errors.COLLATERAL_ASSET_ALREADY_LISTED(params.underlying);
+        }
+
+        // validate priceFeed
+        if (params.priceFeed == address(0)) {
+            revert Errors.NULL_ADDRESS();
+        }
+        if (IPriceFeed(params.priceFeed).decimals() != PRICE_FEED_DECIMALS) {
+            revert Errors.INVALID_PRICE_FEED_DECIMALS(IPriceFeed(params.priceFeed).decimals());
+        }
+        if (IPriceFeed(params.priceFeed).getPrice() == 0) {
+            revert Errors.NULL_AMOUNT();
+        }
+
+        // validate cap
+        // N/A
     }
 
     /// @notice Validates the parameters for the data configuration
+    /// @param state The state
     /// @param d The data configuration parameters
-    function validateInitializeDataParams(InitializeDataParams memory d) internal view {
+    function validateInitializeDataParams(State storage state, InitializeDataParams memory d) internal view {
         // validate weth
         if (d.weth == address(0)) {
             revert Errors.NULL_ADDRESS();
-        }
-
-        // validate underlyingCollateralToken
-        if (d.underlyingCollateralToken == address(0)) {
-            revert Errors.NULL_ADDRESS();
-        }
-        if (IERC20Metadata(d.underlyingCollateralToken).decimals() > 18) {
-            revert Errors.INVALID_DECIMALS(IERC20Metadata(d.underlyingCollateralToken).decimals());
         }
 
         // validate underlyingBorrowToken
@@ -197,27 +228,42 @@ library Initialize {
         if (d.sizeFactory == address(0)) {
             revert Errors.NULL_ADDRESS();
         }
+
+        // validate collateralAssets
+        if (d.collateralAssets.length == 0) {
+            revert Errors.NULL_ARRAY();
+        }
+        if (d.collateralAssets.length > MAX_COLLATERAL_ASSETS) {
+            revert Errors.COLLATERAL_ASSETS_LIMIT_EXCEEDED(MAX_COLLATERAL_ASSETS);
+        }
+        for (uint256 i = 0; i < d.collateralAssets.length; i++) {
+            validateCollateralAssetParams(state, d.collateralAssets[i], d.underlyingBorrowToken);
+            // the registry is empty at this point, so duplicates within the array are checked here
+            for (uint256 j = 0; j < i; j++) {
+                if (d.collateralAssets[j].underlying == d.collateralAssets[i].underlying) {
+                    revert Errors.COLLATERAL_ASSET_ALREADY_LISTED(d.collateralAssets[i].underlying);
+                }
+            }
+        }
     }
 
     /// @notice Validates the parameters for the initialization
+    /// @param state The state
     /// @param owner The owner address
     /// @param f The fee configuration parameters
     /// @param r The risk configuration parameters
-    /// @param o The oracle configuration parameters
     /// @param d The data configuration parameters
     function validateInitialize(
-        State storage,
+        State storage state,
         address owner,
         InitializeFeeConfigParams memory f,
         InitializeRiskConfigParams memory r,
-        InitializeOracleParams memory o,
         InitializeDataParams memory d
     ) external view {
         validateOwner(owner);
         validateInitializeFeeConfigParams(f);
         validateInitializeRiskConfigParams(r);
-        validateInitializeOracleParams(o);
-        validateInitializeDataParams(d);
+        validateInitializeDataParams(state, d);
     }
 
     /// @notice Executes the initialization of the fee configuration
@@ -251,11 +297,31 @@ library Initialize {
         }
     }
 
-    /// @notice Executes the initialization of the oracle configuration
+    /// @notice Deploys the deposit receipt for a collateral asset and appends it to the registry
     /// @param state The state
-    /// @param o The oracle configuration parameters
-    function executeInitializeOracle(State storage state, InitializeOracleParams memory o) internal {
-        state.oracle.priceFeed = IPriceFeed(o.priceFeed);
+    /// @param params The collateral asset parameters
+    function executeAddCollateralAsset(State storage state, InitializeCollateralAssetParams memory params) public {
+        IERC20Metadata underlying = IERC20Metadata(params.underlying);
+        NonTransferrableToken token = new NonTransferrableToken(
+            address(this),
+            string.concat("Rheo ", underlying.name()),
+            string.concat("sz", underlying.symbol()),
+            underlying.decimals()
+        );
+
+        state.data.collateralAssets
+            .push(
+                CollateralAsset({
+                    underlying: underlying,
+                    token: token,
+                    priceFeed: IPriceFeed(params.priceFeed),
+                    cap: params.cap,
+                    depositPaused: false
+                })
+            );
+        state.data.collateralAssetIndexPlusOne[params.underlying] = state.data.collateralAssets.length;
+
+        emit Events.CollateralAssetAdded(params.underlying, address(token), params.priceFeed, params.cap);
     }
 
     /// @notice Executes the initialization of the data configuration
@@ -266,16 +332,18 @@ library Initialize {
         state.data.nextCreditPositionId = CREDIT_POSITION_ID_START;
 
         state.data.weth = IWETH(d.weth);
-        state.data.underlyingCollateralToken = IERC20Metadata(d.underlyingCollateralToken);
         state.data.underlyingBorrowToken = IERC20Metadata(d.underlyingBorrowToken);
         state.data.variablePool = IPool(d.variablePool);
 
-        state.data.collateralToken = new NonTransferrableToken(
-            address(this),
-            string.concat("Rheo ", IERC20Metadata(state.data.underlyingCollateralToken).name()),
-            string.concat("sz", IERC20Metadata(state.data.underlyingCollateralToken).symbol()),
-            IERC20Metadata(state.data.underlyingCollateralToken).decimals()
-        );
+        for (uint256 i = 0; i < d.collateralAssets.length; i++) {
+            executeAddCollateralAsset(state, d.collateralAssets[i]);
+        }
+
+        // legacy mirrors of the first collateral asset, kept for view/tooling compatibility
+        state.data.underlyingCollateralToken = state.data.collateralAssets[0].underlying;
+        state.data.collateralToken = state.data.collateralAssets[0].token;
+        state.oracle.priceFeed = state.data.collateralAssets[0].priceFeed;
+
         state.data.debtToken = new NonTransferrableToken(
             address(this),
             string.concat("Rheo Debt ", IERC20Metadata(state.data.underlyingBorrowToken).name()),
@@ -292,20 +360,17 @@ library Initialize {
     /// @param state The state
     /// @param f The fee configuration parameters
     /// @param r The risk configuration parameters
-    /// @param o The oracle configuration parameters
     /// @param d The data configuration parameters
     function executeInitialize(
         State storage state,
         InitializeFeeConfigParams memory f,
         InitializeRiskConfigParams memory r,
-        InitializeOracleParams memory o,
         InitializeDataParams memory d
     ) external {
         emit Events.Initialize(msg.sender);
 
         executeInitializeFeeConfig(state, f);
         executeInitializeRiskConfig(state, r);
-        executeInitializeOracle(state, o);
         executeInitializeData(state, d);
     }
 }

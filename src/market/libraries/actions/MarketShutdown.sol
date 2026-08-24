@@ -60,12 +60,13 @@ library MarketShutdown {
         for (uint256 i = 0; i < params.debtPositionIdsToForceLiquidate.length; i++) {
             LiquidateParams memory liquidateParams = LiquidateParams({
                 debtPositionId: params.debtPositionIdsToForceLiquidate[i],
-                minimumCollateralProfit: 0,
-                deadline: block.timestamp
+                minimumCollateralProfitValue: 0,
+                deadline: block.timestamp,
+                seizeCollateralAmounts: new uint256[](0)
             });
             // Liquidate.validateLiquidate(state, liquidateParams); // skip validation to allow liquidations of all positions
-            uint256 liquidatorProfitCollateralToken = Liquidate.executeLiquidate(state, liquidateParams);
-            Liquidate.validateMinimumCollateralProfit(state, liquidateParams, liquidatorProfitCollateralToken);
+            uint256 liquidatorProfitValue = Liquidate.executeLiquidate(state, liquidateParams);
+            Liquidate.validateMinimumCollateralProfit(state, liquidateParams, liquidatorProfitValue);
         }
         for (uint256 i = 0; i < params.creditPositionIdsToClaim.length; i++) {
             ClaimParams memory claimParams = ClaimParams({creditPositionId: params.creditPositionIdsToClaim[i]});
@@ -73,24 +74,29 @@ library MarketShutdown {
             Claim.executeClaim(state, claimParams);
         }
         for (uint256 i = 0; i < params.usersToForceWithdraw.length; i++) {
-            WithdrawOnBehalfOfParams memory withdrawParams = WithdrawOnBehalfOfParams({
-                params: WithdrawParams({
-                    token: address(state.data.underlyingCollateralToken),
-                    amount: type(uint256).max,
-                    to: params.usersToForceWithdraw[i]
-                }),
-                onBehalfOf: params.usersToForceWithdraw[i]
-            });
-            // Withdraw.validateWithdraw(state, withdrawParams); // skip validation to allow force withdraw
-            Withdraw.executeWithdraw(state, withdrawParams);
+            for (uint256 j = 0; j < state.data.collateralAssets.length; j++) {
+                WithdrawOnBehalfOfParams memory withdrawParams = WithdrawOnBehalfOfParams({
+                    params: WithdrawParams({
+                        token: address(state.data.collateralAssets[j].underlying),
+                        amount: type(uint256).max,
+                        to: params.usersToForceWithdraw[i]
+                    }),
+                    onBehalfOf: params.usersToForceWithdraw[i]
+                });
+                // Withdraw.validateWithdraw(state, withdrawParams); // skip validation to allow force withdraw
+                Withdraw.executeWithdraw(state, withdrawParams);
+            }
         }
 
         if (params.shouldCheckSupply) {
             if (state.data.debtToken.totalSupply() > 0) {
                 revert Errors.INVALID_AMOUNT(state.data.debtToken.totalSupply());
             }
-            if (state.data.collateralToken.totalSupply() > 0) {
-                revert Errors.INVALID_AMOUNT(state.data.collateralToken.totalSupply());
+            for (uint256 i = 0; i < state.data.collateralAssets.length; i++) {
+                uint256 totalSupply = state.data.collateralAssets[i].token.totalSupply();
+                if (totalSupply > 0) {
+                    revert Errors.INVALID_AMOUNT(totalSupply);
+                }
             }
         }
     }

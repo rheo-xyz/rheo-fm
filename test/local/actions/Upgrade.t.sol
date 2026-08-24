@@ -15,7 +15,7 @@ contract UpgradeTest is Test, BaseTest {
     function test_Upgrade_proxy_can_be_upgraded_with_uups_casting() public {
         address owner = address(this);
         Rheo v1 = new Rheo();
-        ERC1967Proxy proxy = new ERC1967Proxy(address(v1), abi.encodeCall(Rheo.initialize, (owner, f, r, o, d)));
+        ERC1967Proxy proxy = new ERC1967Proxy(address(v1), abi.encodeCall(Rheo.initialize, (owner, f, r, d)));
         Rheo v2 = new RheoMock();
 
         UUPSUpgradeable(address(proxy)).upgradeToAndCall(address(v2), "");
@@ -25,7 +25,7 @@ contract UpgradeTest is Test, BaseTest {
     function test_Upgrade_proxy_can_be_upgraded_directly() public {
         address owner = address(this);
         Rheo v1 = new Rheo();
-        ERC1967Proxy proxy = new ERC1967Proxy(address(v1), abi.encodeCall(Rheo.initialize, (owner, f, r, o, d)));
+        ERC1967Proxy proxy = new ERC1967Proxy(address(v1), abi.encodeCall(Rheo.initialize, (owner, f, r, d)));
         Rheo v2 = new RheoMock();
 
         Rheo(payable(proxy)).upgradeToAndCall(address(v2), "");

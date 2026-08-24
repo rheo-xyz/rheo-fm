@@ -50,6 +50,7 @@ import {SetCopyLimitOrderConfigsParams} from "@rheo-fm/src/market/libraries/acti
 
 import {DataView} from "@rheo-fm/src/market/RheoViewData.sol";
 import {IRheoView} from "@rheo-fm/src/market/interfaces/IRheoView.sol";
+import {Math} from "@rheo-fm/src/market/libraries/Math.sol";
 import {UpdateConfigParams} from "@rheo-fm/src/market/libraries/actions/UpdateConfig.sol";
 
 import {PoolMock} from "@rheo-fm/test/mocks/PoolMock.sol";
@@ -258,6 +259,50 @@ contract BaseTest is Test, Deploy, AssertsHelper {
     function _setPrice(uint256 price) internal {
         vm.prank(address(this));
         PriceFeedMock(address(priceFeed)).setPrice(price);
+    }
+
+    /// @dev Converts a value in borrow token base units into an amount of the first basket asset.
+    ///      Mirrors the pre-v2.0 `debtTokenAmountToCollateralTokenAmount`, rounding up.
+    function _valueToCollateral(uint256 value) internal view returns (uint256) {
+        DataView memory dataView = size.data();
+        return Math.mulDivUp(
+            value * 10 ** 18,
+            10 ** dataView.underlyingCollateralToken.decimals(),
+            priceFeed.getPrice() * 10 ** dataView.underlyingBorrowToken.decimals()
+        );
+    }
+
+    /// @dev Mirrors the two-step pro-rata seizure of `executeLiquidate` for a single-asset basket: the liquidator
+    ///      is served first, then the protocol fee is sliced from what is left.
+    function _expectedSeizure(address borrower, uint256 entitlementValue, uint256 protocolProfitValue)
+        internal
+        view
+        returns (uint256 liquidatorAmount, uint256 protocolAmount)
+    {
+        (address[] memory underlyings, uint256[] memory balances) = size.getUserCollateralBalances(borrower);
+        liquidatorAmount = _proRataCollateral(borrower, entitlementValue, size.collateralValue(borrower));
+
+        uint256 remainingBalance = balances[0] - liquidatorAmount;
+        uint256 remainingValue = size.getCollateralAssetValue(underlyings[0], remainingBalance);
+        if (remainingValue == 0) {
+            return (liquidatorAmount, 0);
+        }
+        protocolAmount =
+            Math.mulDivDown(remainingBalance, Math.min(protocolProfitValue, remainingValue), remainingValue);
+    }
+
+    /// @dev Mirrors `CollateralBasketLibrary.transferProRata` for a single-asset basket: the amount an account
+    ///      gives up when `numerator / denominator` of its collateral value is taken.
+    function _proRataCollateral(address account, uint256 numerator, uint256 denominator)
+        internal
+        view
+        returns (uint256)
+    {
+        if (denominator == 0) {
+            return 0;
+        }
+        (, uint256[] memory balances) = size.getUserCollateralBalances(account);
+        return Math.mulDivDown(balances[0], numerator, denominator);
     }
 
     function _updateConfig(string memory key, uint256 value) internal {
@@ -476,9 +521,7 @@ contract BaseTest is Test, Deploy, AssertsHelper {
         vm.prank(user);
         size.partialRepay(
             PartialRepayParams({
-                creditPositionWithDebtToRepayId: creditPositionWithDebtToRepayId,
-                amount: amount,
-                borrower: borrower
+                creditPositionWithDebtToRepayId: creditPositionWithDebtToRepayId, amount: amount, borrower: borrower
             })
         );
     }
@@ -492,16 +535,27 @@ contract BaseTest is Test, Deploy, AssertsHelper {
         return _liquidate(user, debtPositionId, 0, type(uint256).max);
     }
 
-    function _liquidate(address user, uint256 debtPositionId, uint256 minimumCollateralProfit, uint256 deadline)
+    function _liquidate(address user, uint256 debtPositionId, uint256 minimumCollateralProfitValue, uint256 deadline)
         internal
         returns (uint256)
     {
+        return _liquidate(user, debtPositionId, minimumCollateralProfitValue, deadline, new uint256[](0));
+    }
+
+    function _liquidate(
+        address user,
+        uint256 debtPositionId,
+        uint256 minimumCollateralProfitValue,
+        uint256 deadline,
+        uint256[] memory seizeCollateralAmounts
+    ) internal returns (uint256) {
         vm.prank(user);
         return size.liquidate(
             LiquidateParams({
                 debtPositionId: debtPositionId,
-                minimumCollateralProfit: minimumCollateralProfit,
-                deadline: deadline
+                minimumCollateralProfitValue: minimumCollateralProfitValue,
+                deadline: deadline,
+                seizeCollateralAmounts: seizeCollateralAmounts
             })
         );
     }
@@ -564,8 +618,7 @@ contract BaseTest is Test, Deploy, AssertsHelper {
         vm.prank(user);
         size.setCopyLimitOrderConfigs(
             SetCopyLimitOrderConfigsParams({
-                copyLoanOfferConfig: copyLoanOfferConfig,
-                copyBorrowOfferConfig: copyBorrowOfferConfig
+                copyLoanOfferConfig: copyLoanOfferConfig, copyBorrowOfferConfig: copyBorrowOfferConfig
             })
         );
     }

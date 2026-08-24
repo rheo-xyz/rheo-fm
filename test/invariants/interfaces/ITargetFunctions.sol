@@ -30,7 +30,7 @@ interface ITargetFunctions {
 
     function claim(uint256 creditPositionId) external;
 
-    function liquidate(uint256 debtPositionId, uint256 minimumCollateralProfit) external;
+    function liquidate(uint256 debtPositionId, uint256 minimumCollateralProfitValue) external;
 
     function selfLiquidate(uint256 creditPositionId) external;
 

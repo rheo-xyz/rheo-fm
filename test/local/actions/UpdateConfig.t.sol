@@ -74,11 +74,18 @@ contract UpdateConfigTest is BaseTest {
         assertTrue(size.feeConfig().feeRecipient == address(this));
     }
 
-    function test_UpdateConfig_updateConfig_updates_oracle() public {
+    /// @dev In v2.0 price feeds are per collateral asset, so the `priceFeed` key was removed in favour of
+    ///      `setCollateralAssetPriceFeed`
+    function test_UpdateConfig_updateConfig_priceFeed_key_is_removed() public {
         PriceFeedMock newPriceFeed = new PriceFeedMock(address(this));
-        assertTrue(size.oracle().priceFeed != address(newPriceFeed));
+        newPriceFeed.setPrice(1e18);
+
+        vm.expectRevert(abi.encodeWithSelector(Errors.INVALID_KEY.selector, "priceFeed"));
         size.updateConfig(UpdateConfigParams({key: "priceFeed", value: uint256(uint160(address(newPriceFeed)))}));
-        assertTrue(size.oracle().priceFeed == address(newPriceFeed));
+
+        size.setCollateralAssetPriceFeed(address(weth), address(newPriceFeed));
+        assertTrue(size.oracle().priceFeed != address(newPriceFeed));
+        assertEq(address(size.getCollateralAssets()[0].priceFeed), address(newPriceFeed));
     }
 
     function test_UpdateConfig_updateConfig_should_not_DoS_when_maturities_are_past() public {

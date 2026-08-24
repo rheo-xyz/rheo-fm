@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
+import {singleCollateralAsset} from "@rheo-fm/script/CollateralAssets.sol";
+
 import {IPool} from "@aave/interfaces/IPool.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
@@ -85,7 +87,9 @@ contract ArbitrumDeployFirstMarketForkTest is Test, Networks {
         // Wire CollectionsManager and implementations onto factory (Safe-owned ops)
         vm.startPrank(SAFE);
         SizeFactory(payable(address(sizeFactory))).setCollectionsManager(collectionsManager);
-        sizeFactory.setNonTransferrableRebasingTokenVaultImplementation(address(new NonTransferrableRebasingTokenVault()));
+        sizeFactory.setNonTransferrableRebasingTokenVaultImplementation(
+            address(new NonTransferrableRebasingTokenVault())
+        );
         sizeFactory.setRheoImplementation(address(new Rheo()));
         vm.stopPrank();
     }
@@ -143,7 +147,7 @@ contract ArbitrumDeployFirstMarketForkTest is Test, Networks {
 
         InitializeDataParams memory dataParams = InitializeDataParams({
             weth: cfg.weth,
-            underlyingCollateralToken: cfg.underlyingCollateralToken,
+            collateralAssets: singleCollateralAsset(cfg.underlyingCollateralToken, address(priceFeed)),
             underlyingBorrowToken: cfg.underlyingBorrowToken,
             variablePool: cfg.variablePool,
             borrowTokenVault: address(borrowTokenVault),
@@ -151,8 +155,7 @@ contract ArbitrumDeployFirstMarketForkTest is Test, Networks {
         });
 
         vm.prank(SAFE);
-        market =
-            IRheo(sizeFactory.createMarketRheo(feeConfigParams, riskConfigParams, oracleParams, dataParams));
+        market = IRheo(sizeFactory.createMarketRheo(feeConfigParams, riskConfigParams, dataParams));
     }
 
     function testFork_ArbitrumDeployFirstMarket_priceFeedReturnsSaneEthUsdcPrice() public view {

@@ -77,7 +77,7 @@ library Errors {
     error LOAN_NOT_LIQUIDATABLE(uint256 debtPositionId, uint256 cr, uint8 loanStatus);
     error LOAN_NOT_SELF_LIQUIDATABLE(uint256 creditPositionId, uint256 cr, uint8 loanStatus);
     error LIQUIDATE_PROFIT_BELOW_MINIMUM_COLLATERAL_PROFIT(
-        uint256 liquidatorProfitCollateralToken, uint256 minimumCollateralProfit
+        uint256 liquidatorProfitValue, uint256 minimumCollateralProfitValue
     );
     error CR_BELOW_OPENING_LIMIT_BORROW_CR(address account, uint256 cr, uint256 riskCollateralRatio);
 
@@ -115,4 +115,16 @@ library Errors {
     error PAUSED_MARKET(address market);
 
     error DEBT_TOKEN_CAP_EXCEEDED(uint256 debtTokenCap, uint256 actual);
+
+    error COLLATERAL_ASSET_NOT_LISTED(address underlying);
+    error COLLATERAL_ASSET_ALREADY_LISTED(address underlying);
+    error COLLATERAL_ASSETS_LIMIT_EXCEEDED(uint256 limit);
+    error COLLATERAL_ASSET_CAP_EXCEEDED(address underlying, uint256 cap, uint256 attempted);
+    error COLLATERAL_ASSET_DEPOSIT_PAUSED(address underlying);
+    error SEIZE_COLLATERAL_AMOUNTS_LENGTH_MISMATCH(uint256 expected, uint256 actual);
+    error SEIZED_VALUE_GREATER_THAN_ENTITLEMENT(uint256 seizedValue, uint256 entitlementValue);
+    error NOT_ENOUGH_COLLATERAL(uint256 collateralValue, uint256 required);
+    error INVALID_PRICE_FEED_DECIMALS(uint256 decimals);
+    error INVALID_PRO_RATA_FRACTION(uint256 numerator, uint256 denominator);
+    error NULL_SEIZED_VALUE(uint256 entitlementValue);
 }

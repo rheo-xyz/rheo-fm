@@ -53,26 +53,28 @@ contract LiquidateTest is BaseTest {
 
         Vars memory _before = _state();
 
-        uint256 assignedCollateral = size.getDebtPositionAssignedCollateral(debtPositionId);
-        uint256 debtInCollateralToken = size.debtTokenAmountToCollateralTokenAmount(futureValue);
-        uint256 expectedLiquidatorProfit;
-        uint256 expectedProtocolProfit;
-        if (assignedCollateral > debtInCollateralToken) {
+        uint256 assignedValue = size.getDebtPositionAssignedCollateralValue(debtPositionId);
+        uint256 entitlementValue;
+        uint256 protocolProfitValue;
+        if (assignedValue > futureValue) {
             uint256 liquidatorReward = Math.min(
-                assignedCollateral - debtInCollateralToken,
-                Math.mulDivUp(debtInCollateralToken, size.feeConfig().liquidationRewardPercent, PERCENT)
+                assignedValue - futureValue,
+                Math.mulDivUp(futureValue, size.feeConfig().liquidationRewardPercent, PERCENT)
             );
-            expectedLiquidatorProfit = debtInCollateralToken + liquidatorReward;
-            uint256 collateralRemainder = assignedCollateral - expectedLiquidatorProfit;
+            entitlementValue = futureValue + liquidatorReward;
+            uint256 collateralRemainder = assignedValue - entitlementValue;
             uint256 collateralRemainderCap =
-                Math.mulDivDown(debtInCollateralToken, size.riskConfig().crLiquidation - PERCENT, PERCENT);
+                Math.mulDivDown(futureValue, size.riskConfig().crLiquidation - PERCENT, PERCENT);
             collateralRemainder = Math.min(collateralRemainder, collateralRemainderCap);
-            expectedProtocolProfit =
+            protocolProfitValue =
                 Math.mulDivDown(collateralRemainder, size.feeConfig().collateralProtocolPercent, PERCENT);
         } else {
-            expectedLiquidatorProfit = assignedCollateral;
-            expectedProtocolProfit = 0;
+            entitlementValue = assignedValue;
+            protocolProfitValue = 0;
         }
+
+        (uint256 expectedLiquidatorProfit, uint256 expectedProtocolProfit) =
+            _expectedSeizure(bob, entitlementValue, protocolProfitValue);
 
         _liquidate(liquidator, debtPositionId);
 
@@ -128,9 +130,8 @@ contract LiquidateTest is BaseTest {
         _setPrice(0.1e18);
 
         assertTrue(size.isDebtPositionLiquidatable(debtPositionId));
-        uint256 assignedCollateral = size.getDebtPositionAssignedCollateral(debtPositionId);
-        uint256 futureValueCollateral =
-            size.debtTokenAmountToCollateralTokenAmount(size.getDebtPosition(debtPositionId).futureValue);
+        uint256 assignedCollateral = size.getDebtPositionAssignedCollateralValue(debtPositionId);
+        uint256 futureValueCollateral = _valueToCollateral(size.getDebtPosition(debtPositionId).futureValue);
 
         Vars memory _before = _state();
 
@@ -150,7 +151,7 @@ contract LiquidateTest is BaseTest {
             _before.feeRecipient.collateralTokenBalance,
             "The liquidator receives the collateral remainder first"
         );
-        assertEq(size.getDebtPositionAssignedCollateral(debtPositionId), 0);
+        assertEq(size.getDebtPositionAssignedCollateralValue(debtPositionId), 0);
         assertEq(size.getUserView(bob).collateralTokenBalance, 0);
     }
 
@@ -177,17 +178,19 @@ contract LiquidateTest is BaseTest {
         assertGt(size.getDebtPosition(debtPositionId).futureValue, 0);
         assertTrue(!_isUserUnderwater(bob));
 
-        uint256 debtInCollateralToken = size.debtTokenAmountToCollateralTokenAmount(futureValue);
+        uint256 assignedValue = size.getDebtPositionAssignedCollateralValue(debtPositionId);
         uint256 liquidatorReward = Math.min(
-            _before.bob.collateralTokenBalance - debtInCollateralToken,
-            Math.mulDivUp(debtInCollateralToken, _overdueLiquidationRewardPercent(), PERCENT)
+            assignedValue - futureValue, Math.mulDivUp(futureValue, _overdueLiquidationRewardPercent(), PERCENT)
         );
-        uint256 liquidatorProfitCollateralToken = debtInCollateralToken + liquidatorReward;
+        uint256 entitlementValue = futureValue + liquidatorReward;
 
-        uint256 protocolSplit = Math.min(
-            _before.bob.collateralTokenBalance - liquidatorProfitCollateralToken,
-            debtInCollateralToken * (size.riskConfig().crLiquidation - PERCENT) / PERCENT
-        ) * size.feeConfig().overdueCollateralProtocolPercent / PERCENT;
+        uint256 protocolProfitValue = Math.min(
+                assignedValue - entitlementValue,
+                Math.mulDivDown(futureValue, size.riskConfig().crLiquidation - PERCENT, PERCENT)
+            ) * size.feeConfig().overdueCollateralProtocolPercent / PERCENT;
+
+        (uint256 liquidatorProfitCollateralToken, uint256 protocolSplit) =
+            _expectedSeizure(bob, entitlementValue, protocolProfitValue);
 
         assertTrue(!_isUserUnderwater(bob));
         assertTrue(size.isDebtPositionLiquidatable(debtPositionId));
@@ -237,17 +240,19 @@ contract LiquidateTest is BaseTest {
 
         Vars memory _before = _state();
 
-        uint256 debtInCollateralToken = size.debtTokenAmountToCollateralTokenAmount(futureValue);
+        uint256 assignedValue = size.getDebtPositionAssignedCollateralValue(debtPositionId);
         uint256 liquidatorReward = Math.min(
-            _before.bob.collateralTokenBalance - debtInCollateralToken,
-            Math.mulDivUp(debtInCollateralToken, _overdueLiquidationRewardPercent(), PERCENT)
+            assignedValue - futureValue, Math.mulDivUp(futureValue, _overdueLiquidationRewardPercent(), PERCENT)
         );
-        uint256 liquidatorProfitCollateralToken = debtInCollateralToken + liquidatorReward;
+        uint256 entitlementValue = futureValue + liquidatorReward;
 
-        uint256 protocolSplit = Math.min(
-            _before.bob.collateralTokenBalance - liquidatorProfitCollateralToken,
-            debtInCollateralToken * (size.riskConfig().crLiquidation - PERCENT) / PERCENT
-        ) * size.feeConfig().overdueCollateralProtocolPercent / PERCENT;
+        uint256 protocolProfitValue = Math.min(
+                assignedValue - entitlementValue,
+                Math.mulDivDown(futureValue, size.riskConfig().crLiquidation - PERCENT, PERCENT)
+            ) * size.feeConfig().overdueCollateralProtocolPercent / PERCENT;
+
+        (uint256 liquidatorProfitCollateralToken, uint256 protocolSplit) =
+            _expectedSeizure(bob, entitlementValue, protocolProfitValue);
 
         _liquidate(liquidator, debtPositionId);
 
@@ -287,25 +292,26 @@ contract LiquidateTest is BaseTest {
         Vars memory _before = _state();
         (uint256 loansBefore,) = size.getPositionsCount();
 
-        uint256 assignedCollateral = size.getDebtPositionAssignedCollateral(debtPositionId);
-        uint256 debtInCollateralToken = size.debtTokenAmountToCollateralTokenAmount(futureValue);
-        uint256 liquidatorProfitCollateralToken;
-        if (assignedCollateral > debtInCollateralToken) {
+        uint256 assignedValue = size.getDebtPositionAssignedCollateralValue(debtPositionId);
+        uint256 entitlementValue;
+        if (assignedValue > futureValue) {
             uint256 liquidatorReward = Math.min(
-                assignedCollateral - debtInCollateralToken,
-                Math.mulDivUp(debtInCollateralToken, _overdueLiquidationRewardPercent(), PERCENT)
+                assignedValue - futureValue, Math.mulDivUp(futureValue, _overdueLiquidationRewardPercent(), PERCENT)
             );
-            liquidatorProfitCollateralToken = debtInCollateralToken + liquidatorReward;
+            entitlementValue = futureValue + liquidatorReward;
         } else {
-            liquidatorProfitCollateralToken = assignedCollateral;
+            entitlementValue = assignedValue;
         }
 
         uint256 collateralRemainder = Math.min(
-            assignedCollateral - liquidatorProfitCollateralToken,
-            Math.mulDivDown(debtInCollateralToken, size.riskConfig().crLiquidation - PERCENT, PERCENT)
+            assignedValue - entitlementValue,
+            Math.mulDivDown(futureValue, size.riskConfig().crLiquidation - PERCENT, PERCENT)
         );
 
-        uint256 protocolSplit = collateralRemainder * size.feeConfig().overdueCollateralProtocolPercent / PERCENT;
+        uint256 protocolProfitValue = collateralRemainder * size.feeConfig().overdueCollateralProtocolPercent / PERCENT;
+
+        (uint256 liquidatorProfitCollateralToken, uint256 protocolSplit) =
+            _expectedSeizure(bob, entitlementValue, protocolProfitValue);
 
         _liquidate(liquidator, debtPositionId);
 
@@ -376,12 +382,11 @@ contract LiquidateTest is BaseTest {
 
         _setPrice(0.5e18);
 
-        uint256 debtInCollateralToken = size.debtTokenAmountToCollateralTokenAmount(futureValue);
+        uint256 assignedValue = size.getDebtPositionAssignedCollateralValue(debtPositionId);
         uint256 liquidatorReward = Math.min(
-            _state().bob.collateralTokenBalance - debtInCollateralToken,
-            Math.mulDivUp(debtInCollateralToken, _overdueLiquidationRewardPercent(), PERCENT)
+            assignedValue - futureValue, Math.mulDivUp(futureValue, _overdueLiquidationRewardPercent(), PERCENT)
         );
-        uint256 liquidatorProfitCollateralToken = debtInCollateralToken + liquidatorReward;
+        (uint256 liquidatorProfitCollateralToken,) = _expectedSeizure(bob, futureValue + liquidatorReward, 0);
 
         assertTrue(_isUserUnderwater(bob));
         _liquidate(liquidator, debtPositionId);
@@ -394,15 +399,15 @@ contract LiquidateTest is BaseTest {
         );
     }
 
-    function testFuzz_Liquidate_liquidate_minimumCollateralProfit(
+    function testFuzz_Liquidate_liquidate_minimumCollateralProfitValue(
         uint256 newPrice,
         uint256 interval,
-        uint256 minimumCollateralProfit
+        uint256 minimumCollateralProfitValue
     ) public {
         _setPrice(1e18);
         newPrice = bound(newPrice, 1, 2e18);
         interval = bound(interval, 0, 2 * 150 days);
-        minimumCollateralProfit = bound(minimumCollateralProfit, 1, 200e18);
+        minimumCollateralProfitValue = bound(minimumCollateralProfitValue, 1, 200e18);
 
         _deposit(alice, usdc, 100e6);
         _deposit(bob, weth, 200e18);
@@ -422,13 +427,16 @@ contract LiquidateTest is BaseTest {
         try size.liquidate(
             LiquidateParams({
                 debtPositionId: debtPositionId,
-                minimumCollateralProfit: minimumCollateralProfit,
-                deadline: type(uint256).max
+                minimumCollateralProfitValue: minimumCollateralProfitValue,
+                deadline: type(uint256).max,
+                seizeCollateralAmounts: new uint256[](0)
             })
-        ) returns (uint256 liquidatorProfitCollateralToken) {
+        ) returns (
+            uint256 liquidatorProfitCollateralToken
+        ) {
             Vars memory _after = _state();
 
-            assertGe(liquidatorProfitCollateralToken, minimumCollateralProfit);
+            assertGe(liquidatorProfitCollateralToken, minimumCollateralProfitValue);
             assertGe(_after.liquidator.collateralTokenBalance, _before.liquidator.collateralTokenBalance);
         } catch {}
     }

@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
+import {singleCollateralAsset} from "@rheo-fm/script/CollateralAssets.sol";
+
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
@@ -17,7 +19,7 @@ import {
     InitializeRiskConfigParams
 } from "@rheo-fm/src/market/libraries/actions/Initialize.sol";
 import {ISizeFactory} from "@rheo-solidity/src/factory/interfaces/ISizeFactory.sol";
-import {ISizeFactoryV1_9} from "@rheo-solidity/src/factory/interfaces/ISizeFactoryV1_9.sol";
+import {ISizeFactoryV2} from "@rheo-solidity/src/factory/interfaces/ISizeFactoryV2.sol";
 import {Safe} from "@safe-utils/Safe.sol";
 
 import {IPriceFeed} from "@rheo-fm/src/oracle/IPriceFeed.sol";
@@ -30,8 +32,9 @@ import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/Ag
 import {PendleChainlinkOracle} from "@pendle/contracts/oracles/PtYtLpOracle/chainlink/PendleChainlinkOracle.sol";
 import {PendleSparkLinearDiscountOracle} from "@pendle/contracts/oracles/internal/PendleSparkLinearDiscountOracle.sol";
 
-import {PriceFeedPendleSparkLinearDiscountChainlink} from
-    "@rheo-fm/src/oracle/v1.7.1/PriceFeedPendleSparkLinearDiscountChainlink.sol";
+import {
+    PriceFeedPendleSparkLinearDiscountChainlink
+} from "@rheo-fm/src/oracle/v1.7.1/PriceFeedPendleSparkLinearDiscountChainlink.sol";
 import {PriceFeedPendleTWAPChainlink} from "@rheo-fm/src/oracle/v1.7.2/PriceFeedPendleTWAPChainlink.sol";
 
 import {console} from "forge-std/console.sol";
@@ -108,34 +111,11 @@ contract ProposeSafeTxDeployPTMarketsScript is BaseScript, Networks {
 
         vm.stopBroadcast();
 
-        IRheo market = IRheo(sizeFactory.getMarket(0));
-        InitializeFeeConfigParams memory feeConfigParams = market.feeConfig();
-
-        InitializeRiskConfigParams memory riskConfigParams = market.riskConfig(); // crOpening, crLiquidation replaced below
-        riskConfigParams.crOpening = 1.12e18;
-        riskConfigParams.crLiquidation = 1.09e18;
-
-        InitializeOracleParams memory oracleParams = market.oracle(); // priceFeed replaced below
-
-        DataView memory dataView = market.data();
-        InitializeDataParams memory dataParams = InitializeDataParams({
-            weth: contracts[block.chainid][Contract.WETH],
-            underlyingCollateralToken: address(0), // underlyingCollateralToken replaced below
-            underlyingBorrowToken: address(dataView.underlyingBorrowToken),
-            variablePool: address(dataView.variablePool),
-            borrowTokenVault: address(dataView.borrowTokenVault),
-            sizeFactory: address(sizeFactory)
-        });
-        bytes[] memory datas = new bytes[](2);
-        oracleParams.priceFeed = address(ptSusde30July2025UsdcPriceFeed);
-        dataParams.underlyingCollateralToken = address(baseToken);
-        datas[0] = abi.encodeCall(
-            ISizeFactoryV1_9.createMarketRheo, (feeConfigParams, riskConfigParams, oracleParams, dataParams)
-        );
-        oracleParams.priceFeed = address(wstusrUsdc24Sep2025PriceFeed);
-        dataParams.underlyingCollateralToken = address(baseToken2);
-        datas[1] = abi.encodeCall(
-            ISizeFactoryV1_9.createMarketRheo, (feeConfigParams, riskConfigParams, oracleParams, dataParams)
+        bytes[] memory datas = _createMarketRheoDatas(
+            address(baseToken),
+            address(ptSusde30July2025UsdcPriceFeed),
+            address(baseToken2),
+            address(wstusrUsdc24Sep2025PriceFeed)
         );
         address[] memory targets = new address[](2);
         targets[0] = address(sizeFactory);
@@ -145,5 +125,35 @@ contract ProposeSafeTxDeployPTMarketsScript is BaseScript, Networks {
         bytes memory execTransactionsData = safe.getExecTransactionsData(targets, datas, signer, derivationPath);
         tenderly.setStorageAt(vnet, safe.instance().safe, bytes32(uint256(4)), bytes32(uint256(1)));
         tenderly.sendTransaction(vnet.id, signer, safe.instance().safe, execTransactionsData);
+    }
+
+    /// @notice Builds the `createMarketRheo` calldata for both PT markets, each a single-asset basket
+    function _createMarketRheoDatas(
+        address baseToken,
+        address baseTokenPriceFeed,
+        address baseToken2,
+        address baseToken2PriceFeed
+    ) private view returns (bytes[] memory datas) {
+        IRheo market = IRheo(sizeFactory.getMarket(0));
+        InitializeFeeConfigParams memory feeConfigParams = market.feeConfig();
+
+        InitializeRiskConfigParams memory riskConfigParams = market.riskConfig(); // crOpening, crLiquidation replaced below
+        riskConfigParams.crOpening = 1.12e18;
+        riskConfigParams.crLiquidation = 1.09e18;
+
+        DataView memory dataView = market.data();
+        InitializeDataParams memory dataParams = InitializeDataParams({
+            weth: contracts[block.chainid][Contract.WETH],
+            collateralAssets: singleCollateralAsset(baseToken, baseTokenPriceFeed),
+            underlyingBorrowToken: address(dataView.underlyingBorrowToken),
+            variablePool: address(dataView.variablePool),
+            borrowTokenVault: address(dataView.borrowTokenVault),
+            sizeFactory: address(sizeFactory)
+        });
+
+        datas = new bytes[](2);
+        datas[0] = abi.encodeCall(ISizeFactoryV2.createMarketRheo, (feeConfigParams, riskConfigParams, dataParams));
+        dataParams.collateralAssets = singleCollateralAsset(baseToken2, baseToken2PriceFeed);
+        datas[1] = abi.encodeCall(ISizeFactoryV2.createMarketRheo, (feeConfigParams, riskConfigParams, dataParams));
     }
 }
