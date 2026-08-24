@@ -143,12 +143,20 @@ library Liquidate {
             }
 
             amounts[i] = amount;
-            seizedValueUp += state.assetValueUp(i, amount);
-            liquidatorProfitValue += state.assetValueDown(i, amount);
+            (uint256 valueUp, uint256 valueDown) = state.assetValueUpAndDown(i, amount);
+            seizedValueUp += valueUp;
+            liquidatorProfitValue += valueDown;
         }
 
         if (seizedValueUp > entitlementValue) {
             revert Errors.SEIZED_VALUE_GREATER_THAN_ENTITLEMENT(seizedValueUp, entitlementValue);
+        }
+
+        // an explicit seizure worth nothing would repay the debt and hand the borrower its collateral back.
+        // the guard is skipped when there is nothing to seize in the first place, so that shutting down a
+        // market with zero-collateral borrowers keeps working
+        if (seizedValueUp == 0 && entitlementValue > 0) {
+            revert Errors.NULL_SEIZED_VALUE(entitlementValue);
         }
 
         for (uint256 i = 0; i < length; i++) {

@@ -9,6 +9,11 @@ import {UpdateConfigParams} from "@rheo-fm/src/market/libraries/actions/UpdateCo
 /// @custom:security-contact security@rheo.xyz
 /// @author Rheo (https://rheo.xyz/)
 /// @notice The interface for admin acitons
+/// @dev v2.0 additions are declared here rather than in a versioned `interfaces/v2.0/` interface, unlike
+///      rheo-solidity's ISizeFactoryV2. The versioned pattern exists so an existing consumer keeps compiling
+///      across an additive upgrade; v2.0 is a clean ABI break deployed to fresh markets, so no such consumer
+///      exists. rheo-solidity differs because one SizeFactory must keep serving both v1.9 Size markets and
+///      v2.0 Rheo markets, which makes the split load-bearing there.
 interface IRheoAdmin {
     /// @notice Updates the configuration of the protocol
     ///         Only callable by the DEFAULT_ADMIN_ROLE

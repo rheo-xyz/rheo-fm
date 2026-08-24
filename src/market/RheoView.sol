@@ -71,6 +71,11 @@ abstract contract RheoView is RheoStorage, ReentrancyGuardUpgradeableWithViewMod
     }
 
     /// @inheritdoc IRheoView
+    function getCollateralAssetValueUp(address underlying, uint256 amount) external view returns (uint256) {
+        return CollateralBasketLibrary.getCollateralAssetValueUp(state, underlying, amount);
+    }
+
+    /// @inheritdoc IRheoView
     function getCollateralAssets() external view returns (CollateralAssetView[] memory) {
         return CollateralBasketLibrary.getCollateralAssets(state);
     }

@@ -57,6 +57,25 @@ library CollateralBasketLibrary {
         return Math.mulDivUp(amount, numerator, denominator);
     }
 
+    /// @notice Returns both roundings of the value of `amount` of the collateral asset at index `i`
+    /// @dev Fetches the price once and derives both directions, so an explicit seizure does not read every
+    ///      feed twice
+    /// @param state The state
+    /// @param i The collateral asset index
+    /// @param amount The amount of the underlying collateral asset
+    /// @return valueUp The value rounded up, used to check a seizure against an entitlement
+    /// @return valueDown The value rounded down, used to report a realized profit
+    function assetValueUpAndDown(State storage state, uint256 i, uint256 amount)
+        public
+        view
+        returns (uint256 valueUp, uint256 valueDown)
+    {
+        (uint256 numerator, uint256 denominator) =
+            valuationFactors(state, i, state.data.underlyingBorrowToken.decimals());
+        valueUp = Math.mulDivUp(amount, numerator, denominator);
+        valueDown = Math.mulDivDown(amount, numerator, denominator);
+    }
+
     /// @notice Returns the total value of the account's collateral across the whole basket
     /// @dev Assets with a zero balance are skipped, so a user is only exposed to the price feeds of the assets
     ///      they actually hold
@@ -91,6 +110,24 @@ library CollateralBasketLibrary {
             revert Errors.COLLATERAL_ASSET_NOT_LISTED(underlying);
         }
         return assetValueDown(state, index, amount);
+    }
+
+    /// @notice Returns the value of an amount of a listed collateral asset, rounded up
+    /// @dev The rounding `liquidate` uses to check an explicit seizure against the entitlement
+    /// @param state The state
+    /// @param underlying The underlying collateral token
+    /// @param amount The amount of the underlying collateral token
+    /// @return The value in borrow token base units
+    function getCollateralAssetValueUp(State storage state, address underlying, uint256 amount)
+        public
+        view
+        returns (uint256)
+    {
+        (bool found, uint256 index) = getCollateralAssetIndex(state, underlying);
+        if (!found) {
+            revert Errors.COLLATERAL_ASSET_NOT_LISTED(underlying);
+        }
+        return assetValueUp(state, index, amount);
     }
 
     /// @notice Returns the market's collateral asset registry

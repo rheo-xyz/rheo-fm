@@ -249,12 +249,12 @@ library BuyCreditMarket {
             });
         }
 
-        state.data.borrowTokenVault.transferFrom(
-            onBehalfOf, swapData.borrower, swapData.cashAmountIn - swapData.swapFee - swapData.fragmentationFee
-        );
-        state.data.borrowTokenVault.transferFrom(
-            onBehalfOf, state.feeConfig.feeRecipient, swapData.swapFee + swapData.fragmentationFee
-        );
+        state.data.borrowTokenVault
+            .transferFrom(
+                onBehalfOf, swapData.borrower, swapData.cashAmountIn - swapData.swapFee - swapData.fragmentationFee
+            );
+        state.data.borrowTokenVault
+            .transferFrom(onBehalfOf, state.feeConfig.feeRecipient, swapData.swapFee + swapData.fragmentationFee);
 
         uint256 exitCreditPositionId =
             params.creditPositionId == RESERVED_ID ? state.data.nextCreditPositionId - 1 : params.creditPositionId;

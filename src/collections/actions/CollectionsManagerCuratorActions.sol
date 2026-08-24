@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {ERC721EnumerableUpgradeable} from
-    "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
+import {
+    ERC721EnumerableUpgradeable
+} from "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
@@ -10,8 +11,9 @@ import {CopyLimitOrderConfig, OfferLibrary} from "@rheo-fm/src/market/libraries/
 
 import {CollectionsManagerBase} from "@rheo-fm/src/collections/CollectionsManagerBase.sol";
 
-import {ICollectionsManagerCuratorActions} from
-    "@rheo-fm/src/collections/interfaces/ICollectionsManagerCuratorActions.sol";
+import {
+    ICollectionsManagerCuratorActions
+} from "@rheo-fm/src/collections/interfaces/ICollectionsManagerCuratorActions.sol";
 
 import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
 import {ISizeFactory} from "@rheo-solidity/src/factory/interfaces/ISizeFactory.sol";

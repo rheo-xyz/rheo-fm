@@ -14,11 +14,17 @@ import {
 import {SellCreditMarket, SellCreditMarketParams} from "@rheo-fm/src/market/libraries/actions/SellCreditMarket.sol";
 
 import {IRheoViewV1_8} from "@rheo-fm/src/market/interfaces/v1.8/IRheoViewV1_8.sol";
+
 /// @title IRheoView
 /// @custom:security-contact security@rheo.xyz
 /// @author Rheo (https://rheo.xyz/)
 /// @notice View methods for the Rheo protocol
 
+/// @dev v2.0 additions are declared here rather than in a versioned `interfaces/v2.0/` interface, unlike
+///      rheo-solidity's ISizeFactoryV2. The versioned pattern exists so an existing consumer keeps compiling
+///      across an additive upgrade; v2.0 is a clean ABI break deployed to fresh markets, so no such consumer
+///      exists. rheo-solidity differs because one SizeFactory must keep serving both v1.9 Size markets and
+///      v2.0 Rheo markets, which makes the split load-bearing there.
 interface IRheoView is IRheoViewV1_8 {
     /// @notice Get the collateral ratio of a user
     /// @param user The address of the user
@@ -40,6 +46,15 @@ interface IRheoView is IRheoViewV1_8 {
     /// @param amount The amount of the underlying collateral token
     /// @return The value in borrow token base units
     function getCollateralAssetValue(address underlying, uint256 amount) external view returns (uint256);
+
+    /// @notice Get the value of an amount of a listed collateral asset, rounded up
+    /// @dev Added in v2.0. This is the rounding `liquidate` uses to check an explicit seizure against the
+    ///      liquidator entitlement, so a bot should size `seizeCollateralAmounts` against this view rather
+    ///      than against the round-down `getCollateralAssetValue`.
+    /// @param underlying The underlying collateral token
+    /// @param amount The amount of the underlying collateral token
+    /// @return The value in borrow token base units
+    function getCollateralAssetValueUp(address underlying, uint256 amount) external view returns (uint256);
 
     /// @notice Get the market's collateral asset registry
     /// @dev Added in v2.0

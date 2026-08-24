@@ -12,8 +12,9 @@ import {Ownable2StepUpgradeable} from "@openzeppelin/contracts-upgradeable/acces
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import {ReentrancyGuardUpgradeableWithViewModifier} from
-    "@rheo-fm/src/helpers/ReentrancyGuardUpgradeableWithViewModifier.sol";
+import {
+    ReentrancyGuardUpgradeableWithViewModifier
+} from "@rheo-fm/src/helpers/ReentrancyGuardUpgradeableWithViewModifier.sol";
 
 import {IERC20Metadata} from "@openzeppelin/contracts/interfaces/IERC20Metadata.sol";
 
@@ -473,6 +474,7 @@ contract NonTransferrableRebasingTokenVault is
         adapterToIdMap.set(address(adapter), id);
         emit AdapterSet(id, existed, address(adapter));
     }
+
     // slither-disable-end unused-return
 
     /// @notice Sets the adapter for a vault

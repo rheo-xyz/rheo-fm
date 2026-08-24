@@ -61,9 +61,7 @@ library BuyCreditLimit {
     /// @param state The state
     /// @param externalParams The input parameters for buying credit as a limit order
     /// @dev A null offer means clearing a user's loan limit order
-    function executeBuyCreditLimit(State storage state, BuyCreditLimitOnBehalfOfParams memory externalParams)
-        external
-    {
+    function executeBuyCreditLimit(State storage state, BuyCreditLimitOnBehalfOfParams memory externalParams) external {
         BuyCreditLimitParams memory params = externalParams.params;
         address onBehalfOf = externalParams.onBehalfOf;
 

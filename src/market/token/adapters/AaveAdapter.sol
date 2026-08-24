@@ -63,7 +63,16 @@ contract AaveAdapter is Ownable, IAaveAdapter {
     }
 
     /// @inheritdoc IAdapter
-    function deposit(address, /*vault*/ address to, uint256 amount) external onlyOwner returns (uint256 assets) {
+    function deposit(
+        address,
+        /*vault*/
+        address to,
+        uint256 amount
+    )
+        external
+        onlyOwner
+        returns (uint256 assets)
+    {
         uint256 sharesBefore = aToken.scaledBalanceOf(address(tokenVault));
         uint256 userSharesBefore = tokenVault.sharesOf(to);
 
@@ -135,7 +144,14 @@ contract AaveAdapter is Ownable, IAaveAdapter {
     }
 
     /// @inheritdoc IAdapter
-    function checkLiquidity(address, /*vault*/ uint256 amount) public view {
+    function checkLiquidity(
+        address,
+        /*vault*/
+        uint256 amount
+    )
+        public
+        view
+    {
         if (underlyingToken.balanceOf(address(aToken)) < amount) {
             revert InsufficientAssets(DEFAULT_VAULT, underlyingToken.balanceOf(address(aToken)), amount);
         }

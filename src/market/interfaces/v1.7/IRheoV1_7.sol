@@ -11,8 +11,9 @@ import {SelfLiquidateOnBehalfOfParams} from "@rheo-fm/src/market/libraries/actio
 import {SellCreditLimitOnBehalfOfParams} from "@rheo-fm/src/market/libraries/actions/SellCreditLimit.sol";
 import {SellCreditMarketOnBehalfOfParams} from "@rheo-fm/src/market/libraries/actions/SellCreditMarket.sol";
 
-import {SetCopyLimitOrderConfigsOnBehalfOfParams} from
-    "@rheo-fm/src/market/libraries/actions/SetCopyLimitOrderConfigs.sol";
+import {
+    SetCopyLimitOrderConfigsOnBehalfOfParams
+} from "@rheo-fm/src/market/libraries/actions/SetCopyLimitOrderConfigs.sol";
 import {SetUserConfigurationOnBehalfOfParams} from "@rheo-fm/src/market/libraries/actions/SetUserConfiguration.sol";
 import {WithdrawOnBehalfOfParams} from "@rheo-fm/src/market/libraries/actions/Withdraw.sol";
 
@@ -66,7 +67,5 @@ interface IRheoV1_7 {
     function setUserConfigurationOnBehalfOf(SetUserConfigurationOnBehalfOfParams memory params) external payable;
 
     /// @notice Same as `setCopyLimitOrderConfigs` but `onBehalfOf`
-    function setCopyLimitOrderConfigsOnBehalfOf(SetCopyLimitOrderConfigsOnBehalfOfParams memory params)
-        external
-        payable;
+    function setCopyLimitOrderConfigsOnBehalfOf(SetCopyLimitOrderConfigsOnBehalfOfParams memory params) external payable;
 }

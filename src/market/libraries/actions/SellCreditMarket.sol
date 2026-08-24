@@ -177,7 +177,9 @@ library SellCreditMarket {
 
             (swapData.cashAmountOut, swapData.swapFee, swapData.fragmentationFee) = state.getCashAmountOut({
                 creditAmountIn: swapData.creditAmountIn,
-                maxCredit: params.creditPositionId == RESERVED_ID ? swapData.creditAmountIn : swapData.creditPosition.credit,
+                maxCredit: params.creditPositionId == RESERVED_ID
+                    ? swapData.creditAmountIn
+                    : swapData.creditPosition.credit,
                 ratePerTenor: ratePerTenor,
                 tenor: tenor
             });
@@ -192,7 +194,9 @@ library SellCreditMarket {
                         swapData.creditPosition.credit, PERCENT - state.getSwapFeePercent(tenor), PERCENT + ratePerTenor
                     ),
                 maxCredit: params.creditPositionId == RESERVED_ID
-                    ? Math.mulDivUp(swapData.cashAmountOut, PERCENT + ratePerTenor, PERCENT - state.getSwapFeePercent(tenor))
+                    ? Math.mulDivUp(
+                        swapData.cashAmountOut, PERCENT + ratePerTenor, PERCENT - state.getSwapFeePercent(tenor)
+                    )
                     : swapData.creditPosition.credit,
                 ratePerTenor: ratePerTenor,
                 tenor: tenor
@@ -247,9 +251,8 @@ library SellCreditMarket {
             forSale: true
         });
         state.data.borrowTokenVault.transferFrom(params.lender, recipient, swapData.cashAmountOut);
-        state.data.borrowTokenVault.transferFrom(
-            params.lender, state.feeConfig.feeRecipient, swapData.swapFee + swapData.fragmentationFee
-        );
+        state.data.borrowTokenVault
+            .transferFrom(params.lender, state.feeConfig.feeRecipient, swapData.swapFee + swapData.fragmentationFee);
 
         emit Events.SwapData(
             exitCreditPositionId,

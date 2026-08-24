@@ -126,4 +126,5 @@ library Errors {
     error NOT_ENOUGH_COLLATERAL(uint256 collateralValue, uint256 required);
     error INVALID_PRICE_FEED_DECIMALS(uint256 decimals);
     error INVALID_PRO_RATA_FRACTION(uint256 numerator, uint256 denominator);
+    error NULL_SEIZED_VALUE(uint256 entitlementValue);
 }

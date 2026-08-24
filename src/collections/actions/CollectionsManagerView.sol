@@ -11,7 +11,9 @@ import {RESERVED_ID} from "@rheo-fm/src/market/libraries/LoanLibrary.sol";
 
 import {IRheo} from "@rheo-fm/src/market/interfaces/IRheo.sol";
 import {
-    CopyLimitOrderConfig, FixedMaturityLimitOrder, OfferLibrary
+    CopyLimitOrderConfig,
+    FixedMaturityLimitOrder,
+    OfferLibrary
 } from "@rheo-fm/src/market/libraries/OfferLibrary.sol";
 
 /// @title CollectionsManagerView
@@ -234,6 +236,7 @@ abstract contract CollectionsManagerView is ICollectionsManagerView, Collections
             return true;
         }
     }
+
     // slither-disable-end calls-loop
     // slither-disable-end var-read-using-this
 
